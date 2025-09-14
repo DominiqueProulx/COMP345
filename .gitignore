@@ -1,0 +1,9 @@
+# ide specific configs
+/.vs
+
+# user specified configs
+**/*.vcxproj.user
+
+# compilation outputs
+/out
+/out/intermediates
