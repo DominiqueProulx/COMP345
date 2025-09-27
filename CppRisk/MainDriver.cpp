@@ -1,3 +1,5 @@
+#include "GameEngine.h"
+
 int main(void)
 {
 	// run all driver test functions
@@ -5,7 +7,7 @@ int main(void)
 	//testPlayers();
 	//testOrdersLists();
 	//testCards();
-	//testGameStates();
+	testGameStates();
 
 	return 0;
 }
