@@ -12,6 +12,7 @@
 //TODO: Implement destructor
 //TODO : Implement player Driver
 //TODO : Write meaningful comments and cleanup any flags.
+//TODO: Check that the constructor is okay and accepts a list of territories
 
 // Headers
 #include "Player.h"
