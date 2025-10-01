@@ -38,4 +38,10 @@ void testCards() {
 	hand.playFromHand(0, deck);
 	hand.printHand();
 	std::cout << "Hand size: " << hand.getSize() << std::endl;
+
+	deck.draw(&hand);
+	deck.draw(&hand);
+	hand.printHand();
+	std::cout << "Hand size: " << hand.getSize() << std::endl;
+
 }

@@ -99,8 +99,8 @@ void Deck::initializeDeck() {
         deck.push_back(new Airlift());
         deck.push_back(new Diplomacy());
     }
-    shuffle();
     std::cout << "Deck initialized with 50 cards." << std::endl;
+    shuffle();
 }
 
 //uses random to shuffle the deck
@@ -127,15 +127,15 @@ Card* Deck::draw(Hand* hand) {
     Card* drawn_card = deck.back();
     //removes the last card of the deck
     deck.pop_back();
-    std::cout << "Drew a card from the deck." << std::endl;
     hand->addCard(drawn_card);
-	std::cout << "Added to player's hand." << std::endl;
+	std::cout << "Card from deck added to player's hand." << std::endl;
     return drawn_card;
 }
 
 void Deck::returnCard(Card* card) {
     deck.push_back(card);
     std::cout << "Returned " <<card->getName() << " to deck." << std::endl;
+    shuffle();
 }
 
 //Hand Class
