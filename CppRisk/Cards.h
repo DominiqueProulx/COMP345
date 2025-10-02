@@ -79,6 +79,7 @@ public:
 //vector that holds hand cards
 private:
 	std::vector<Card*> hand;
+	static const int MAX_HAND_SIZE = 5;
 };
 
 class Deck {

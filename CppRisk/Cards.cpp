@@ -157,8 +157,16 @@ Hand::~Hand() {
     }
 }
 
+// In Hand.cpp
 void Hand::addCard(Card* card) {
-    hand.push_back(card);
+    if (hand.size() < MAX_HAND_SIZE) {
+        hand.push_back(card);
+    }
+    else {
+        std::cout << "Hand is full! Cannot draw another card." << std::endl;
+        //delete to prevent memory leak
+        delete card;
+    }
 }
 
 void Hand::printHand() const {
