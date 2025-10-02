@@ -105,7 +105,7 @@ public:
 
 	// Methods
 	std::vector<TerritoriesWithArmies*> Player::toDefend();
-	//toAttack();
+	std::vector<Territory*> Player::toAttack(const std::vector<Territory*>& possibleTerritories);
 	// //issueOrder();
 
 private:

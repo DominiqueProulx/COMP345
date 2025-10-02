@@ -11,6 +11,13 @@ void testPlayers() {
 	Territory* territory4 = new Territory("Mirkwood");
 	Territory* territory5 = new Territory("Osgiliath");
 
+	std::vector<Territory*> mapstub1;
+	mapstub1.push_back(territory1);
+	mapstub1.push_back(territory2);
+	mapstub1.push_back(territory3);
+	mapstub1.push_back(territory4);
+	mapstub1.push_back(territory5);
+
 	TerritoriesWithArmies* twa1 = new TerritoriesWithArmies{ territory1, 3 };
 	TerritoriesWithArmies* twa2 = new TerritoriesWithArmies{ territory2, 3 };
 	TerritoriesWithArmies* twa3 = new TerritoriesWithArmies{ territory3, 3 };
@@ -48,6 +55,14 @@ void testPlayers() {
 	Territory* territory8 = new Territory("Minas Morgul");
 	Territory* territory9 = new Territory("Dol Guldur");
 	Territory* territory10 = new Territory("Isengard");
+
+	std::vector<Territory*> mapstub2;
+	mapstub2.push_back(territory6);
+	mapstub2.push_back(territory7);
+	mapstub2.push_back(territory8);
+	mapstub2.push_back(territory9);
+	mapstub2.push_back(territory10);
+
 
 	TerritoriesWithArmies* twa6 = new TerritoriesWithArmies{ territory6, 3 };
 	TerritoriesWithArmies* twa7 = new TerritoriesWithArmies{ territory7, 3 };
@@ -104,5 +119,24 @@ void testPlayers() {
 		std::cout << *(territoriesToDefend2[i]->territory->name) << std::endl;
 	}
 
+	//Testing toAttack() method
+	std::cout << "\nTesting toAttack() method for Player 1" << std::endl;
+	std::vector<Territory*> territoriesToAttack1 = player1.toAttack(mapstub2);
+	std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1.size() << " territories." << std::endl;
+	std::cout << "The territories are: " << std::endl;
+	int vectorsize5 = territoriesToAttack1.size();
+	for (int i = 0; i < vectorsize5; i++) {
+		std::cout << *(territoriesToAttack1[i]->name) << std::endl;
+	}
+
+	//Testing toAttack() method
+	std::cout << "\nTesting toAttack() method for Player 2" << std::endl;
+	std::vector<Territory*> territoriesToAttack2 = player2.toAttack(mapstub1);
+	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2.size() << " territories." << std::endl;
+	std::cout << "The territories are: " << std::endl;
+	int vectorsize6 = territoriesToAttack2.size();
+	for (int i = 0; i < vectorsize6; i++) {
+		std::cout << *(territoriesToAttack2[i]->name) << std::endl;
+	}
 }
 
