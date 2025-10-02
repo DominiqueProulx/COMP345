@@ -3,6 +3,7 @@
 #include <string>
 #include <vector> 
 
+class Order; //forward declaration for DummyOrder class
 class Deck; //forward declaration for Deck class
 
 //declaration for virtual parent class 
@@ -10,7 +11,7 @@ class Card {
 public:
 	Card(const std::string& name);
 	virtual ~Card();
-	virtual void play() = 0;
+	virtual Order* play() = 0;
 	virtual void print(std::ostream& os) const;
 
 	//getter function
@@ -27,7 +28,7 @@ class Bomb : public Card {
 public:
 	Bomb();
 	~Bomb();
-	void play() override;
+	Order* play() override;
 	void print(std::ostream& os) const override;
 };
 
@@ -35,7 +36,7 @@ class Reinforcement : public Card {
 	public:
 	Reinforcement();
 	~Reinforcement();
-	void play() override;
+	Order* play() override;
 	void print(std::ostream& os) const override;
 };
 
@@ -43,7 +44,7 @@ class Blockade : public Card {
 	public:
 	Blockade();
 	~Blockade();
-	void play() override;
+	Order* play() override;
 	void print(std::ostream& os) const override;
 };
 
@@ -51,7 +52,7 @@ class Airlift : public Card {
 	public:
 	Airlift();
 	~Airlift();
-	void play() override;
+	Order* play() override;
 	void print(std::ostream& os) const override;
 };
 
@@ -59,7 +60,7 @@ class Diplomacy : public Card {
 	public:
 	Diplomacy();
 	~Diplomacy();
-	void play() override;
+	Order* play() override;
 	void print(std::ostream& os) const override;
 };
 

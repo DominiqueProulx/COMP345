@@ -1,4 +1,5 @@
 #include "Cards.h"
+#include "DummyOrder.h"
 #include <iostream>
 #include <random>
 
@@ -21,9 +22,10 @@ std::ostream& operator<<(std::ostream& os, const Card& card) {
 Bomb::Bomb() : Card("Bomb") {}
 Bomb::~Bomb() {}
 
-void Bomb::play() {
+Order* Bomb::play() {
     std::cout << "Bomb card played" << std::endl;
-};
+	return new Order("Bomb");
+}
 
 void Bomb::print(std::ostream& os) const {
     os << "Card: " << name;
@@ -33,8 +35,9 @@ void Bomb::print(std::ostream& os) const {
 Reinforcement::Reinforcement() : Card("Reinforcement") {}
 Reinforcement::~Reinforcement() {}
 
-void Reinforcement::play() {
+Order* Reinforcement::play() {
     std::cout << "Reinforcement card played" << std::endl;
+	return new Order("Reinforcement");
 }
 
 void Reinforcement::print(std::ostream& os) const {
@@ -45,8 +48,9 @@ void Reinforcement::print(std::ostream& os) const {
 Blockade::Blockade() : Card("Blockade") {}
 Blockade::~Blockade() {}
 
-void Blockade::play() {
+Order* Blockade::play() {
     std::cout << "Blockade card played" << std::endl;
+	return new Order("Blockade");
 }
 
 void Blockade::print(std::ostream& os) const {
@@ -57,8 +61,9 @@ void Blockade::print(std::ostream& os) const {
 Airlift::Airlift() : Card("Airlift") {}
 Airlift::~Airlift() {}
 
-void Airlift::play() {
+Order* Airlift::play() {
     std::cout << "Airlift card played" << std::endl;
+	return new Order("Airlift");
 }
 
 void Airlift::print(std::ostream& os) const {
@@ -69,8 +74,9 @@ void Airlift::print(std::ostream& os) const {
 Diplomacy::Diplomacy() : Card("Diplomacy") {}
 Diplomacy::~Diplomacy() {}
 
-void Diplomacy::play() {
+Order* Diplomacy::play() {
     std::cout << "Diplomacy card played" << std::endl;
+	return new Order("Diplomacy");
 }
 
 void Diplomacy::print(std::ostream& os) const {
