@@ -138,5 +138,44 @@ void testPlayers() {
 	for (int i = 0; i < vectorsize6; i++) {
 		std::cout << *(territoriesToAttack2[i]->name) << std::endl;
 	}
+
+
+
+	//Testing issueOrder() method
+	std::cout << "Creating cards and adding them to the hand of the player to test orders" << std::endl;
+	//creating some cards and adding them to the player's hand for testing
+	Cards* card1 = new Cards("bomb");
+	Cards* card2 = new Cards("bomb");
+	Cards* card3 = new Cards("blockade");
+	Cards* card4 = new Cards("airlift");
+	Cards* card5 = new Cards("negotiate");
+	(*(player1.getHand())).addCard(card1);
+	(*(player1.getHand())).addCard(card2);
+	(*(player1.getHand())).addCard(card3);
+	(*(player1.getHand())).addCard(card4);
+	(*(player1.getHand())).addCard(card5);
+
+	std::cout << "\nTesting issueOrder() method for Player 1" << std::endl;
+	bool endOrder = false;
+	while(!endOrder) {
+		player1.issueOrder();
+		std::cout << "Do you want to issue another order ? (y/n)" << std::endl;
+		char answer;
+		std::cin >> answer;
+		if (answer == 'n' || answer == 'N') {
+			endOrder = true;
+		}
+	}
+
+		std::cout << "Here is the list of all the orders that are part of the player's order list: " <<  std::endl;
+		std::queue<DummyOrders*> listOfPlayerOrders = *((*(player1.getOrdersList())).getQueue());
+		while (!listOfPlayerOrders.empty() ) {
+			DummyOrders* order = listOfPlayerOrders.front();
+			std::cout << *order << std::endl;
+		    listOfPlayerOrders.pop();
+		}
+
+	std::cout << "\nEnd of Tests for Player Class "<< std::endl;
+
 }
 

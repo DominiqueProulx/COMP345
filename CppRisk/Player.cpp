@@ -1,19 +1,17 @@
 // -------------------------------
 // COMP 345 - Fall 2025
+// Risk Game Project
 // Dominique Proulx - 40177566
 // File: Player.cpp
 // -------------------------------
 
 //Implementation for Player class
 
-//Change territories to a vector.
-//TODO: Impletement toDefend(), toAttack(), issueOrder() methods
+//TODO: issueOrder() methods
 //TODO : Implement stream insertion operator
 //TODO : Implement assignation operator
-//TODO : Implement player Driver
 //TODO : Write meaningful comments and cleanup any flags.
-//TODO: Check that the constructor is okay and accepts a list of territories
-//TODO overload tostring 
+ 
 
 // Headers
 #include "Player.h"
@@ -38,9 +36,9 @@ int Player::playerCount = 0;
     
     Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories)  {
         Player::playerCount++;
-        this->playerID = new int(playerCount);
-        this->playerColor = new std::string(color);
-        this->territories = new std::vector<TerritoriesWithArmies*>();
+        playerID = new int(playerCount);
+        playerColor = new std::string(color);
+        territories = new std::vector<TerritoriesWithArmies*>();
 		// Copy every pointer to the struct containing territories and armies, do a deep copies of territories too.
 		// This is assuming that territories do not have a copy constructor defined.
         for (TerritoriesWithArmies* twa : initialTerritories) {
@@ -50,16 +48,16 @@ int Player::playerCount = 0;
 			(*territories).push_back(newTWA);
         }
 
-        hand = new Hand();
-        orders = new OrderList();
+        playerHand = new Hand();
+        orderlist = new OrderList();
 		
     }
     // Copy constructor
 	Player::Player(const Player& other) {
        this->playerID = new int(*(other.playerID));
        this->playerColor = new std::string(*(other.playerColor));
-       this->hand = new Hand(*(other.hand));
-       this->orders = new OrderList(*(other.orders));
+       this->playerHand = new Hand(*(other.playerHand));
+       this->orderlist = new OrderList(*(other.orderlist));
 
        this->territories = new std::vector<TerritoriesWithArmies*>();
        // For every pointer to the strcut containing territories and armies, do a deep copies of territories and armies.
@@ -75,8 +73,8 @@ int Player::playerCount = 0;
     Player::~Player() {
         delete playerID;
         delete playerColor;
-        delete hand;
-        delete orders;
+        delete playerHand;
+        delete orderlist;
 
         // Delete all territoriesWithArmies and their territory
         for (TerritoriesWithArmies* twa : *territories) {
@@ -102,11 +100,11 @@ int Player::playerCount = 0;
     }
 
     Hand* Player::getHand() const {
-        return hand;
+        return playerHand;
     }
 
-    OrderList* Player::getOrders() const {
-        return orders;
+    OrderList* Player::getOrdersList() const {
+        return orderlist;
     }
     // setters
     void Player::setColor(const std::string& color) {
@@ -199,16 +197,62 @@ int Player::playerCount = 0;
 
     
 	//issueOrder();
-        // To create an order, you must play a card
-		// To play a card , it must ne in your hand
-        // to have a card in your hand , you must draw it from the deck.
-    //to issue order
-         // deploy and advance are always available
-		 // Check hand for airlift, blockade, bomb, negotiate cards ( Hand.getcard.type)
-             // If they are in hand , offer the order 
-		     //  If order form a card is chosen , Hand.getCard.play()  -- it will return and order and remove the card from hand
-				 // Add the order to the player's list of orders
-			 //  if deploy or advance is chosen , create the order and add it to the player's list of orders
+    // deploy and advance are always available as orders
+	// Players can also issue orders based on the cards they have in their hand
+    void Player::issueOrder() {
+
+        std::cout << "Here are the possible orders" << std::endl;
+        std::cout << "1. Deploy" << std::endl;
+        std::cout << "2. Advance" << std::endl;
+        std::cout << "From the cards available in your hand" << std::endl;
+        int i = 3;
+        for (Cards* c : (*((*playerHand).hand))) {
+            
+            std::cout << i << "  " << (*c).getName() << std::endl;
+            i++;
+        }
+        bool validInput = false;
+        int choice;
+        while (!validInput)
+        {
+            std::cout << "Please chose an order number" << std::endl;
+            
+            std::cin >> choice;
+            if (choice < 1 || choice > 2 + (*(*playerHand).hand).size()) {
+                std::cout << "Invalid choice. Please try again." << std::endl;
+            };
+            validInput = true;
+        }
+
+       
+        if(choice == 1){
+            std::cout << " Creationg a deploy order and adding it to the orders list" << std::endl;
+            // Create a deploy order and add it to the player's list of orders
+            Orders* deployOrder = new Orders("deploy");
+            (*(*orderlist).orders).push(deployOrder);
+           
+        }
+        else if(choice == 2 ){
+            std::cout << " Creationg a Advance order and adding it to the orders list" << std::endl;
+            // Create a advance order and add it to the player's list of orders
+            Orders* advanceOrder = new Orders("advance");
+            (*(*orderlist).orders).push(advanceOrder);
+           
+        }
+			
+        else {
+            std::string cardName = (*(*(*playerHand).hand)[choice-3]).getName();
+            std::cout << " Creationg an " << cardName  << " order and adding it to the orders list" << std::endl;
+            // the card pay() returns an Order
+            Orders* cardOrder = (*((*(*playerHand).hand)[choice-3])).play(cardName);
+			// add the order to the player's list of orders
+			(*(*orderlist).orders).push(cardOrder);
+        }
+        
+        
+    }
+
+        
 
 
 
