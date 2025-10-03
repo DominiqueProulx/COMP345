@@ -18,11 +18,11 @@ void testPlayers() {
 	mapstub1.push_back(territory4);
 	mapstub1.push_back(territory5);
 
-	TerritoriesWithArmies* twa1 = new TerritoriesWithArmies{ territory1, 3 };
-	TerritoriesWithArmies* twa2 = new TerritoriesWithArmies{ territory2, 3 };
-	TerritoriesWithArmies* twa3 = new TerritoriesWithArmies{ territory3, 3 };
-	TerritoriesWithArmies* twa4 = new TerritoriesWithArmies{ territory4, 3 };
-	TerritoriesWithArmies* twa5 = new TerritoriesWithArmies{ territory5, 3 };
+	TerritoriesWithArmies* twa1 = new TerritoriesWithArmies( territory1, 3 );
+	TerritoriesWithArmies* twa2 = new TerritoriesWithArmies( territory2, 3 );
+	TerritoriesWithArmies* twa3 = new TerritoriesWithArmies( territory3, 3 );
+	TerritoriesWithArmies* twa4 = new TerritoriesWithArmies( territory4, 3 );
+	TerritoriesWithArmies* twa5 = new TerritoriesWithArmies( territory5, 3 );
 
 	std::vector<TerritoriesWithArmies*> intitialTerritories1;
 	intitialTerritories1.push_back(twa1);
@@ -41,14 +41,8 @@ void testPlayers() {
 
 	Player player1(color, intitialTerritories1);
 	std::cout << "\nPlayer 1 created with attributes : " << std::endl;
-	std::cout << "Player 1 ID: " << *(player1.getID()) << std::endl;
-	std::cout << "Player 1 Color: " << *(player1.getColor()) << std::endl;
-	std::cout << "Player 1 Territories: " << std::endl;
-	int vectorsize1 = (*(player1.getTerritories())).size();
-	std::vector<TerritoriesWithArmies*> player1Territories = *(player1.getTerritories());
-	for (int i = 0; i < vectorsize1; i++) {
-		std::cout << *(player1Territories[i]->territory->name) << std::endl;
-	}
+	std::cout <<  player1 << std::endl;
+
 
 	Territory* territory6 = new Territory("Mordor");
 	Territory* territory7 = new Territory("Angmar");
@@ -64,11 +58,11 @@ void testPlayers() {
 	mapstub2.push_back(territory10);
 
 
-	TerritoriesWithArmies* twa6 = new TerritoriesWithArmies{ territory6, 3 };
-	TerritoriesWithArmies* twa7 = new TerritoriesWithArmies{ territory7, 3 };
-	TerritoriesWithArmies* twa8 = new TerritoriesWithArmies{ territory8, 3 };
-	TerritoriesWithArmies* twa9 = new TerritoriesWithArmies{ territory9, 3 };
-	TerritoriesWithArmies* twa10 = new TerritoriesWithArmies{ territory10, 3 };
+	TerritoriesWithArmies* twa6 = new TerritoriesWithArmies(territory6, 3);
+	TerritoriesWithArmies* twa7 = new TerritoriesWithArmies(territory7, 3 );
+	TerritoriesWithArmies* twa8 = new TerritoriesWithArmies(territory8, 3 );
+	TerritoriesWithArmies* twa9 = new TerritoriesWithArmies(territory9, 3 );
+	TerritoriesWithArmies* twa10 = new TerritoriesWithArmies(territory10, 3 );
 
 	std::vector<TerritoriesWithArmies*> intitialTerritories2;
 	intitialTerritories2.push_back(twa6);
@@ -85,14 +79,7 @@ void testPlayers() {
 
 	Player player2(color, intitialTerritories2);
 	std::cout << "\nPlayer 2 created with attributes : " << std::endl;
-	std::cout << "Player 2 ID: " << *(player2.getID()) << std::endl;
-	std::cout << "Player 2 Color: " << *(player2.getColor()) << std::endl;
-	std::cout << "Player 2 Territories: " << std::endl;
-	int vectorsize2 = (*(player2.getTerritories())).size();
-	std::vector<TerritoriesWithArmies*> player2Territories = *(player2.getTerritories());
-	for (int i = 0; i < vectorsize2; i++) {
-		std::cout << *(player2Territories[i]->territory->name) << std::endl;
-	}
+		std::cout << player2 << std::endl;
 
 	
 	//setup the random generator using the current time
@@ -174,6 +161,28 @@ void testPlayers() {
 			std::cout << *order << std::endl;
 		    listOfPlayerOrders.pop();
 		}
+		
+		//cleanup 
+		delete territory1;
+		delete territory2;
+		delete territory3;
+		delete territory4;
+		delete territory5;
+
+		delete territory6;
+		delete territory7;
+		delete territory8;
+		delete territory9;
+		delete territory10;
+
+		
+		delete card1;
+		delete card2;
+		delete card3;
+		delete card4;
+		delete card5;
+
+
 
 	std::cout << "\nEnd of Tests for Player Class "<< std::endl;
 

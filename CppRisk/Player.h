@@ -50,7 +50,7 @@ public:
 	}
 	DummyCards(std::string t) : name(t) {}
 	DummyOrders* play() {
-		std::cout << "Dummy Cards processing\n This returns an order";
+		std::cout << "Dummy Cards processing --  This returns an order\n";
 		return new DummyOrders();
 	}
 	DummyOrders* play(std::string& cardName) {
@@ -83,6 +83,7 @@ public:
 	DummyTerritory(const DummyTerritory& territoryToCopy) {
 		name = new std::string(*territoryToCopy.name);
 	}
+	std::string getName() const { return *name; }
 	 
 };
 
@@ -95,11 +96,43 @@ using Cards = DummyCards;
 
 // ------------------ Struct to keep track of the armies ------------------
 
-//Struct  definintion to hold a pointer to a territory and the number of armies on it
+//User defined Strcut to hold a pointer to a territory and the number of armies on it
 struct TerritoriesWithArmies {
 	Territory* territory;
-	int armies;
+	int* armies;
+
+
+// Constructor
+TerritoriesWithArmies()
+		: territory(nullptr), armies(nullptr) {
+	}
+TerritoriesWithArmies(Territory* terr, int ar) {
+	territory = terr;
+	armies = new int(ar);
 };
+
+//Copy Constructor
+TerritoriesWithArmies(const TerritoriesWithArmies& otherTwa) {
+	territory = new Territory(*(otherTwa.territory));
+	armies = new int(*(otherTwa.armies));
+};
+// Destructor
+~TerritoriesWithArmies() {
+	delete territory;
+	delete armies;
+	territory = nullptr;
+	armies = nullptr;
+};
+// Assignment operator
+TerritoriesWithArmies& operator=(const TerritoriesWithArmies& otherTwa) {
+	if (this != &otherTwa) {
+		delete territory;
+		delete armies;
+		territory = new Territory(*(otherTwa.territory));
+		armies = new int(*(otherTwa.armies));
+	}
+	return *this;
+}};
 
 // ------------------ CLASS PLAYER ------------------
 
@@ -108,18 +141,15 @@ public:
 	static int playerCount;
 
 
-	//Constructors
-	Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories);
-	Player(const Player& other); //Copy Constructor
+//Constructor
+Player();
+Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories);
+//Copy Constructor
+Player(const Player& other); 
 
-	//Destrcutor 
+//Destrcutor 
 	~Player();
-
-	//Assignment Operator
-	//Player& operator=(const Player& other);
-
-	 // Stream insertion operator (declare as friend)
-	//friend std::ostream& operator<<(std::ostream& os, const Player& player);
+	
 
 	 //getters and setters
 	const int* getID() const;
@@ -129,6 +159,12 @@ public:
 	OrderList* getOrdersList() const;
 
 	void setColor(const std::string& color);
+
+	//Steam insertion operator
+	friend std::ostream& operator<<(std::ostream& os, const Player& player);
+
+	 //Assignment Operator
+	Player& operator= (const Player& otherplayer);
 
 	// Methods
 	std::vector<TerritoriesWithArmies*> toDefend();
