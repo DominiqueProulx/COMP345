@@ -5,17 +5,18 @@
 
 class Order; //forward declaration for DummyOrder class
 class Deck; //forward declaration for Deck class
+class Hand; //forward declaration for Hand class
 
 //declaration for virtual parent class 
 class Card {
 public:
 	Card(const std::string& name);
 	virtual ~Card();
-	virtual Order* play() = 0;
+	virtual Order* play(Hand& hand, Deck& deck) = 0;
 	virtual void print(std::ostream& os) const;
 
 	//getter function
-	std::string getName() const { return name; }
+	std::string getName() const;
 
 	//friend operator<< overload
 	friend std::ostream& operator<<(std::ostream& os, const Card& card);
@@ -24,11 +25,12 @@ protected:
 	std::string name;
 };
 
+//declarations for child classes that inherit from Card
 class Bomb : public Card {
 public:
 	Bomb();
 	~Bomb();
-	Order* play() override;
+	Order* play(Hand& hand, Deck& deck) override;
 	void print(std::ostream& os) const override;
 };
 
@@ -36,7 +38,7 @@ class Reinforcement : public Card {
 	public:
 	Reinforcement();
 	~Reinforcement();
-	Order* play() override;
+	Order* play(Hand& hand, Deck& deck) override;
 	void print(std::ostream& os) const override;
 };
 
@@ -44,7 +46,7 @@ class Blockade : public Card {
 	public:
 	Blockade();
 	~Blockade();
-	Order* play() override;
+	Order* play(Hand& hand, Deck& deck) override;
 	void print(std::ostream& os) const override;
 };
 
@@ -52,7 +54,7 @@ class Airlift : public Card {
 	public:
 	Airlift();
 	~Airlift();
-	Order* play() override;
+	Order* play(Hand& hand, Deck& deck) override;
 	void print(std::ostream& os) const override;
 };
 
@@ -60,7 +62,7 @@ class Diplomacy : public Card {
 	public:
 	Diplomacy();
 	~Diplomacy();
-	Order* play() override;
+	Order* play(Hand& hand, Deck& deck) override;
 	void print(std::ostream& os) const override;
 };
 
@@ -72,9 +74,11 @@ public:
 
 	//functions
 	void addCard(Card* card);
-	void playFromHand(int index, Deck& deck);
+	//Order* playFromHand(int index, Deck& deck);
+	Card* getCard(int index);
 	void printHand() const;
 	int getSize();
+	void removeCard(Card* card);
 
 //vector that holds hand cards
 private:
@@ -94,6 +98,7 @@ public:
 	void shuffle();
 	Card* draw(Hand* hand);
 	void returnCard(Card* card);
+	void getSize();
 	void printDeck() const;
 
 //vector that holds cards

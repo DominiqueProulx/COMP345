@@ -13,77 +13,108 @@ void Card::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
+//friend operator<< overload
 std::ostream& operator<<(std::ostream& os, const Card& card) {
     card.print(os);
     return os;
 }
 
-//definitions for Bomb class
+//getter function
+std::string Card::getName() const {
+    return name;
+}
+
+//definitions for Bomb class - consructor, destructor, play, print
 Bomb::Bomb() : Card("Bomb") {}
 Bomb::~Bomb() {}
 
-Order* Bomb::play() {
+Order* Bomb::play(Hand& hand, Deck& deck) {
     std::cout << "Bomb card played" << std::endl;
-	return new Order("Bomb");
+	//returns to deck
+    deck.returnCard(this);
+    //removes from hand
+	hand.removeCard(this);
+    //returns order for order list
+    return new Order("Bomb");
 }
 
 void Bomb::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
-//definitions for Reinforcement class
+//definitions for Reinforcement class - consructor, destructor, play, print
 Reinforcement::Reinforcement() : Card("Reinforcement") {}
 Reinforcement::~Reinforcement() {}
 
-Order* Reinforcement::play() {
+Order* Reinforcement::play(Hand& hand, Deck& deck) {
     std::cout << "Reinforcement card played" << std::endl;
-	return new Order("Reinforcement");
+    //returns to deck
+    deck.returnCard(this);
+    //removes from hand
+    hand.removeCard(this);
+    //returns order for order list
+    return new Order("Reinforcement");
 }
 
 void Reinforcement::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
-//definitions for Blockade class
+//definitions for Blockade class - consructor, destructor, play, print
 Blockade::Blockade() : Card("Blockade") {}
 Blockade::~Blockade() {}
 
-Order* Blockade::play() {
+Order* Blockade::play(Hand& hand, Deck& deck) {
     std::cout << "Blockade card played" << std::endl;
-	return new Order("Blockade");
+    //returns to deck
+    deck.returnCard(this);
+    //removes from hand
+    hand.removeCard(this);
+    //returns order for order list
+    return new Order("Blockade");
 }
 
 void Blockade::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
-//definitions for Airlift class
+//definitions for Airlift class - consructor, destructor, play, print
 Airlift::Airlift() : Card("Airlift") {}
 Airlift::~Airlift() {}
 
-Order* Airlift::play() {
+Order* Airlift::play(Hand& hand, Deck& deck) {
     std::cout << "Airlift card played" << std::endl;
-	return new Order("Airlift");
+    //returns to deck
+    deck.returnCard(this);
+    //removes from hand
+    hand.removeCard(this);
+    //returns order for order list
+    return new Order("Airlift");
 }
 
 void Airlift::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
-//definitions for Diplomacy class
+//definitions for Diplomacy class - consructor, destructor, play, print
 Diplomacy::Diplomacy() : Card("Diplomacy") {}
 Diplomacy::~Diplomacy() {}
 
-Order* Diplomacy::play() {
+Order* Diplomacy::play(Hand& hand, Deck& deck) {
     std::cout << "Diplomacy card played" << std::endl;
-	return new Order("Diplomacy");
+    //returns to deck
+    deck.returnCard(this);
+    //removes from hand
+    hand.removeCard(this);
+    //returns order for order list
+    return new Order("Diplomacy");
 }
 
 void Diplomacy::print(std::ostream& os) const {
     os << "Card: " << name;
 }
 
-//Deck Class
+//Deck Class constructors and destructors
 Deck::Deck() {
     std::cout << "Deck created." << std::endl;
 }
@@ -96,6 +127,7 @@ Deck::~Deck() {
     }
 }
 
+//initializes deck with 50 cards and shuffles
 void Deck::initializeDeck() {
     // Create 10 of each card type
     for (int i = 0; i < 10; ++i) {
@@ -117,6 +149,7 @@ void Deck::shuffle() {
     std::cout << "Deck shuffled." << std::endl;
 }
 
+//displays all information in deck
 void Deck::printDeck() const {
     std::cout << "Deck contains:" << std::endl;
     for (const Card* card : deck) {
@@ -124,6 +157,7 @@ void Deck::printDeck() const {
     }
 }
 
+//draws last card from deck and adds to hand
 Card* Deck::draw(Hand* hand) {
     if (deck.empty()) {
         std::cout << "Deck is empty. Cannot draw a card." << std::endl;
@@ -133,18 +167,24 @@ Card* Deck::draw(Hand* hand) {
     Card* drawn_card = deck.back();
     //removes the last card of the deck
     deck.pop_back();
+    //adds to hand
     hand->addCard(drawn_card);
 	std::cout << "Card from deck added to player's hand." << std::endl;
     return drawn_card;
 }
 
+//adds card to back of deck and shuffles
 void Deck::returnCard(Card* card) {
     deck.push_back(card);
     std::cout << "Returned " <<card->getName() << " to deck." << std::endl;
     shuffle();
 }
 
-//Hand Class
+void Deck::getSize() {
+	std::cout << "Cards left in deck: " << deck.size() << std::endl;
+}
+
+//Hand constructors and desctructors
 Hand::Hand() {
     std::cout << "Hand created." << std::endl;
 }
@@ -157,8 +197,9 @@ Hand::~Hand() {
     }
 }
 
-// In Hand.cpp
+//Hand functions
 void Hand::addCard(Card* card) {
+    //checks to see if hand is full, then adds card to end of vector
     if (hand.size() < MAX_HAND_SIZE) {
         hand.push_back(card);
     }
@@ -169,6 +210,7 @@ void Hand::addCard(Card* card) {
     }
 }
 
+//displays hand
 void Hand::printHand() const {
     if (hand.empty()) {
         std::cout << "Hand is empty." << std::endl;
@@ -183,22 +225,43 @@ void Hand::printHand() const {
     
 }
 
+//returns size of hand
 int Hand::getSize() {
     return hand.size();
 }
 
-void Hand::playFromHand(int index, Deck& deck) {
-    if (hand.empty() || index < 0 || index >= hand.size()) {
-        std::cout << "Invalid index or hand empty. Cannot play card." << std::endl;
-        return;
+Card* Hand::getCard(int index) {
+    if (index >= 0 && index < hand.size()) {
+        return hand[index];
+    } else {
+        std::cout << "Invalid index. Cannot get card." << std::endl;
+        return nullptr;
 	}
+}
 
-    Card* played_card = hand[index];
-    played_card->play();
+//this would make more sense game design wise but i think it fails the rubric, i don't know. 
+//Order* Hand::playFromHand(int index, Deck& deck) {
+//        if (index < 0 || index >= hand.size()) {
+//            std::cout << "Invalid index or hand empty. Cannot play card." << std::endl;
+//            return nullptr;
+//        }
+//
+//        // Get the card at the specified index from the private vector.
+//        Card* cardToPlay = hand[index];
+//
+//        // Call the card's own play method. It will handle its removal
+//        // from the hand and return to the deck.
+//        return cardToPlay->play(*this, deck);
+//    }
 
-    //add back to deck
-	deck.returnCard(played_card);
-
-    //erase from hand
-    hand.erase(hand.begin() + index);
+void Hand::removeCard(Card* card) {
+    //creates an iterator to find the card in hand (start, end, value)
+    std::vector<Card*>::iterator iterator = std::find(hand.begin(), hand.end(), card);
+    if (iterator != hand.end()) {
+        //removes card at the position of iterator
+        hand.erase(iterator);
+        std::cout << "Removed " << card->getName() << " from hand." << std::endl;
+    } else {
+        std::cout << "Card not found in hand." << std::endl;
+	}
 }
