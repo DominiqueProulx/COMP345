@@ -2,25 +2,26 @@
 #include "GameEngine.h"
 
 // for brevity
-using GameState = GameEngine::State::StatePtr;
+using GameState = GameEngine::GameState;
 
 // Tests the GameEngine implementation by creating an FSM to replicate Risk and starting a loop to test state
 // transitions using user-inputted commands.
+// The State implementation is hidden under GameEngine and can only be created through engine.createState
 void testGameStates()
 {
 	GameEngine engine;
 
 	// adding states to recreate the state diagram
-	GameState startup{ std::make_shared<GameEngine::State>("startup", true) };
-	GameState play{ std::make_shared<GameEngine::State>("play", true) };
-	GameState end{ std::make_shared<GameEngine::State>("end", true) };
+	GameState startup{ engine.createState("startup", true) };
+	GameState play{ engine.createState("play", true) };
+	GameState end{ engine.createState("end", true) };
 	engine.addParentStates({ startup, play, end });
 
 	// STARTUP
-	GameState start{ std::make_shared<GameEngine::State>("start", false) };
-	GameState mapLoaded{ std::make_shared<GameEngine::State>("map loaded", false) };
-	GameState mapValidated{ std::make_shared<GameEngine::State>("map validated", false) };
-	GameState playersAdded{ std::make_shared<GameEngine::State>("players added", false) };
+	GameState start{ engine.createState("start", false) };
+	GameState mapLoaded{ engine.createState("map loaded", false) };
+	GameState mapValidated{ engine.createState("map validated", false) };
+	GameState playersAdded{ engine.createState("players added", false) };
 
 	engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
 	engine.addChildTransition(start, "loadmap", mapLoaded);
@@ -29,13 +30,13 @@ void testGameStates()
 	engine.addChildTransition(mapValidated, "addplayer", playersAdded);
 	engine.addChildTransition(playersAdded, "addplayer", playersAdded);
 	engine.addChildTransition(playersAdded, "assigncountries", play);
-	engine.setActiveState(startup->getInitialSubstate());
+	engine.setActiveState(startup->getInitialSubstatePtr());
 
 	// PLAY
-	GameState assignReinforcements{ std::make_shared<GameEngine::State>("assign reinforcements", false) };
-	GameState issueOrders{ std::make_shared<GameEngine::State>("issue orders", false) };
-	GameState executeOrders{ std::make_shared<GameEngine::State>("execute orders", false) };
-	GameState win{ std::make_shared<GameEngine::State>("win", false) };
+	GameState assignReinforcements{ engine.createState("assign reinforcements", false) };
+	GameState issueOrders{ engine.createState("issue orders", false) };
+	GameState executeOrders{ engine.createState("execute orders", false) };
+	GameState win{ engine.createState("win", false) };
 
 	engine.addChildStates(play, { assignReinforcements, issueOrders, executeOrders, win });
 	engine.addChildTransition(assignReinforcements, "issueorder", issueOrders);
@@ -48,16 +49,23 @@ void testGameStates()
 	engine.addChildTransition(win, "end", end);
 
 	// END
-	GameState final{ std::make_shared<GameEngine::State>("quit", false) };
+	GameState final{ engine.createState("quit", false) };
 	engine.addChildStates(end, { final });
 
 	// console test loop
 	std::cout << "----- testGameStates() -----";
+
+	if (engine.getActiveParentStatePtr() == nullptr || engine.getActiveStatePtr() == nullptr)
+	{
+		std::cout << "ERR: No non-final states provided for this engine. Returning...";
+		return;
+	}
+
 	bool shouldContinue{ true };
 	std::string cmd{};
 	while (shouldContinue)
 	{
-		std::cout << "\n[" << engine.getActiveParentState()->getName() << "/" << engine.getActiveState()->getName()
+		std::cout << "\n[" << engine.getActiveParentStatePtr()->getName() << "/" << engine.getActiveStatePtr()->getName()
 			<< "] Enter a command to transition to a new state: ";
 		cmd = engine.readCommand();
 

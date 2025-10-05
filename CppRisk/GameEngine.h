@@ -12,15 +12,14 @@ void testGameStates();
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
 {
-public:
+private:
 	/* -- STATE OBJECT DEFINITION (GAME ENGINE COMPONENT) -- */
 	class State
 	{
 	public:
 		// custom type aliases for readability
-		using StatePtr = std::shared_ptr<State>;
-		using StateMap = std::unique_ptr<std::unordered_map<std::string, std::weak_ptr<State>>>;
-		using StateList = std::unique_ptr<std::vector<StatePtr>>;
+		using StateMap = std::unordered_map<std::string, State*>;
+		using StateList = std::vector<State*>;
 
 		State();
 		State(const std::string& name, bool isParent);
@@ -29,37 +28,39 @@ public:
 
 		// operators
 		State& operator=(const State& other);
-		friend std::ostream& operator<<(std::ostream& os, const State& state);
+		friend std::ostream& operator<<(std::ostream& os, State& state);
 
 		// builder functions
-		void addSubstate(StatePtr newState);
-		void addTransition(const std::string& cmd, StatePtr dest);
+		void addSubstate(State* newState);
+		void addTransition(const std::string& cmd, State* dest);
 
 		// accessors
 		std::string getName() const;
 		const StateList& getSubstates() const;
 		const StateMap& getTransitions() const;
-		const StatePtr& getInitialSubstate() const;
+		State* getInitialSubstatePtr() const;
 		bool isParent() const;
-		void setInitialSubstate(StatePtr state);
+		void setInitialSubstate(State* state);
 
-		StatePtr resolveTransition(const std::string& cmd) const;
+		State* resolveTransition(const std::string& cmd) const;
 
 	private:
-		std::unique_ptr<std::string> name{};
-		StateMap transitions{};
-		StateList substates{};
-		StatePtr initialSubstate{};
-		std::unique_ptr<bool> parent;
+		std::string* name{};
+		StateMap* transitions{};
+		StateList* substates{};
+		State* initialSubstate{};
+		bool* parent;
 	};
 	/* ----------------------------------------------------- */
 
-private:
-	State::StatePtr activeState;
-	State::StatePtr activeParentState;
-	State::StateList parentStates;
+	State* activeState;
+	State* activeParentState;
+	State::StateList* parentStates;
+	State::StateList* states;
 
 public:
+	using GameState = State*; // exposed publically so states can be initialized but not used directly externally
+
 	GameEngine();
 	GameEngine(const GameEngine& other);
 	~GameEngine();
@@ -70,15 +71,16 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
 
 	// builder functions
-	void addParentStates(std::initializer_list<State::StatePtr> states);
-	void addChildStates(State::StatePtr parent, std::initializer_list<State::StatePtr> states);
-	void addChildTransition(State::StatePtr from, const std::string& cmd, State::StatePtr to);
+	State* createState(const std::string& name, bool isParent);
+	void addParentStates(const std::initializer_list<State*>& states);
+	void addChildStates(State* parent, const std::initializer_list<State*>& states);
+	void addChildTransition(State* from, const std::string& cmd, State* to);
 
 	// accessors
-	const State::StatePtr& getActiveState() const;
-	const State::StatePtr& getActiveParentState() const;
-	void setActiveState(State::StatePtr state);
-	void setActiveParentState(State::StatePtr state);
+	State* getActiveStatePtr() const;
+	State* getActiveParentStatePtr() const;
+	void setActiveState(State* state);
+	void setActiveParentState(State* state);
 
 	std::string readCommand() const;
 	void changeGameState(const std::string& cmd);
