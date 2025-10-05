@@ -1,13 +1,11 @@
 // -------------------------------
 // COMP 345 - Fall 2025
 // Risk Game Project
-// Dominique Proulx - 40177566
+// Part 2 : Player 
 // File: Player.cpp
 // -------------------------------
 
 //Implementation for Player class
-
-//TODO : Verify what to do with the map stub in the driver
 
 // Headers
 #include "Player.h"
@@ -17,12 +15,6 @@
 // Initialize static member
 int Player::playerCount = 0; 
 
-
-// Define a class
-//All data members of user-defined class type must be of pointer type
-//All classes must implement a correct copy constructor, assignment operator, and stream insertion operator.
-
-
  // Constructors 
 Player::Player() {
     Player::playerCount++;
@@ -30,7 +22,7 @@ Player::Player() {
     playerColor = new std::string("NoColor");
     territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
     playerHand = new Hand();
-    orderlist = new OrderList();
+    orderslist = new OrdersList();
 }
 
 Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories) {
@@ -38,16 +30,16 @@ Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies
     playerID = new int(playerCount);
     playerColor = new std::string(color);
     territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
-    // Copy every pointer to the struct containing territories and armies, do a deep copies of territories too.
-    // This is assuming that territories do not have a copy constructor defined.
+    // You want the pointers of Player to point to the same territories as map territories. 
+ 
     for (TerritoriesWithArmies* twa : initialTerritories) {
         TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
         (*newTWA).armies = (*twa).armies;
-        (*newTWA).territory = new Territory(*((*twa).territory));
+        (*newTWA).territory = (*twa).territory;
         (*territories).push_back(newTWA);
     }
     playerHand = new Hand();
-    orderlist = new OrderList();
+    orderslist = new OrdersList();
 }
 
 // Copy constructor
@@ -55,7 +47,7 @@ Player::Player(const Player& other) {
        this->playerID = new int(*(other.playerID));
        this->playerColor = new std::string(*(other.playerColor));
        this->playerHand = new Hand(*(other.playerHand)); //Calling Hand copy constrcutor
-	   this->orderlist = new OrderList(*(other.orderlist)); //Calling OrderList copy constrcutor
+	   this->orderslist = new OrdersList(*(other.orderslist)); //Calling OrderList copy constrcutor
 
        this->territories = new std::vector<TerritoriesWithArmies*>();
        // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
@@ -72,7 +64,7 @@ Player::~Player() {
         delete playerID;
         delete playerColor;
         delete playerHand;
-        delete orderlist;
+        delete orderslist;
 
        // Delete all territoriesWithArmies and their territory
         for (TerritoriesWithArmies* twa : *territories) {
@@ -100,8 +92,8 @@ Hand* Player::getHand() const {
         return playerHand;
     }
 
-OrderList* Player::getOrdersList() const {
-        return orderlist;
+OrdersList* Player::getOrdersList() const {
+        return orderslist;
     }
 //setter
 void Player::setColor(const std::string& color) {
@@ -115,13 +107,13 @@ std::ostream& operator<<(std::ostream& os, const Player& player)
     {
         os << "\nPlayer ID : " << *(player.playerID)
             << "\nPlayer Color : " << *(player.playerColor)
-            << "\nPlayer Terrirories: " << std::endl;
+            << "\nPlayer Territories: " << std::endl;
         const std::vector<TerritoriesWithArmies*>* twaVector = player.territories;
        if (twaVector != nullptr) {
         for (int i = 0; i < (*twaVector).size(); i++) {
             TerritoriesWithArmies& twa = *((*twaVector)[i]);
-            if ( twa.territory != nullptr  && (*(twa.territory)).name != nullptr) {
-                os << *(*twa.territory).name  << std::endl;
+            if ( twa.territory != nullptr) {
+                os << (*twa.territory).getName()  << std::endl;
             }
         }
     }
@@ -136,13 +128,13 @@ Player& Player::operator= (const Player& otherPlayer) {
     delete playerID;
     delete playerColor;
 	delete playerHand; //calling Hand destructor
-    delete orderlist; //calling Orderlist destructor
+    delete orderslist; //calling Orderlist destructor
     delete territories;  //calling Territories destructor
 
     this->playerID = new int(*(otherPlayer.playerID));
     this->playerColor = new std::string(*(otherPlayer.playerColor));
     this->playerHand = new Hand(*(otherPlayer.playerHand)); //calling Hand copy constructor
-    this->orderlist = new OrderList(*(otherPlayer.orderlist)); //calling orderList copy constructor
+    this->orderslist = new OrdersList(*(otherPlayer.orderslist)); //calling orderList copy constructor
 
     this->territories = new std::vector<TerritoriesWithArmies*>(); // default constructor assigns null pointers. 
     // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
@@ -156,7 +148,6 @@ Player& Player::operator= (const Player& otherPlayer) {
     }
     
 // ------------------ ToDefend() ------------------
-    
 //toDefend();
  // Returns a vector of pointers to TerritoriesWithArmies struct
  // The territories returned are a subset of the player's territories
@@ -193,37 +184,6 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 	 return territoriesToDefend;
     }
     
-// ------------------ ToAttack() (old)  ------------------
-//ToAttack();
-    // Returns a vector of pointers to Territories vector
-    // The territories are randomly chosen from the vector of territories passed as argument
-    // The argument  serves as a stub to model what the player could get from the map
-    // The vector can be empty if the player has no territories to attack
-    // The vector can contain all the territories passed as argument
-    // The number of territories to attack is randomly chosen between 0 and the number of territories passed as argument
-//std::vector<Territory*> Player::toAttack(const std::vector<Territory*>& possibleTerritories) {
-//        int numberOfPossibleTerritories = possibleTerritories.size();
-//        std::vector<Territory*> territoriesToAttack;
-//        std::vector<int> territoriesAdded; // to keep track of already added territories
-//        if (numberOfPossibleTerritories == 0) {
-//            std::cout << "Player has no territories to attack." << std::endl;
-//			return territoriesToAttack; //return the empty vector
-//        }
-//        //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
-//        int randomNumberOfTerritories = std::rand() % numberOfPossibleTerritories;
-//        //assign the territories that get added to the vecor randomly
-//        while (territoriesToAttack.size() < randomNumberOfTerritories) {
-//            int randomTerritory = std::rand() % numberOfPossibleTerritories;
-//            // Check that the territory was not already added
-//            if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
-//                territoriesAdded.push_back(randomTerritory);     
-//                Territory* territoryToAdd = new Territory(*possibleTerritories[randomTerritory]);   
-//                territoriesToAttack.push_back(territoryToAdd);
-//            }
-//        }
-//        return territoriesToAttack;
-//    }
-
 // ------------------ ToAttack() TO KEEP AFTER MERGING------------------
 //ToAttack();
     // Returns a vector of pointers to a vector containing Territories pointers
@@ -235,12 +195,14 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 std::vector<Territory*> Player::toAttack() {
     std::vector<Territory*> possibleTerritories;
 	//construct the vector of possible territories to attack
-    for (TerritoriesWithArmies* twa : *territories) {
+    for (TerritoriesWithArmies* twa : *territories) {  
         Territory* playerTerritory = (*twa).territory;
         std::vector<Territory*> adjacentTerritories = playerTerritory->getAdjacentTerritories();
+       	
+		//Create the collection of possible territories to attack
         for (Territory* adjTerritory : adjacentTerritories) {
             if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end()) {
-                possibleTerritories.push_back(adjTerritory);
+                possibleTerritories.push_back(adjTerritory); 
             }
         }
 	}
@@ -268,8 +230,6 @@ std::vector<Territory*> Player::toAttack() {
 }
 
 
-
- 
 // ------------------ issueOrder() ------------------
 	// This method allows the user to issue an order . it adds the order to the player's order list
     // Deploy and advance are always available as orders
@@ -300,27 +260,27 @@ void Player::issueOrder() {
         }
 
         if(choice == 1){
-            std::cout << " Creationg a deploy order and adding it to the orders list" << std::endl;
+            std::cout << " Creationg a Deploy order and adding it to the orders list" << std::endl;
             // Create a deploy order and add it to the player's list of orders
-            Orders* deployOrder = new Orders("deploy");
-            (*(*orderlist).orders).push_back(deployOrder);
+            Order* deployOrder = new Deploy();
+            (*orderslist).add(deployOrder);
            
         }
         else if(choice == 2 ){
             std::cout << " Creationg a Advance order and adding it to the orders list" << std::endl;
             // Create a advance order and add it to the player's list of orders
-            Orders* advanceOrder = new Orders("advance");
-            (*(*orderlist).orders).push_back(advanceOrder);
-           
+            Order* advanceOrder = new Advance();
+            (*orderslist).add(advanceOrder);
+            
         }
 			
         else {
             std::string cardName = (*(*(*playerHand).hand)[choice-3]).getName();
             std::cout << " Creationg an " << cardName  << " order and adding it to the orders list" << std::endl;
             // the card pay() returns an Order
-            Orders* cardOrder = (*((*(*playerHand).hand)[choice-3])).play(cardName);
-			// add the order to the player's list of orders
-			(*(*orderlist).orders).push_back(cardOrder);
+            Order* cardOrder = (*((*(*playerHand).hand)[choice-3])).play(cardName);
+			// add the order to the player's list of orders 
+			(*orderslist).add(cardOrder);
         }          
     }
 

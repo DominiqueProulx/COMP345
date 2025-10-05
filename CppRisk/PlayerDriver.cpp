@@ -1,75 +1,62 @@
+// COMP 345 - Fall 2025
+// Risk Game Project
+// Part 2 : Player 
+// File: PlayerDriver.cpp
+
 #include "Player.h"
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 
 void testPlayers() {
-	std::cout << "------------------ Testing Player Class ------------------" << std::endl;
-	Territory* territory1 = new Territory("Rohan");
-	Territory* territory2 = new Territory("Gondor");
-	Territory* territory3 = new Territory("Rivendell");
-	Territory* territory4 = new Territory("Mirkwood");
-	Territory* territory5 = new Territory("Osgiliath");
+	//create a map 
+	MapLoader loader;
+	std::string error;
+	Map* map = loader.load("MAP.txt", &error);
 
-	std::vector<Territory*> mapstub1;
-	mapstub1.push_back(territory1);
-	mapstub1.push_back(territory2);
-	mapstub1.push_back(territory3);
-	mapstub1.push_back(territory4);
-	mapstub1.push_back(territory5);
+	if (!map) {
+		std::cerr << "Failed to load map: " << error << std::endl;
+		return ;
+	}
 
-	TerritoriesWithArmies* twa1 = new TerritoriesWithArmies( territory1, 3 );
-	TerritoriesWithArmies* twa2 = new TerritoriesWithArmies( territory2, 3 );
-	TerritoriesWithArmies* twa3 = new TerritoriesWithArmies( territory3, 3 );
-	TerritoriesWithArmies* twa4 = new TerritoriesWithArmies( territory4, 3 );
-	TerritoriesWithArmies* twa5 = new TerritoriesWithArmies( territory5, 3 );
 
-	std::vector<TerritoriesWithArmies*> intitialTerritories1;
-	intitialTerritories1.push_back(twa1);
-	intitialTerritories1.push_back(twa2);
-	intitialTerritories1.push_back(twa3);
-	intitialTerritories1.push_back(twa4);
-	intitialTerritories1.push_back(twa5);
+	std::cout << "Map loaded successfully!\n" << std::endl;
+	//std::cout << *map << std::endl;
+	
+	std::cout << "Allocating Territories to players for testing purposes:\n";
+	std::vector<TerritoriesWithArmies*> territoryPlayer1;
+	std::vector<TerritoriesWithArmies*> territoryPlayer2;
+	int count = 0;
+
+	for (Territory* t : map->getTerritories()) {
+		if(count % 2 == 0) {
+			std::cout << " Player 2 - " << t->getName() << std::endl; 
+			TerritoriesWithArmies* twa2 = new TerritoriesWithArmies(t, 3);
+			territoryPlayer2.push_back(twa2);
+		}
+		else {
+			std::cout << " Player 1 - " << t->getName() << std::endl;
+			TerritoriesWithArmies* twa1 = new TerritoriesWithArmies(t, 3);
+			territoryPlayer1.push_back(twa1);
+		}
+		count++;
+		
+	}
 
 	
 
-
+	std::cout << "------------------ Testing Player Class ------------------" << std::endl;
+	
+	
 	std::cout << "\nWhat is the Player1 color" << std::endl;
 	std::string color;
 	std::cin >> color;
 
 
-	Player player1(color, intitialTerritories1);
+	Player player1(color, territoryPlayer1);
 	std::cout << "\nPlayer 1 created with attributes : " << std::endl;
 	std::cout <<  player1 << std::endl;
 
-
-	Territory* territory6 = new Territory("Mordor");
-	Territory* territory7 = new Territory("Angmar");
-	Territory* territory8 = new Territory("Minas Morgul");
-	Territory* territory9 = new Territory("Dol Guldur");
-	Territory* territory10 = new Territory("Isengard");
-
-	std::vector<Territory*> mapstub2;
-	mapstub2.push_back(territory6);
-	mapstub2.push_back(territory7);
-	mapstub2.push_back(territory8);
-	mapstub2.push_back(territory9);
-	mapstub2.push_back(territory10);
-
-
-	TerritoriesWithArmies* twa6 = new TerritoriesWithArmies(territory6, 3);
-	TerritoriesWithArmies* twa7 = new TerritoriesWithArmies(territory7, 3 );
-	TerritoriesWithArmies* twa8 = new TerritoriesWithArmies(territory8, 3 );
-	TerritoriesWithArmies* twa9 = new TerritoriesWithArmies(territory9, 3 );
-	TerritoriesWithArmies* twa10 = new TerritoriesWithArmies(territory10, 3 );
-
-	std::vector<TerritoriesWithArmies*> intitialTerritories2;
-	intitialTerritories2.push_back(twa6);
-	intitialTerritories2.push_back(twa7);
-	intitialTerritories2.push_back(twa8);
-	intitialTerritories2.push_back(twa9);
-	intitialTerritories2.push_back(twa10);
 
 
 	std::cout << "\nWhat is the Player2 color" << std::endl;
@@ -77,7 +64,7 @@ void testPlayers() {
 	std::cin >> color2;
 
 
-	Player player2(color, intitialTerritories2);
+	Player player2(color, territoryPlayer2);
 	std::cout << "\nPlayer 2 created with attributes : " << std::endl;
 		std::cout << player2 << std::endl;
 
@@ -89,21 +76,19 @@ void testPlayers() {
 	std::cout << "\nTesting toDefend() method for Player 1" << std::endl;
 	std::vector<TerritoriesWithArmies*> territoriesToDefend1 = player1.toDefend();
 	std::cout << "Player 1 has chosen to defend " << territoriesToDefend1.size() << " territories." << std::endl;
-	std::cout << "The territories are: " << std::endl; 
+	std::cout << "The territories to defend are: " << std::endl; 
 	int vectorsize3 = territoriesToDefend1.size();
 	for (int i = 0; i < vectorsize3; i++) {
-		std::cout << *(territoriesToDefend1[i]->territory->name) << std::endl;
+		std::cout << (territoriesToDefend1[i]->territory->getName()) << std::endl;
 	}
-
-
 
 	std::cout << "\nTesting toDefend() method for Player 2" << std::endl;
 	std::vector<TerritoriesWithArmies*> territoriesToDefend2 = player2.toDefend();
 	std::cout << "Player 2 has chosen to defend " << territoriesToDefend2.size() << " territories." << std::endl;
-	std::cout << "The territories are: " << std::endl;
+	std::cout << "The territories to defend are: " << std::endl;
 	int vectorsize4 = territoriesToDefend2.size();
 	for (int i = 0; i < vectorsize4; i++) {
-		std::cout << *(territoriesToDefend2[i]->territory->name) << std::endl;
+		std::cout << (territoriesToDefend2[i]->territory->getName()) << std::endl;
 	}
 
 	//Testing toAttack() method
@@ -111,10 +96,10 @@ void testPlayers() {
 	//std::vector<Territory*> territoriesToAttack1 = player1.toAttack(mapstub2);
 	std::vector<Territory*> territoriesToAttack1 = player1.toAttack();
 	std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1.size() << " territories." << std::endl;
-	std::cout << "The territories are: " << std::endl;
+	std::cout << "The territories to Attack are: " << std::endl;
 	int vectorsize5 = territoriesToAttack1.size();
 	for (int i = 0; i < vectorsize5; i++) {
-		std::cout << *(territoriesToAttack1[i]->name) << std::endl;
+		std::cout << (territoriesToAttack1[i]->getName()) << std::endl;
 	}
 
 	//Testing toAttack() method
@@ -122,10 +107,10 @@ void testPlayers() {
 	//std::vector<Territory*> territoriesToAttack2 = player2.toAttack(mapstub1);
 	std::vector<Territory*> territoriesToAttack2 = player2.toAttack();
 	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2.size() << " territories." << std::endl;
-	std::cout << "The territories are: " << std::endl;
+	std::cout << "The territories to Attack are: " << std::endl;
 	int vectorsize6 = territoriesToAttack2.size();
 	for (int i = 0; i < vectorsize6; i++) {
-		std::cout << *(territoriesToAttack2[i]->name) << std::endl;
+		std::cout << (territoriesToAttack2[i]->getName()) << std::endl;
 	}
 
 
@@ -157,15 +142,17 @@ void testPlayers() {
 	}
 
 		std::cout << "Here is the list of all the orders that are part of the player's order list: " <<  std::endl;
-		std::vector<DummyOrders*> listOfPlayerOrders = *((*(player1.getOrdersList())).getOrderList());
+		std::cout << *(player1.getOrdersList()) << std::endl;
+		/*std::vector<Order*> listOfPlayerOrders = *((*(player1.getOrdersList())).getOrdersList());
+
 		while (!listOfPlayerOrders.empty() ) {
-			DummyOrders* order = listOfPlayerOrders.back();
+			Order* order = listOfPlayerOrders.back();
 			std::cout << *order << std::endl;
 		    listOfPlayerOrders.pop_back();
-		}
+		}*/
 		
 		//cleanup 
-		delete territory1;
+		/*delete territory1;
 		delete territory2;
 		delete territory3;
 		delete territory4;
@@ -175,7 +162,7 @@ void testPlayers() {
 		delete territory7;
 		delete territory8;
 		delete territory9;
-		delete territory10;
+		delete territory10;*/
 
 		
 		delete card1;
@@ -184,6 +171,7 @@ void testPlayers() {
 		delete card4;
 		delete card5;
 
+		delete map;
 
 
 	std::cout << "\nEnd of Tests for Player Class "<< std::endl;
