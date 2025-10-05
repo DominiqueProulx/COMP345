@@ -108,7 +108,8 @@ void testPlayers() {
 
 	//Testing toAttack() method
 	std::cout << "\nTesting toAttack() method for Player 1" << std::endl;
-	std::vector<Territory*> territoriesToAttack1 = player1.toAttack(mapstub2);
+	//std::vector<Territory*> territoriesToAttack1 = player1.toAttack(mapstub2);
+	std::vector<Territory*> territoriesToAttack1 = player1.toAttack();
 	std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1.size() << " territories." << std::endl;
 	std::cout << "The territories are: " << std::endl;
 	int vectorsize5 = territoriesToAttack1.size();
@@ -118,7 +119,8 @@ void testPlayers() {
 
 	//Testing toAttack() method
 	std::cout << "\nTesting toAttack() method for Player 2" << std::endl;
-	std::vector<Territory*> territoriesToAttack2 = player2.toAttack(mapstub1);
+	//std::vector<Territory*> territoriesToAttack2 = player2.toAttack(mapstub1);
+	std::vector<Territory*> territoriesToAttack2 = player2.toAttack();
 	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2.size() << " territories." << std::endl;
 	std::cout << "The territories are: " << std::endl;
 	int vectorsize6 = territoriesToAttack2.size();

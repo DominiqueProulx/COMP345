@@ -84,7 +84,15 @@ public:
 		name = new std::string(*territoryToCopy.name);
 	}
 	std::string getName() const { return *name; }
-	 
+	std::vector<DummyTerritory*> getAdjacentTerritories() {
+		DummyTerritory* adjTerritory = new DummyTerritory("adjTerritory");
+		DummyTerritory* adjTerritory2 = new DummyTerritory("adjTerritory");
+		std::vector<DummyTerritory*> adjTerritories;
+		adjTerritories.push_back(adjTerritory);
+		adjTerritories.push_back(adjTerritory2);
+		return adjTerritories;
+		
+	}
 };
 
 //Setup the Dummy classes 
@@ -168,7 +176,8 @@ Player(const Player& other);
 
 	// Methods
 	std::vector<TerritoriesWithArmies*> toDefend();
-	std::vector<Territory*> toAttack(const std::vector<Territory*>& possibleTerritories);
+	//std::vector<Territory*> toAttack(const std::vector<Territory*>& possibleTerritories);
+	std::vector<Territory*> toAttack();
 	void issueOrder();
 
 private:

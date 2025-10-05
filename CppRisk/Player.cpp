@@ -193,36 +193,81 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 	 return territoriesToDefend;
     }
     
-// ------------------ ToAttack() ------------------
+// ------------------ ToAttack() (old)  ------------------
 //ToAttack();
-    // Returns a vector of pointers to Territories struct
+    // Returns a vector of pointers to Territories vector
     // The territories are randomly chosen from the vector of territories passed as argument
     // The argument  serves as a stub to model what the player could get from the map
     // The vector can be empty if the player has no territories to attack
     // The vector can contain all the territories passed as argument
     // The number of territories to attack is randomly chosen between 0 and the number of territories passed as argument
-std::vector<Territory*> Player::toAttack(const std::vector<Territory*>& possibleTerritories) {
-        int numberOfPossibleTerritories = possibleTerritories.size();
-        std::vector<Territory*> territoriesToAttack;
-        std::vector<int> territoriesAdded; // to keep track of already added territories
-        if (numberOfPossibleTerritories == 0) {
-            std::cout << "Player has no territories to attack." << std::endl;
-			return territoriesToAttack; //return the empty vector
-        }
-        //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
-        int randomNumberOfTerritories = std::rand() % numberOfPossibleTerritories;
-        //assign the territories that get added to the vecor randomly
-        while (territoriesToAttack.size() < randomNumberOfTerritories) {
-            int randomTerritory = std::rand() % numberOfPossibleTerritories;
-            // Check that the territory was not already added
-            if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
-                territoriesAdded.push_back(randomTerritory);     
-                Territory* territoryToAdd = new Territory(*possibleTerritories[randomTerritory]);   
-                territoriesToAttack.push_back(territoryToAdd);
+//std::vector<Territory*> Player::toAttack(const std::vector<Territory*>& possibleTerritories) {
+//        int numberOfPossibleTerritories = possibleTerritories.size();
+//        std::vector<Territory*> territoriesToAttack;
+//        std::vector<int> territoriesAdded; // to keep track of already added territories
+//        if (numberOfPossibleTerritories == 0) {
+//            std::cout << "Player has no territories to attack." << std::endl;
+//			return territoriesToAttack; //return the empty vector
+//        }
+//        //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
+//        int randomNumberOfTerritories = std::rand() % numberOfPossibleTerritories;
+//        //assign the territories that get added to the vecor randomly
+//        while (territoriesToAttack.size() < randomNumberOfTerritories) {
+//            int randomTerritory = std::rand() % numberOfPossibleTerritories;
+//            // Check that the territory was not already added
+//            if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
+//                territoriesAdded.push_back(randomTerritory);     
+//                Territory* territoryToAdd = new Territory(*possibleTerritories[randomTerritory]);   
+//                territoriesToAttack.push_back(territoryToAdd);
+//            }
+//        }
+//        return territoriesToAttack;
+//    }
+
+// ------------------ ToAttack() TO KEEP AFTER MERGING------------------
+//ToAttack();
+    // Returns a vector of pointers to a vector containing Territories pointers
+    // Creates a collection of territories from adjacent territories to the player's territories
+    // The territories are randomly chosen from this collection
+    // The vector can be empty if the player has no territories to attack
+    // The vector can contain all the territories passed as argument
+	// The number of territories to attack is randomly chosen between 0 and the number of territories that could be attacked
+std::vector<Territory*> Player::toAttack() {
+    std::vector<Territory*> possibleTerritories;
+	//construct the vector of possible territories to attack
+    for (TerritoriesWithArmies* twa : *territories) {
+        Territory* playerTerritory = (*twa).territory;
+        std::vector<Territory*> adjacentTerritories = playerTerritory->getAdjacentTerritories();
+        for (Territory* adjTerritory : adjacentTerritories) {
+            if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end()) {
+                possibleTerritories.push_back(adjTerritory);
             }
         }
-        return territoriesToAttack;
+	}
+	//Build the collection of randomly chosen territories to attack
+    int numberOfPossibleTerritories = possibleTerritories.size();
+    std::vector<Territory*> territoriesToAttack;
+    std::vector<int> territoriesAdded; // to keep track of already added territories
+    if (numberOfPossibleTerritories == 0) {
+        std::cout << "Player has no territories to attack." << std::endl;
+        return territoriesToAttack; //return the empty vector
     }
+    //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
+    int randomNumberOfTerritories = std::rand() % numberOfPossibleTerritories;
+    //assign the territories that get added to the vecor randomly
+    while (territoriesToAttack.size() < randomNumberOfTerritories) {
+        int randomTerritory = std::rand() % numberOfPossibleTerritories;
+        // Check that the territory was not already added
+        if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
+            territoriesAdded.push_back(randomTerritory);
+            Territory* territoryToAdd = new Territory(*possibleTerritories[randomTerritory]);
+            territoriesToAttack.push_back(territoryToAdd);
+        }
+    }
+    return territoriesToAttack;
+}
+
+
 
  
 // ------------------ issueOrder() ------------------
