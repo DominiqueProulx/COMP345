@@ -1,7 +1,4 @@
 #include "Cards.h"
-
-//forward declaration
-void testCards();
 #include "Map.h"
 #include "Orders.h"
 #include "GameEngine.h"
