@@ -1,3 +1,7 @@
+#include "Cards.h"
+
+//forward declaration
+void testCards();
 #include "Map.h"
 #include "Orders.h"
 #include "GameEngine.h"
@@ -20,6 +24,9 @@ int main(void)
 	// run all driver test functions
 	testLoadMaps();
 	//testPlayers();
+	//testOrdersLists();
+	testCards();
+	//testGameStates();
 	testOrdersLists();
 	//testCards();
 	testGameStates();

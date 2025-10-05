@@ -147,6 +147,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cards.cpp" />
+    <ClCompile Include="CardsDriver.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameEngineDriver.cpp" />
     <ClCompile Include="MainDriver.cpp" />
@@ -159,6 +161,10 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Orders.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cards.h" />
+    <ClInclude Include="DummyOrder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
