@@ -6,9 +6,6 @@
 #include <string>
 #include <unordered_map>
 
-/* -- GAME ENGINE DRIVER (FOR TESTING) -- */
-void testGameStates();
-
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
 {
