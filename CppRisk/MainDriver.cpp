@@ -5,11 +5,12 @@
 #include <string>
 using namespace std;
 
+void testLoadMaps();
 
 int main(void)
 {
 	// run all driver test functions
-	//testLoadMaps();
+	testLoadMaps();
 	//testPlayers();
 	//testOrdersLists();
 	//testCards();

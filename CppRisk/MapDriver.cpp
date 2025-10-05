@@ -20,7 +20,7 @@ void testLoadMaps() {
         if (m) {
             cout << "[OK] Loaded: " << p << "\n";
             cout << *m << "\n";
-            cout << "  -> isValid(): " << (m->isValid() ? "SUCCESS" : "FAILURE") << "\n";
+            cout << "  -> validate(): " << (m->validate() ? "SUCCESS" : "FAILURE") << "\n";
             delete m;
         } else {
             cout << "[ERR] " << p << " => " << err << "\n";
@@ -29,11 +29,3 @@ void testLoadMaps() {
     }
 }
 
-int main(void)
-{
-
-	testLoadMaps();
-
-
-	return 0;
-}

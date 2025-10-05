@@ -62,7 +62,7 @@ private:
     int* x;
     int* y;
     int* numberOfArmies;
-    std::vector<Territory*> adjacentTerritories;
+    std::vector<Territory*>* adjacentTerritories;
 };
 
 //CONTINENT-----------------------------------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ public:
 private:
     std::string* name;
     int* bonus;
-    std::vector<Territory*> territories;
+    std::vector<Territory*>* territories;
 };
 
 //MAP-----------------------------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ public:
     const std::vector<Territory*>& getTerritories() const;
 
     
-    bool isValid() const;
+    bool validate() const;
 
     
     friend std::ostream& operator<<(std::ostream& out, const Map& map);
@@ -135,8 +135,8 @@ private:
     bool* wrap;
     bool* warn;
 
-    std::vector<Territory*> territories;
-    std::vector<Continent*> continents;
+    std::vector<Territory*>* territories;
+    std::vector<Continent*>* continents;
 };
 
 #endif

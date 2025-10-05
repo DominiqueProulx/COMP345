@@ -1,7 +1,4 @@
 #include "map.h"
-// #include "country.h"
-// #include "continent.h"
-// #include "MapLoader.h"
 #include <unordered_set>
 #include <queue>
 #include <algorithm>
@@ -14,20 +11,20 @@ using namespace std;
 //CONTINENT-----------------------------------------------------------------------------------------------------------------------
 //normal constructor
 Continent::Continent(const string& n, int b)
-    : name(new string(n)), bonus(new int(b)), territories() {}
+    : name(new string(n)), bonus(new int(b)), territories(new vector<Territory*>()) {}
 
 //copy constructor
 Continent::Continent(const Continent& other)
     : name(new string(*other.name)),
     bonus(new int(*other.bonus)),
-    territories(other.territories) {}
+    territories(new vector<Territory*>(*other.territories)) {}
 
-//assignment operator 
+//assignment operator
 Continent& Continent::operator=(const Continent& other) {
     if (this != &other) {
         *name  = *other.name;
         *bonus = *other.bonus;
-        territories = other.territories;
+        *territories = *other.territories;
     }
     return *this;
 }
@@ -36,18 +33,19 @@ Continent& Continent::operator=(const Continent& other) {
 Continent::~Continent() {
     delete name;
     delete bonus;
+    delete territories;
     
 }
 
 //add territory if not null or present already
 void Continent::addTerritory(Territory* territory) {
     if (!territory) return;
-    if (find(territories.begin(), territories.end(), territory) == territories.end()) {
-        territories.push_back(territory);
+    if (find(territories->begin(), territories->end(), territory) == territories->end()) {
+        territories->push_back(territory);
     }
 }
 
-const vector<Territory*>& Continent::getTerritories() const { return territories; }
+const vector<Territory*>& Continent::getTerritories() const { return *territories; }
 
 int Continent::getBonus() const { return *bonus; }
 string Continent::getName() const { return *name; }
@@ -74,7 +72,7 @@ Territory::Territory(const string& n, int xCord, int yCord)
     x(new int(xCord)),
     y(new int(yCord)),
     numberOfArmies(new int(0)),
-    adjacentTerritories() {}
+    adjacentTerritories(new vector<Territory*>()) {}
 
 // Copy constructor w/shallow copy for adjacency, for new territories
 Territory::Territory(const Territory& other)
@@ -82,7 +80,7 @@ Territory::Territory(const Territory& other)
     x(new int(*other.x)),
     y(new int(*other.y)),
     numberOfArmies(new int(*other.numberOfArmies)),
-    adjacentTerritories(other.adjacentTerritories) {}
+    adjacentTerritories(new vector<Territory*>(*other.adjacentTerritories)) {}
 
 //when territory already exists
 Territory& Territory::operator=(const Territory& other) {
@@ -91,7 +89,7 @@ Territory& Territory::operator=(const Territory& other) {
         *x               = *other.x;
         *y               = *other.y;
         *numberOfArmies  = *other.numberOfArmies;
-        adjacentTerritories = other.adjacentTerritories;
+        *adjacentTerritories = *other.adjacentTerritories;
     }
     return *this;
 }
@@ -102,19 +100,20 @@ Territory::~Territory() {
     delete x;
     delete y;
     delete numberOfArmies;
+    delete adjacentTerritories;
 }
 
 //add neighboring territory if not null, itself, or already present
 void Territory::addAdjacentTerritory(Territory* territory) {
     if (!territory || territory == this) return;
-    if (find(adjacentTerritories.begin(), adjacentTerritories.end(), territory)
-        == adjacentTerritories.end()) {
-        adjacentTerritories.push_back(territory);
+    if (find(adjacentTerritories->begin(), adjacentTerritories->end(), territory)
+        == adjacentTerritories->end()) {
+        adjacentTerritories->push_back(territory);
     }
 }
 
 const vector<Territory*>& Territory::getAdjacentTerritories() const {
-    return adjacentTerritories;
+    return *adjacentTerritories;
 }
 
 string Territory::getName() const { return *name; }
@@ -153,8 +152,8 @@ Map::Map(const string &scr, const string &auth,
     name(new string(nm)),
     wrap(new bool(wp)),
     warn(new bool(wn)),
-    territories(),
-    continents() {}
+    territories(new vector<Territory*>()),
+    continents(new vector<Continent*>()) {}
 
 //copy constructor
 Map::Map(const Map &other)
@@ -163,28 +162,28 @@ Map::Map(const Map &other)
     name(new string(*other.name)),
     wrap(new bool(*other.wrap)),
     warn(new bool(*other.warn)),
-    territories(),
-    continents()
+    territories(new vector<Territory*>(*other.territories)),
+    continents(new vector<Continent*>(*other.continents))
 {
     //deep copy continents
     unordered_map<const Continent *, Continent *> cMap;
-    for (auto *oc : other.continents)
+    for (auto *oc : *other.continents)
     {
         auto *nc = new Continent(oc->getName(), oc->getBonus());
-        continents.push_back(nc);
+        continents->push_back(nc);
         cMap[oc] = nc;
     }
     //deep copy territories
     unordered_map<const Territory *, Territory *> tMap;
-    for (auto *ot : other.territories)
+    for (auto *ot : *other.territories)
     {
         auto *nt = new Territory(ot->getName(), ot->getX(), ot->getY());
         nt->setNumberOfArmies(ot->getNumberOfArmies());
-        territories.push_back(nt);
+        territories->push_back(nt);
         tMap[ot] = nt;
     }
     // new deep copy continents assign to new deep copy territories
-    for (auto *oc : other.continents)
+    for (auto *oc : *other.continents)
     {
         Continent *nc = cMap[oc];
         for (auto *ot : oc->getTerritories())
@@ -193,7 +192,7 @@ Map::Map(const Map &other)
         }
     }
     // new deep copy territories assign to new deep copy adjacent territories
-    for (auto *ot : other.territories)
+    for (auto *ot : *other.territories)
     {
         Territory *nt = tMap[ot];
         for (auto *oa : ot->getAdjacentTerritories())
@@ -207,12 +206,12 @@ Map &Map::operator=(const Map &other)
 {
     if (this != &other)
     {
-        for (auto *t : territories)
+        for (auto *t : *territories)
             delete t;
-        for (auto *c : continents)
+        for (auto *c : *continents)
             delete c;
-        territories.clear();
-        continents.clear();
+        territories->clear();
+        continents->clear();
 
         *scroll = *other.scroll;
         *author = *other.author;
@@ -222,23 +221,23 @@ Map &Map::operator=(const Map &other)
 
         // deep copy continents 
         unordered_map<const Continent *, Continent *> cMap;
-        for (auto *oc : other.continents)
+        for (auto *oc : *other.continents)
         {
             auto *nc = new Continent(oc->getName(), oc->getBonus());
-            continents.push_back(nc);
+            continents->push_back(nc);
             cMap[oc] = nc;
         }
         // deep copy territories
         unordered_map<const Territory *, Territory *> tMap;
-        for (auto *ot : other.territories)
+        for (auto *ot : *other.territories)
         {
             auto *nt = new Territory(ot->getName(), ot->getX(), ot->getY());
             nt->setNumberOfArmies(ot->getNumberOfArmies());
-            territories.push_back(nt);
+            territories->push_back(nt);
             tMap[ot] = nt;
         }
         // new deep copy continents assign to new deep copy territories
-        for (auto *oc : other.continents)
+        for (auto *oc : *other.continents)
         {
             Continent *nc = cMap[oc];
             for (auto *ot : oc->getTerritories())
@@ -247,7 +246,7 @@ Map &Map::operator=(const Map &other)
             }
         }
         // new deep copy territories assign to new deep copy adjacent territories
-        for (auto *ot : other.territories)
+        for (auto *ot : *other.territories)
         {
             Territory *nt = tMap[ot];
             for (auto *oa : ot->getAdjacentTerritories())
@@ -262,9 +261,9 @@ Map &Map::operator=(const Map &other)
 //destructor
 Map::~Map()
 {
-    for (auto *t : territories)
+    for (auto *t : *territories)
         delete t;
-    for (auto *c : continents)
+    for (auto *c : *continents)
         delete c;
     delete scroll;
     delete author;
@@ -277,9 +276,9 @@ void Map::addTerritory(Territory *territory)
 {
     if (!territory)
         return;
-    if (find(territories.begin(), territories.end(), territory) == territories.end())
+    if (find(territories->begin(), territories->end(), territory) == territories->end())
     {
-        territories.push_back(territory);
+        territories->push_back(territory);
     }
 }
 
@@ -287,9 +286,9 @@ void Map::addContinent(Continent *continent)
 {
     if (!continent)
         return;
-    if (find(continents.begin(), continents.end(), continent) == continents.end())
+    if (find(continents->begin(), continents->end(), continent) == continents->end())
     {
-        continents.push_back(continent);
+        continents->push_back(continent);
     }
 }
 
@@ -299,8 +298,8 @@ string Map::getName() const { return *name; }
 bool Map::getWrap() const { return *wrap; }
 bool Map::getWarn() const { return *warn; }
 
-const vector<Continent *> &Map::getContinents() const { return continents; }
-const vector<Territory*>& Map::getTerritories() const { return territories; }
+const vector<Continent *> &Map::getContinents() const { return *continents; }
+const vector<Territory*>& Map::getTerritories() const { return *territories; }
 
 
 
@@ -328,21 +327,21 @@ void Map::dfs(Territory *start, unordered_set<Territory *> &visited) const
 
 bool Map::isConnected() const
 {
-    if (territories.empty())
+    if (territories->empty())
         return false;
     unordered_set<Territory *> visited;
-    dfs(territories.front(), visited);
-    return visited.size() == territories.size();
+    dfs(territories->front(), visited);
+    return visited.size() == territories->size();
 }
 
 bool Map::areContinentsInterconnected() const
 {
-    
-    for (auto *c : continents)
+
+    for (auto *c : *continents)
     {
         const auto &ts = c->getTerritories();
         if (ts.empty())
-            continue; 
+            continue;
         unordered_set<Territory *> allowed(ts.begin(), ts.end());
         unordered_set<Territory *> visited;
 
@@ -374,10 +373,10 @@ bool Map::areContinentsInterconnected() const
 bool Map::areTerritoriesUniqueToContinents() const
 {
     
-    for (auto *t : territories)
+    for (auto *t : *territories)
     {
         int count = 0;
-        for (auto *c : continents)
+        for (auto *c : *continents)
         {
             const auto &ts = c->getTerritories();
             count += static_cast<int>(count_if(ts.begin(), ts.end(),
@@ -390,9 +389,9 @@ bool Map::areTerritoriesUniqueToContinents() const
     return true;
 }
 
-bool Map::isValid() const
+bool Map::validate() const
 {
-    if (territories.empty())
+    if (territories->empty())
         return false;
     if (!isConnected())
         return false;
@@ -548,7 +547,7 @@ Map* MapLoader::load(const string& path, string* errorOut) const {
         }
     }
 
-    if (!map->isValid()) {
+    if (!map->validate()) {
         if (errorOut) *errorOut = "Invalid map check failed).";
         delete map;
         return nullptr;
