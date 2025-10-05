@@ -155,11 +155,11 @@ void testPlayers() {
 	}
 
 		std::cout << "Here is the list of all the orders that are part of the player's order list: " <<  std::endl;
-		std::queue<DummyOrders*> listOfPlayerOrders = *((*(player1.getOrdersList())).getQueue());
+		std::vector<DummyOrders*> listOfPlayerOrders = *((*(player1.getOrdersList())).getOrderList());
 		while (!listOfPlayerOrders.empty() ) {
-			DummyOrders* order = listOfPlayerOrders.front();
+			DummyOrders* order = listOfPlayerOrders.back();
 			std::cout << *order << std::endl;
-		    listOfPlayerOrders.pop();
+		    listOfPlayerOrders.pop_back();
 		}
 		
 		//cleanup 

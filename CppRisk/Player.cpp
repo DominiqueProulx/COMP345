@@ -7,14 +7,7 @@
 
 //Implementation for Player class
 
-
-//TODO : Go through other branches and make sure names are same
-//TODO : Final check for memory leaks
-//TODO : Make sure other branches have copy constructor and destructor because my code uses them. 
 //TODO : Verify what to do with the map stub in the driver
-//TODO : Make sure the card gets back in the deck after it's been played.
-
- 
 
 // Headers
 #include "Player.h"
@@ -61,15 +54,15 @@ Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies
 Player::Player(const Player& other) {
        this->playerID = new int(*(other.playerID));
        this->playerColor = new std::string(*(other.playerColor));
-       this->playerHand = new Hand(*(other.playerHand)); //asuming OrderList has a copy constructor
-	   this->orderlist = new OrderList(*(other.orderlist)); //asuming OrderList has a copy constructor
+       this->playerHand = new Hand(*(other.playerHand)); //Calling Hand copy constrcutor
+	   this->orderlist = new OrderList(*(other.orderlist)); //Calling OrderList copy constrcutor
 
        this->territories = new std::vector<TerritoriesWithArmies*>();
-       // For every pointer to the strcut containing territories and armies, do deep copies of territories and armies.
+       // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
         for (TerritoriesWithArmies* territoriesWithArmies_ptr : *(other.territories)) {
             TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
             (*newTWA).armies = (*territoriesWithArmies_ptr).armies;
-            (*newTWA).territory = new Territory(*((*territoriesWithArmies_ptr).territory)); // deep copy of the territory as well
+            (*newTWA).territory = new Territory(*((*territoriesWithArmies_ptr).territory));
             (*territories).push_back(newTWA);
         }
 	}   
@@ -123,11 +116,8 @@ std::ostream& operator<<(std::ostream& os, const Player& player)
         os << "\nPlayer ID : " << *(player.playerID)
             << "\nPlayer Color : " << *(player.playerColor)
             << "\nPlayer Terrirories: " << std::endl;
-
         const std::vector<TerritoriesWithArmies*>* twaVector = player.territories;
-
-        if (twaVector != nullptr) {
-
+       if (twaVector != nullptr) {
         for (int i = 0; i < (*twaVector).size(); i++) {
             TerritoriesWithArmies& twa = *((*twaVector)[i]);
             if ( twa.territory != nullptr  && (*(twa.territory)).name != nullptr) {
@@ -145,14 +135,14 @@ Player& Player::operator= (const Player& otherPlayer) {
 
     delete playerID;
     delete playerColor;
-	delete playerHand; //asuming Hand has a destructor
-    delete orderlist; //asuming OrderList has a destructor
-    delete territories;  
+	delete playerHand; //calling Hand destructor
+    delete orderlist; //calling Orderlist destructor
+    delete territories;  //calling Territories destructor
 
     this->playerID = new int(*(otherPlayer.playerID));
     this->playerColor = new std::string(*(otherPlayer.playerColor));
-    this->playerHand = new Hand(*(otherPlayer.playerHand)); //asuming OrderList has a copy constructor
-    this->orderlist = new OrderList(*(otherPlayer.orderlist)); //asuming OrderList has a copy constructor
+    this->playerHand = new Hand(*(otherPlayer.playerHand)); //calling Hand copy constructor
+    this->orderlist = new OrderList(*(otherPlayer.orderlist)); //calling orderList copy constructor
 
     this->territories = new std::vector<TerritoriesWithArmies*>(); // default constructor assigns null pointers. 
     // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
@@ -165,8 +155,7 @@ Player& Player::operator= (const Player& otherPlayer) {
     
     }
     
-   // Methods
-    
+// ------------------ ToDefend() ------------------
     
 //toDefend();
  // Returns a vector of pointers to TerritoriesWithArmies struct
@@ -204,6 +193,7 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 	 return territoriesToDefend;
     }
     
+// ------------------ ToAttack() ------------------
 //ToAttack();
     // Returns a vector of pointers to Territories struct
     // The territories are randomly chosen from the vector of territories passed as argument
@@ -235,8 +225,9 @@ std::vector<Territory*> Player::toAttack(const std::vector<Territory*>& possible
     }
 
  
-//issueOrder();
-    // deploy and advance are always available as orders
+// ------------------ issueOrder() ------------------
+	// This method allows the user to issue an order . it adds the order to the player's order list
+    // Deploy and advance are always available as orders
 	// Players can also issue orders based on the cards they have in their hand
 void Player::issueOrder() {
 
@@ -263,20 +254,18 @@ void Player::issueOrder() {
             validInput = true;
         }
 
-
-       
         if(choice == 1){
             std::cout << " Creationg a deploy order and adding it to the orders list" << std::endl;
             // Create a deploy order and add it to the player's list of orders
             Orders* deployOrder = new Orders("deploy");
-            (*(*orderlist).orders).push(deployOrder);
+            (*(*orderlist).orders).push_back(deployOrder);
            
         }
         else if(choice == 2 ){
             std::cout << " Creationg a Advance order and adding it to the orders list" << std::endl;
             // Create a advance order and add it to the player's list of orders
             Orders* advanceOrder = new Orders("advance");
-            (*(*orderlist).orders).push(advanceOrder);
+            (*(*orderlist).orders).push_back(advanceOrder);
            
         }
 			
@@ -286,10 +275,8 @@ void Player::issueOrder() {
             // the card pay() returns an Order
             Orders* cardOrder = (*((*(*playerHand).hand)[choice-3])).play(cardName);
 			// add the order to the player's list of orders
-			(*(*orderlist).orders).push(cardOrder);
-        }
-        
-        
+			(*(*orderlist).orders).push_back(cardOrder);
+        }          
     }
 
         

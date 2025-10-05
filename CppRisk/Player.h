@@ -29,11 +29,11 @@ public:
 
 class DummyOrderList {
 public:
-	std::queue<DummyOrders*>* orders;
+	std::vector<DummyOrders*>* orders;
 	DummyOrderList() {
-		orders = new std::queue<DummyOrders*>();
+		orders = new std::vector<DummyOrders*>();
 	}
-	std::queue<DummyOrders*>* getQueue() { return orders; }
+	std::vector<DummyOrders*>* getOrderList() { return orders; }
 	void move() { std::cout << "Dummy Orderlist move\n"; }
 	void remove() { std::cout << "Dummy Orderlist remove\n"; }
 	void execute() { std::cout << "Dummy Orderlist execute\n"; }
@@ -50,11 +50,11 @@ public:
 	}
 	DummyCards(std::string t) : name(t) {}
 	DummyOrders* play() {
-		std::cout << "Dummy Cards processing --  This returns an order\n";
+		std::cout << "Dummy Cards processing. This returns an order\n";
 		return new DummyOrders();
 	}
 	DummyOrders* play(std::string& cardName) {
-		std::cout << "Dummy Cards processing\n This returns an order";
+		std::cout << "Dummy Cards processing. This returns an order\n";
 		return new DummyOrders(cardName);
 	}
 	const std::string getName() const{ return name; }
