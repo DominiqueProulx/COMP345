@@ -13,7 +13,7 @@ public:
 	Card(const std::string& name);
 	virtual ~Card();
 	virtual Order* play(Hand& hand, Deck& deck) = 0;
-	//virtual void print(std::ostream& os) const = 0;
+	virtual Card* copy() const = 0;
 
 	//getter function
 	std::string getName() const;
@@ -31,6 +31,7 @@ public:
 	Bomb();
 	~Bomb();
 	Order* play(Hand& hand, Deck& deck) override;
+	Card* copy() const override;
 	
 };
 
@@ -39,7 +40,7 @@ class Reinforcement : public Card {
 	Reinforcement();
 	~Reinforcement();
 	Order* play(Hand& hand, Deck& deck) override;
-	
+	Card* copy() const override;
 };
 
 class Blockade : public Card {
@@ -47,7 +48,7 @@ class Blockade : public Card {
 	Blockade();
 	~Blockade();
 	Order* play(Hand& hand, Deck& deck) override;
-	
+	Card* copy() const override;
 };
 
 class Airlift : public Card {
@@ -55,7 +56,7 @@ class Airlift : public Card {
 	Airlift();
 	~Airlift();
 	Order* play(Hand& hand, Deck& deck) override;
-	
+	Card* copy() const override;
 };
 
 class Diplomacy : public Card {
@@ -63,14 +64,15 @@ class Diplomacy : public Card {
 	Diplomacy();
 	~Diplomacy();
 	Order* play(Hand& hand, Deck& deck) override;
-	
+	Card* copy() const override;
 };
 
 class Hand {
 public:
-	//constructor and destructor
+	//constructor and destructor and copier
 	Hand();
 	~Hand();
+	Hand(const Hand& copy);
 
 	//functions
 	void addCard(Card* card);
@@ -88,10 +90,11 @@ private:
 
 class Deck {
 
-	//constructor and destructor
+	//constructor and destructor and copier
 public:
 	Deck();
 	~Deck();
+	Deck(const Deck& copy);
 
 	//functions
 	void initializeDeck();

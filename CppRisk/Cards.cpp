@@ -28,6 +28,9 @@ std::string Card::getName() const {
 //definitions for Bomb class - consructor, destructor, play, print
 Bomb::Bomb() : Card("Bomb") {}
 Bomb::~Bomb() {}
+Card* Bomb::copy() const {
+    return new Bomb(*this);
+}
 
 Order* Bomb::play(Hand& hand, Deck& deck) {
     std::cout << "Bomb card played" << std::endl;
@@ -42,6 +45,9 @@ Order* Bomb::play(Hand& hand, Deck& deck) {
 //definitions for Reinforcement class - consructor, destructor, play, print
 Reinforcement::Reinforcement() : Card("Reinforcement") {}
 Reinforcement::~Reinforcement() {}
+Card* Reinforcement::copy() const {
+    return new Reinforcement(*this);
+}
 
 Order* Reinforcement::play(Hand& hand, Deck& deck) {
     std::cout << "Reinforcement card played" << std::endl;
@@ -56,6 +62,9 @@ Order* Reinforcement::play(Hand& hand, Deck& deck) {
 //definitions for Blockade class - consructor, destructor, play, print
 Blockade::Blockade() : Card("Blockade") {}
 Blockade::~Blockade() {}
+Card* Blockade::copy() const {
+    return new Blockade(*this);
+}
 
 Order* Blockade::play(Hand& hand, Deck& deck) {
     std::cout << "Blockade card played" << std::endl;
@@ -70,6 +79,9 @@ Order* Blockade::play(Hand& hand, Deck& deck) {
 //definitions for Airlift class - consructor, destructor, play, print
 Airlift::Airlift() : Card("Airlift") {}
 Airlift::~Airlift() {}
+Card* Airlift::copy() const {
+    return new Airlift(*this);
+}
 
 Order* Airlift::play(Hand& hand, Deck& deck) {
     std::cout << "Airlift card played" << std::endl;
@@ -84,6 +96,9 @@ Order* Airlift::play(Hand& hand, Deck& deck) {
 //definitions for Diplomacy class - consructor, destructor, play, print
 Diplomacy::Diplomacy() : Card("Diplomacy") {}
 Diplomacy::~Diplomacy() {}
+Card* Diplomacy::copy() const {
+    return new Diplomacy(*this);
+}
 
 Order* Diplomacy::play(Hand& hand, Deck& deck) {
     std::cout << "Diplomacy card played" << std::endl;
@@ -108,6 +123,14 @@ Deck::~Deck() {
     deck->clear();
     delete deck;
     deck = nullptr;
+}
+
+//copy constructor for deep copy
+Deck::Deck(const Deck& copy) : deck(new std::vector<Card*>()) {
+    for (Card* card : *copy.deck) {
+        deck->push_back(card->copy());
+    }
+    std::cout << "Deck copied." << std::endl;
 }
 
 //initializes deck with 50 cards and shuffles
@@ -180,6 +203,14 @@ Hand::~Hand() {
     hand->clear();
     delete hand;
     hand = nullptr;
+}
+
+//copy constructor for deep copy
+Hand::Hand(const Hand& copy) : hand(new std::vector<Card*>()) {
+    for (Card* card : *copy.hand) {
+        hand->push_back(card->copy());
+    }
+    std::cout << "Hand copied." << std::endl;
 }
 
 //Hand functions
