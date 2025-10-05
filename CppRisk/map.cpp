@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 using namespace std;
 
@@ -17,14 +18,14 @@ Continent::Continent(const string& n, int b)
 Continent::Continent(const Continent& other)
     : name(new string(*other.name)),
     bonus(new int(*other.bonus)),
-    territories(new vector<Territory*>(*other.territories)) {}
+    territories(new vector<Territory*>()) {}
 
 //assignment operator
 Continent& Continent::operator=(const Continent& other) {
     if (this != &other) {
         *name  = *other.name;
         *bonus = *other.bonus;
-        *territories = *other.territories;
+        territories->clear();
     }
     return *this;
 }
@@ -80,7 +81,7 @@ Territory::Territory(const Territory& other)
     x(new int(*other.x)),
     y(new int(*other.y)),
     numberOfArmies(new int(*other.numberOfArmies)),
-    adjacentTerritories(new vector<Territory*>(*other.adjacentTerritories)) {}
+    adjacentTerritories(new vector<Territory*>()) {}
 
 //when territory already exists
 Territory& Territory::operator=(const Territory& other) {
@@ -89,7 +90,7 @@ Territory& Territory::operator=(const Territory& other) {
         *x               = *other.x;
         *y               = *other.y;
         *numberOfArmies  = *other.numberOfArmies;
-        *adjacentTerritories = *other.adjacentTerritories;
+        adjacentTerritories->clear();
     }
     return *this;
 }
@@ -162,8 +163,8 @@ Map::Map(const Map &other)
     name(new string(*other.name)),
     wrap(new bool(*other.wrap)),
     warn(new bool(*other.warn)),
-    territories(new vector<Territory*>(*other.territories)),
-    continents(new vector<Continent*>(*other.continents))
+    territories(new vector<Territory*>()),
+    continents(new vector<Continent*>())
 {
     //deep copy continents
     unordered_map<const Continent *, Continent *> cMap;
@@ -270,6 +271,8 @@ Map::~Map()
     delete name;
     delete wrap;
     delete warn;
+    delete territories;
+    delete continents;
 }
 
 void Map::addTerritory(Territory *territory)
