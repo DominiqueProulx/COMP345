@@ -1,5 +1,6 @@
-#include "Orders.h"
 #include <iostream>
+#include "Orders.h"
+#include "GameEngine.h"
 
 // Declare test functions
 void testLoadMaps();
@@ -15,7 +16,7 @@ int main(void)
 	//testPlayers();
 	testOrdersLists();
 	//testCards();
-	//testGameStates();
+	testGameStates();
 
 	return 0;
 }
