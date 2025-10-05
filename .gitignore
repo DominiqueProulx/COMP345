@@ -7,3 +7,6 @@
 # compilation outputs
 /out
 /out/intermediates
+
+# executables
+**.exe

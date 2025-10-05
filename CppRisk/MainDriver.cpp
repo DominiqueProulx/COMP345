@@ -1,5 +1,4 @@
-
-#include "map.h"
+#include "Map.h"
 #include "Orders.h"
 #include "GameEngine.h"
 
@@ -8,8 +7,6 @@
 #include <string>
 
 using namespace std;
-
-
 
 // Declare test functions
 void testLoadMaps();
