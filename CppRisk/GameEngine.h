@@ -25,7 +25,7 @@ private:
 
 		// operators
 		State& operator=(const State& other);
-		friend std::ostream& operator<<(std::ostream& os, State& state);
+		friend std::ostream& operator<<(std::ostream& os, const State& state);
 
 		// builder functions
 		void addSubstate(State* newState);
