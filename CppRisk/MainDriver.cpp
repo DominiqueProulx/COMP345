@@ -1,6 +1,12 @@
-#include <iostream>
+#include "Map.h"
 #include "Orders.h"
 #include "GameEngine.h"
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
 
 // Declare test functions
 void testLoadMaps();
@@ -12,7 +18,7 @@ void testGameStates();
 int main(void)
 {
 	// run all driver test functions
-	//testLoadMaps();
+	testLoadMaps();
 	//testPlayers();
 	testOrdersLists();
 	//testCards();

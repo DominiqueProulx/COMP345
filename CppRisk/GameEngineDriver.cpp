@@ -53,7 +53,9 @@ void testGameStates()
 	engine.addChildStates(end, { final });
 
 	// console test loop
-	std::cout << "----- testGameStates() -----";
+	std::cout << "========================================\n";
+	std::cout << "          TESTING GAME ENGINE\n";
+	std::cout << "========================================\n";
 
 	if (engine.getActiveParentStatePtr() == nullptr || engine.getActiveStatePtr() == nullptr)
 	{
