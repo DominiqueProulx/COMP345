@@ -1,5 +1,5 @@
+#include "Orders.h"
 #include "Cards.h"
-#include "DummyOrder.h"
 #include <iostream>
 #include <random>
 
@@ -26,88 +26,88 @@ std::string Card::getName() const {
 }
 
 //definitions for Bomb class - consructor, destructor, play, print
-Bomb::Bomb() : Card("Bomb") {}
-Bomb::~Bomb() {}
-Card* Bomb::copy() const {
-    return new Bomb(*this);
+BombCard::BombCard() : Card("Bomb") {}
+BombCard::~BombCard() {}
+Card* BombCard::copy() const {
+    return new BombCard(*this);
 }
 
-Order* Bomb::play(Hand& hand, Deck& deck) {
+Order* BombCard::play(Hand& hand, Deck& deck) {
     std::cout << "Bomb card played" << std::endl;
 	//returns to deck
     deck.returnCard(this);
     //removes from hand
 	hand.removeCard(this);
     //returns order for order list
-    return new Order("Bomb");
+    return new Bomb();
 }
 
 //definitions for Reinforcement class - consructor, destructor, play, print
-Reinforcement::Reinforcement() : Card("Reinforcement") {}
-Reinforcement::~Reinforcement() {}
-Card* Reinforcement::copy() const {
-    return new Reinforcement(*this);
+ReinforcementCard::ReinforcementCard() : Card("Reinforcement") {}
+ReinforcementCard::~ReinforcementCard() {}
+Card* ReinforcementCard::copy() const {
+    return new ReinforcementCard(*this);
 }
 
-Order* Reinforcement::play(Hand& hand, Deck& deck) {
+Order* ReinforcementCard::play(Hand& hand, Deck& deck) {
     std::cout << "Reinforcement card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Order("Reinforcement");
+    return new Deploy();
 }
 
 //definitions for Blockade class - consructor, destructor, play, print
-Blockade::Blockade() : Card("Blockade") {}
-Blockade::~Blockade() {}
-Card* Blockade::copy() const {
-    return new Blockade(*this);
+BlockadeCard::BlockadeCard() : Card("Blockade") {}
+BlockadeCard::~BlockadeCard() {}
+Card* BlockadeCard::copy() const {
+    return new BlockadeCard(*this);
 }
 
-Order* Blockade::play(Hand& hand, Deck& deck) {
+Order* BlockadeCard::play(Hand& hand, Deck& deck) {
     std::cout << "Blockade card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Order("Blockade");
+    return new Blockade();
 }
 
 //definitions for Airlift class - consructor, destructor, play, print
-Airlift::Airlift() : Card("Airlift") {}
-Airlift::~Airlift() {}
-Card* Airlift::copy() const {
-    return new Airlift(*this);
+AirliftCard::AirliftCard() : Card("Airlift") {}
+AirliftCard::~AirliftCard() {}
+Card* AirliftCard::copy() const {
+    return new AirliftCard(*this);
 }
 
-Order* Airlift::play(Hand& hand, Deck& deck) {
+Order* AirliftCard::play(Hand& hand, Deck& deck) {
     std::cout << "Airlift card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Order("Airlift");
+    return new Airlift();
 }
 
 //definitions for Diplomacy class - consructor, destructor, play, print
-Diplomacy::Diplomacy() : Card("Diplomacy") {}
-Diplomacy::~Diplomacy() {}
-Card* Diplomacy::copy() const {
-    return new Diplomacy(*this);
+DiplomacyCard::DiplomacyCard() : Card("Diplomacy") {}
+DiplomacyCard::~DiplomacyCard() {}
+Card* DiplomacyCard::copy() const {
+    return new DiplomacyCard(*this);
 }
 
-Order* Diplomacy::play(Hand& hand, Deck& deck) {
+Order* DiplomacyCard::play(Hand& hand, Deck& deck) {
     std::cout << "Diplomacy card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Order("Diplomacy");
+	return new Negotiate();
 }
 
 //Deck Class constructors and destructors
@@ -137,11 +137,11 @@ Deck::Deck(const Deck& copy) : deck(new std::vector<Card*>()) {
 void Deck::initializeDeck() {
     // Create 10 of each card type
     for (int i = 0; i < 10; ++i) {
-        deck->push_back(new Bomb());
-        deck->push_back(new Reinforcement());
-        deck->push_back(new Blockade());
-        deck->push_back(new Airlift());
-        deck->push_back(new Diplomacy());
+        deck->push_back(new BombCard());
+        deck->push_back(new ReinforcementCard());
+        deck->push_back(new BlockadeCard());
+        deck->push_back(new AirliftCard());
+        deck->push_back(new DiplomacyCard());
     }
     std::cout << "Deck initialized with 50 cards." << std::endl;
     shuffle();
