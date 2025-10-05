@@ -27,7 +27,7 @@ void testCards() {
             Order* returnedOrder = cardToPlay->play(hand, deck);
 
             if (returnedOrder) {
-                std::cout << "\nCard's play() method returned an order of type: " << returnedOrder->getType() << std::endl;
+                std::cout << "Card's play() method returned an order of type: " << returnedOrder->getType() << "\n" << std::endl;
 
                 // Delete Order to prevent memory leak
                 delete returnedOrder;
@@ -42,7 +42,5 @@ void testCards() {
             std::cout << "Hand is empty, cannot test playing a card." << std::endl;
         }
     }
-    
-
 
 }

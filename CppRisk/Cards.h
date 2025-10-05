@@ -13,7 +13,7 @@ public:
 	Card(const std::string& name);
 	virtual ~Card();
 	virtual Order* play(Hand& hand, Deck& deck) = 0;
-	virtual void print(std::ostream& os) const;
+	//virtual void print(std::ostream& os) const = 0;
 
 	//getter function
 	std::string getName() const;
@@ -22,7 +22,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Card& card);
 
 protected:
-	std::string name;
+	std::string* name;
 };
 
 //declarations for child classes that inherit from Card
@@ -31,7 +31,7 @@ public:
 	Bomb();
 	~Bomb();
 	Order* play(Hand& hand, Deck& deck) override;
-	void print(std::ostream& os) const override;
+	
 };
 
 class Reinforcement : public Card {
@@ -39,7 +39,7 @@ class Reinforcement : public Card {
 	Reinforcement();
 	~Reinforcement();
 	Order* play(Hand& hand, Deck& deck) override;
-	void print(std::ostream& os) const override;
+	
 };
 
 class Blockade : public Card {
@@ -47,7 +47,7 @@ class Blockade : public Card {
 	Blockade();
 	~Blockade();
 	Order* play(Hand& hand, Deck& deck) override;
-	void print(std::ostream& os) const override;
+	
 };
 
 class Airlift : public Card {
@@ -55,7 +55,7 @@ class Airlift : public Card {
 	Airlift();
 	~Airlift();
 	Order* play(Hand& hand, Deck& deck) override;
-	void print(std::ostream& os) const override;
+	
 };
 
 class Diplomacy : public Card {
@@ -63,7 +63,7 @@ class Diplomacy : public Card {
 	Diplomacy();
 	~Diplomacy();
 	Order* play(Hand& hand, Deck& deck) override;
-	void print(std::ostream& os) const override;
+	
 };
 
 class Hand {
@@ -82,8 +82,8 @@ public:
 
 //vector that holds hand cards
 private:
-	std::vector<Card*> hand;
-	static const int MAX_HAND_SIZE = 5;
+	std::vector<Card*>* hand;
+	static const int* MAX_HAND_SIZE;
 };
 
 class Deck {
@@ -103,5 +103,5 @@ public:
 
 //vector that holds cards
 private:
-	std::vector<Card*> deck;
+	std::vector<Card*>* deck;
 };
