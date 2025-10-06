@@ -5,19 +5,6 @@
 #include <vector>
 #include <iostream>
 
-//// Placeholder for Player until integration with Player component
-//class Player {
-//public:
-//	std::string* playerName;
-//
-//	Player(const std::string& name);
-//	Player(const Player& other);
-//	Player& operator=(const Player& other);
-//	~Player();
-//
-//	std::string getName() const;
-//};
-
 // -------- ORDER BASE CLASS --------
 // Abstract base class for all order types
 class Order {
