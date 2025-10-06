@@ -1,8 +1,11 @@
+#define _CRTDBG_MAP_ALLOC
 #include "PlayerDriver.h"
+#include <cstdlib>
+#include <crtdbg.h>
 
 int main(void)
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 
 	// run all driver test functions
 	//testLoadMaps();
@@ -11,6 +14,6 @@ int main(void)
 	//testCards();
 	//testGameStates();
 
-
+		
 	return 0;
 }

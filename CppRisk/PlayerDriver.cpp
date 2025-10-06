@@ -21,7 +21,6 @@ void testPlayers() {
 
 
 	std::cout << "Map loaded successfully!\n" << std::endl;
-	//std::cout << *map << std::endl;
 
 	std::cout << "Creating the Deck of Cards" << std::endl;
 	Deck deck;
@@ -110,7 +109,6 @@ void testPlayers() {
 
 	//Testing toAttack() method
 	std::cout << "\nTesting toAttack() method for Player 1" << std::endl;
-	//std::vector<Territory*> territoriesToAttack1 = player1.toAttack(mapstub2);
 	std::vector<Territory*> territoriesToAttack1 = player1.toAttack();
 	std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1.size() << " territories." << std::endl;
 	std::cout << "The territories to Attack are: " << std::endl;
@@ -121,7 +119,6 @@ void testPlayers() {
 
 	//Testing toAttack() method
 	std::cout << "\nTesting toAttack() method for Player 2" << std::endl;
-	//std::vector<Territory*> territoriesToAttack2 = player2.toAttack(mapstub1);
 	std::vector<Territory*> territoriesToAttack2 = player2.toAttack();
 	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2.size() << " territories." << std::endl;
 	std::cout << "The territories to Attack are: " << std::endl;
@@ -150,38 +147,11 @@ void testPlayers() {
 
 		std::cout << "\nHere is the list of all the orders that are part of the player's order list: " <<  std::endl;
 		std::cout << *(player1.getOrdersList()) << std::endl;
-		/*std::vector<Order*> listOfPlayerOrders = *((*(player1.getOrdersList())).getOrdersList());
-
-		while (!listOfPlayerOrders.empty() ) {
-			Order* order = listOfPlayerOrders.back();
-			std::cout << *order << std::endl;
-		    listOfPlayerOrders.pop_back();
-		}*/
 		
-		//cleanup 
-		/*delete territory1;
-		delete territory2;
-		delete territory3;
-		delete territory4;
-		delete territory5;
-
-		delete territory6;
-		delete territory7;
-		delete territory8;
-		delete territory9;
-		delete territory10;*/
-
-		
-		/*delete card1;
-		delete card2;
-		delete card3;
-		delete card4;
-		delete card5;*/
 
 		delete map; // all territories will also be deleted
 		
-
-
+	
 	std::cout << "\nEnd of Tests for Player Class "<< std::endl;
 
 }

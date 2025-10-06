@@ -32,7 +32,7 @@ Player::Player(const std::string& color, const std::vector<Territory*>& initialT
     playerID = new int(playerCount);
     playerColor = new std::string(color);
 	territoriesOwned = new std::vector<Territory*>(); // initialized with null pointers.
-   // You want the pointers of Player to point to the same territories as map territories. 
+   // You want the pointers of Player's territories to point to the same territories as map. 
     for (Territory* t : initialTerritories) {
 		(*territoriesOwned).push_back(t);
     }
@@ -60,7 +60,6 @@ Player::~Player() {
         delete playerHand;
         delete orderslist;
         delete territoriesOwned;
-        
     }
 
 //getters
