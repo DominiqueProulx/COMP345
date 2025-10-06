@@ -29,20 +29,19 @@ void testPlayers() {
 	deck.getSize();
 	
 	std::cout << "Allocating Territories to players for testing purposes:\n";
-	std::vector<TerritoriesWithArmies*> territoryPlayer1;
-	std::vector<TerritoriesWithArmies*> territoryPlayer2;
+	std::vector<Territory*> territoryPlayer1;
+	std::vector<Territory*> territoryPlayer2;
 	int count = 0;
 
+	
 	for (Territory* t : map->getTerritories()) {
 		if(count % 2 == 0) {
-			std::cout << " Player 2 - " << t->getName() << std::endl; 
-			TerritoriesWithArmies* twa2 = new TerritoriesWithArmies(t, 3);
-			territoryPlayer2.push_back(twa2);
+			std::cout << " Player 1 - " << t->getName() << std::endl; 
+			territoryPlayer1.push_back(t);
 		}
 		else {
-			std::cout << " Player 1 - " << t->getName() << std::endl;
-			TerritoriesWithArmies* twa1 = new TerritoriesWithArmies(t, 3);
-			territoryPlayer1.push_back(twa1);
+			std::cout << " Player 2 - " << t->getName() << std::endl;
+			territoryPlayer2.push_back(t);
 		}
 		count++;
 		
@@ -92,21 +91,21 @@ void testPlayers() {
 
 	//Testing toDefend() method
 	std::cout << "\nTesting toDefend() method for Player 1" << std::endl;
-	std::vector<TerritoriesWithArmies*> territoriesToDefend1 = player1.toDefend();
+	std::vector<Territory*> territoriesToDefend1 = player1.toDefend();
 	std::cout << "Player 1 has chosen to defend " << territoriesToDefend1.size() << " territories." << std::endl;
 	std::cout << "The territories to defend are: " << std::endl; 
 	int vectorsize3 = territoriesToDefend1.size();
 	for (int i = 0; i < vectorsize3; i++) {
-		std::cout << (territoriesToDefend1[i]->territory->getName()) << std::endl;
+		std::cout << (territoriesToDefend1[i]->getName()) << std::endl;
 	}
 
 	std::cout << "\nTesting toDefend() method for Player 2" << std::endl;
-	std::vector<TerritoriesWithArmies*> territoriesToDefend2 = player2.toDefend();
+	std::vector<Territory*> territoriesToDefend2 = player2.toDefend();
 	std::cout << "Player 2 has chosen to defend " << territoriesToDefend2.size() << " territories." << std::endl;
 	std::cout << "The territories to defend are: " << std::endl;
 	int vectorsize4 = territoriesToDefend2.size();
 	for (int i = 0; i < vectorsize4; i++) {
-		std::cout << (territoriesToDefend2[i]->territory->getName()) << std::endl;
+		std::cout << (territoriesToDefend2[i]->getName()) << std::endl;
 	}
 
 	//Testing toAttack() method
@@ -141,7 +140,7 @@ void testPlayers() {
 	bool endOrder = false;
 	while(!endOrder) {
 		player1.issueOrder();
-		std::cout << "Do you want to issue another order ? (y/n)" << std::endl;
+		std::cout << "\nDo you want to issue another order ? (y/n)" << std::endl;
 		char answer;
 		std::cin >> answer;
 		if (answer == 'n' || answer == 'N') {
@@ -149,7 +148,7 @@ void testPlayers() {
 		}
 	}
 
-		std::cout << "Here is the list of all the orders that are part of the player's order list: " <<  std::endl;
+		std::cout << "\nHere is the list of all the orders that are part of the player's order list: " <<  std::endl;
 		std::cout << *(player1.getOrdersList()) << std::endl;
 		/*std::vector<Order*> listOfPlayerOrders = *((*(player1.getOrdersList())).getOrdersList());
 

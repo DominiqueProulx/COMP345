@@ -20,25 +20,21 @@ Player::Player() {
     Player::playerCount++;
     playerID = new int(playerCount);
     playerColor = new std::string("NoColor");
-    territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
+ 	territoriesOwned = new std::vector<Territory*>(); // initialized with null pointers.
     playerHand = new Hand();
     orderslist = new OrdersList();
 	deck = new Deck();
 }
 
-Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories,Deck* deck) {
+Player::Player(const std::string& color, const std::vector<Territory*>& initialTerritories,Deck* deck) {
     Player::playerCount++;
     this->deck = deck; //shared amongs all players.
     playerID = new int(playerCount);
     playerColor = new std::string(color);
-    territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
-    // You want the pointers of Player to point to the same territories as map territories. 
- 
-    for (TerritoriesWithArmies* twa : initialTerritories) {
-        TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
-        (*newTWA).armies = (*twa).armies;
-        (*newTWA).territory = (*twa).territory; //shallow copies because the territories are owned by map, just shared to the player
-        (*territories).push_back(newTWA);
+	territoriesOwned = new std::vector<Territory*>(); // initialized with null pointers.
+   // You want the pointers of Player to point to the same territories as map territories. 
+    for (Territory* t : initialTerritories) {
+		(*territoriesOwned).push_back(t);
     }
     playerHand = new Hand();
     orderslist = new OrdersList();
@@ -51,15 +47,10 @@ Player::Player(const Player& other) {
        this->playerHand = new Hand(*(other.playerHand)); //Calling Hand copy constrcutor
 	   this->orderslist = new OrdersList(*(other.orderslist)); //Calling OrderList copy constrcutor
        this->deck = other.deck; // all players must play with the same deck of cards.
-
-       this->territories = new std::vector<TerritoriesWithArmies*>();
-       // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
-        for (TerritoriesWithArmies* territoriesWithArmies_ptr : *(other.territories)) {
-            TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
-            (*newTWA).armies = (*territoriesWithArmies_ptr).armies;
-            (*newTWA).territory = (*territoriesWithArmies_ptr).territory;// Shallow copy as territories are owned by map
-			(*territories).push_back(newTWA); 
-        }
+	   this->territoriesOwned = new std::vector<Territory*>();
+       for (Territory* t : *(other.territoriesOwned)) {
+		   territoriesOwned->push_back(t);
+       }
 	}   
 
 //Destructor
@@ -68,14 +59,7 @@ Player::~Player() {
         delete playerColor;
         delete playerHand;
         delete orderslist;
-     
-
-       // Delete all territoriesWithArmies and their territory
-        for (TerritoriesWithArmies* twa : *territories) {
-          // delete (*twa).territory; the territories are shared don't delete them 
-            delete twa;
-        }
-        delete territories;
+        delete territoriesOwned;
         
     }
 
@@ -88,8 +72,8 @@ const std::string* Player::getColor() const {
         return playerColor;
     }
 
-const std::vector<TerritoriesWithArmies*>* Player::getTerritories() const {
-        return territories;
+const std::vector<Territory*>* Player::getTerritories() const {
+        return territoriesOwned;
     }
 
 Hand* Player::getHand() const {
@@ -115,15 +99,10 @@ std::ostream& operator<<(std::ostream& os, const Player& player)
         os << "\nPlayer ID : " << *(player.playerID)
             << "\nPlayer Color : " << *(player.playerColor)
             << "\nPlayer Territories: " << std::endl;
-        const std::vector<TerritoriesWithArmies*>* twaVector = player.territories;
-       if (twaVector != nullptr) {
-        for (int i = 0; i < (*twaVector).size(); i++) {
-            TerritoriesWithArmies& twa = *((*twaVector)[i]);
-            if ( twa.territory != nullptr) {
-                os << (*twa.territory).getName()  << std::endl;
-            }
+
+        for (Territory* t : *(player.territoriesOwned)) {
+            std::cout << *t << std::endl;
         }
-    }
         return os;
     }
     
@@ -134,25 +113,22 @@ Player& Player::operator= (const Player& otherPlayer) {
 
     delete playerID;
     delete playerColor;
-	delete playerHand; //calling Hand destructor
-    delete orderslist; //calling Orderlist destructor
-    delete territories;  //calling Territories destructor
+	delete playerHand; 
+    delete orderslist; 
+    delete territoriesOwned; 
 
     this->playerID = new int(*(otherPlayer.playerID));
     this->playerColor = new std::string(*(otherPlayer.playerColor));
-    this->playerHand = new Hand(*(otherPlayer.playerHand)); //calling Hand copy constructor
-    this->orderslist = new OrdersList(*(otherPlayer.orderslist)); //calling orderList copy constructor
-	
+    this->playerHand = new Hand(*(otherPlayer.playerHand)); 
+    this->orderslist = new OrdersList(*(otherPlayer.orderslist));
+    this->territoriesOwned = new std::vector<Territory*>();
+	for (Territory* t : *(otherPlayer.territoriesOwned)) { //Shallow copies since territories are owned by map
+        territoriesOwned->push_back(t);
+    }
 	this->deck = otherPlayer.deck; // all players must play with the same deck of cards.
-    this->territories = new std::vector<TerritoriesWithArmies*>(); // default constructor assigns null pointers. 
-    // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
-    for (TerritoriesWithArmies* territoriesWithArmies_ptr : *(otherPlayer.territories)) {
-        TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
-        (*newTWA).armies = (*territoriesWithArmies_ptr).armies;
-        (*newTWA).territory = new Territory(*((*territoriesWithArmies_ptr).territory)); 
-        (*territories).push_back(newTWA);
-    }
-    }
+    
+    return *this;
+}
     
 // ------------------ ToDefend() ------------------
 //toDefend();
@@ -162,10 +138,9 @@ Player& Player::operator= (const Player& otherPlayer) {
  // The vector can contain all the player's territories
  // The number of territories to defend is randomly chosen between 0 and the number of territories the player owns
  // The territories to defend are randomly chosen from the player's territories
-std::vector<TerritoriesWithArmies*> Player::toDefend(){
-     int numberOfTerritories = (*territories).size();
-     std::vector<TerritoriesWithArmies*> territoriesToDefend = std::vector<TerritoriesWithArmies*>();
-     std::vector<int> territoriesAdded; // to keep track of already added territories
+std::vector<Territory*> Player::toDefend(){
+     int numberOfTerritories = (*territoriesOwned).size();
+     std::vector<Territory*> territoriesToDefend;
 
      if(numberOfTerritories == 0) {
          std::cout << "Player has no territories to defend." << std::endl;
@@ -174,19 +149,15 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 	 //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
      int randomNumberOfTerritories = std::rand() % numberOfTerritories; 
  
-     //assign the territories that get added to the vecor randomly
+     //assign the territories that get added to the vector randomly
      while (territoriesToDefend.size() < randomNumberOfTerritories) {
-         int randomTerritory = std::rand() % numberOfTerritories;
-
-		 // Check that the territory was not already added
-         if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
-             territoriesAdded.push_back(randomTerritory);
-
-             TerritoriesWithArmies* twaToAdd = new TerritoriesWithArmies;
-             (*twaToAdd).armies = (*((*territories)[randomTerritory])).armies;
-             (*twaToAdd).territory = new Territory(*((*((*territories)[randomTerritory])).territory));
-             territoriesToDefend.push_back(twaToAdd);
+         int randomTerritoryIndex = std::rand() % numberOfTerritories;
+         Territory* territoryToAdd = territoriesOwned->at(randomTerritoryIndex);
+         if (std::find(territoriesToDefend.begin(), territoriesToDefend.end(), territoryToAdd) == territoriesToDefend.end()) {
+             territoriesToDefend.push_back(territoryToAdd);
          }
+
+		
      }
 	 return territoriesToDefend;
     }
@@ -201,12 +172,11 @@ std::vector<TerritoriesWithArmies*> Player::toDefend(){
 	// The number of territories to attack is randomly chosen between 0 and the number of territories that could be attacked
 std::vector<Territory*> Player::toAttack() {
     std::vector<Territory*> possibleTerritories;
+
 	//construct the vector of possible territories to attack
-    for (TerritoriesWithArmies* twa : *territories) {  
-        Territory* playerTerritory = (*twa).territory;
-        std::vector<Territory*> adjacentTerritories = playerTerritory->getAdjacentTerritories();
-       	
-		//Create the collection of possible territories to attack
+      for (Territory* t : *territoriesOwned) {
+            std::vector<Territory*> adjacentTerritories = t->getAdjacentTerritories();
+			//Add adjacent territories to the possible territories vector if not already present
         for (Territory* adjTerritory : adjacentTerritories) {
             if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end()) {
                 possibleTerritories.push_back(adjTerritory); 
@@ -216,20 +186,23 @@ std::vector<Territory*> Player::toAttack() {
 	//Build the collection of randomly chosen territories to attack
     int numberOfPossibleTerritories = possibleTerritories.size();
     std::vector<Territory*> territoriesToAttack;
-    std::vector<int> territoriesAdded; // to keep track of already added territories
+
     if (numberOfPossibleTerritories == 0) {
         std::cout << "Player has no territories to attack." << std::endl;
         return territoriesToAttack; //return the empty vector
     }
+
     //using the random generator to select how many territories will be added. (from 0 to numberOfTerritories -1)
     int randomNumberOfTerritories = std::rand() % numberOfPossibleTerritories;
-    //assign the territories that get added to the vecor randomly
+
+    //assign the territories that get added to the vector randomly
     while (territoriesToAttack.size() < randomNumberOfTerritories) {
-        int randomTerritory = std::rand() % numberOfPossibleTerritories;
-        // Check that the territory was not already added
-        if (std::find(territoriesAdded.begin(), territoriesAdded.end(), randomTerritory) == territoriesAdded.end()) {
-            territoriesAdded.push_back(randomTerritory);
-            Territory* territoryToAdd = new Territory(*possibleTerritories[randomTerritory]);
+
+        int randomTerritoryIndex = std::rand() % numberOfPossibleTerritories;
+        // Check that the territory was not already added, if not, add it
+        Territory* territoryToAdd = possibleTerritories.at(randomTerritoryIndex);
+        if (std::find(territoriesToAttack.begin(), territoriesToAttack.end(), territoryToAdd) == territoriesToAttack.end()) {
+          
             territoriesToAttack.push_back(territoryToAdd);
         }
     }
@@ -243,7 +216,7 @@ std::vector<Territory*> Player::toAttack() {
 	// Players can also issue orders based on the cards they have in their hand
 void Player::issueOrder() {
 
-        std::cout << "Here are the possible orders" << std::endl;
+        std::cout << "\nHere are the possible orders" << std::endl;
         std::cout << "1. Deploy" << std::endl;
         std::cout << "2. Advance" << std::endl;
         std::cout << "From the cards available in your hand : \n" << std::endl;

@@ -65,7 +65,7 @@ public:
 
 //Constructor
 Player();
-Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories, Deck* deck);
+Player(const std::string& color, const std::vector<Territory*>& initialTerritories, Deck* deck);
 //Copy Constructor
 Player(const Player& other); 
 
@@ -76,7 +76,7 @@ Player(const Player& other);
 	 //getters and setters
 	const int* getID() const;
 	const std::string* getColor() const;
-	const std::vector<TerritoriesWithArmies*>* getTerritories() const;
+	const std::vector<Territory*>* getTerritories() const;
 	Hand* getHand() const;
 	OrdersList* getOrdersList() const;
 
@@ -90,16 +90,14 @@ Player(const Player& other);
 	Player& operator= (const Player& otherplayer);
 
 	// Methods
-	std::vector<TerritoriesWithArmies*> toDefend();
-	//std::vector<Territory*> toAttack(const std::vector<Territory*>& possibleTerritories);
+	std::vector<Territory*> toDefend();
 	std::vector<Territory*> toAttack();
 	void issueOrder();
 
 private:
 	const int* playerID;
 	const std::string* playerColor;
-	//A vector of territories owned by the player, each has a number of armies on it.  The vector constains pointers to the TerritoriesWithArmies struct
-	std::vector<TerritoriesWithArmies*>* territories;
+	std::vector<Territory*>* territoriesOwned;
 	Hand* playerHand;
 	OrdersList* orderslist;
 	Deck* deck;
