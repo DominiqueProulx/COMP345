@@ -22,6 +22,11 @@ void testPlayers() {
 
 	std::cout << "Map loaded successfully!\n" << std::endl;
 	//std::cout << *map << std::endl;
+
+	std::cout << "Creating the Deck of Cards" << std::endl;
+	Deck deck;
+	deck.initializeDeck();
+	deck.getSize();
 	
 	std::cout << "Allocating Territories to players for testing purposes:\n";
 	std::vector<TerritoriesWithArmies*> territoryPlayer1;
@@ -53,22 +58,35 @@ void testPlayers() {
 	std::cin >> color;
 
 
-	Player player1(color, territoryPlayer1);
+	Player player1(color, territoryPlayer1, &deck);
 	std::cout << "\nPlayer 1 created with attributes : " << std::endl;
 	std::cout <<  player1 << std::endl;
 
-
+	std::cout << "\nCreate and set the player1 hand. " << std::endl;
+	Hand player1Hand;
+	// Draw 5 cards from the deck to the player's hand
+	for (int i = 0; i < 5; ++i) {
+		deck.draw(&player1Hand);
+	}
+	player1.setHand(player1Hand);
 
 	std::cout << "\nWhat is the Player2 color" << std::endl;
 	std::string color2;
 	std::cin >> color2;
 
 
-	Player player2(color, territoryPlayer2);
+	Player player2(color, territoryPlayer2, &deck);
 	std::cout << "\nPlayer 2 created with attributes : " << std::endl;
 		std::cout << player2 << std::endl;
 
-	
+	std::cout << "\nCreate and set the player2 hand " << std::endl;
+	Hand player2Hand;
+		// Draw 5 cards from the deck to the player's hand
+		for (int i = 0; i < 5; ++i) {
+			deck.draw(&player2Hand);
+		}
+		player2.setHand(player2Hand);
+
 	//setup the random generator using the current time
 	std::srand(std::time(0));
 
@@ -116,18 +134,8 @@ void testPlayers() {
 
 
 	//Testing issueOrder() method
-	std::cout << "Creating cards and adding them to the hand of the player to test orders" << std::endl;
-	//creating some cards and adding them to the player's hand for testing
-	Cards* card1 = new Cards("bomb");
-	Cards* card2 = new Cards("bomb");
-	Cards* card3 = new Cards("blockade");
-	Cards* card4 = new Cards("airlift");
-	Cards* card5 = new Cards("negotiate");
-	(*(player1.getHand())).addCard(card1);
-	(*(player1.getHand())).addCard(card2);
-	(*(player1.getHand())).addCard(card3);
-	(*(player1.getHand())).addCard(card4);
-	(*(player1.getHand())).addCard(card5);
+	std::cout << "\nCreating cards and adding them to the hand of the player to test orders" << std::endl;
+	
 
 	std::cout << "\nTesting issueOrder() method for Player 1" << std::endl;
 	bool endOrder = false;
@@ -165,13 +173,14 @@ void testPlayers() {
 		delete territory10;*/
 
 		
-		delete card1;
+		/*delete card1;
 		delete card2;
 		delete card3;
 		delete card4;
-		delete card5;
+		delete card5;*/
 
-		delete map;
+		delete map; // all territories will also be deleted
+		
 
 
 	std::cout << "\nEnd of Tests for Player Class "<< std::endl;

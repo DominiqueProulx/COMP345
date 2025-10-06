@@ -23,10 +23,12 @@ Player::Player() {
     territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
     playerHand = new Hand();
     orderslist = new OrdersList();
+	deck = new Deck();
 }
 
-Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories) {
+Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories,Deck* deck) {
     Player::playerCount++;
+    this->deck = deck; //shared amongs all players.
     playerID = new int(playerCount);
     playerColor = new std::string(color);
     territories = new std::vector<TerritoriesWithArmies*>(); // initialized with null pointers. 
@@ -35,7 +37,7 @@ Player::Player(const std::string& color, const std::vector<TerritoriesWithArmies
     for (TerritoriesWithArmies* twa : initialTerritories) {
         TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
         (*newTWA).armies = (*twa).armies;
-        (*newTWA).territory = (*twa).territory;
+        (*newTWA).territory = (*twa).territory; //shallow copies because the territories are owned by map, just shared to the player
         (*territories).push_back(newTWA);
     }
     playerHand = new Hand();
@@ -48,14 +50,15 @@ Player::Player(const Player& other) {
        this->playerColor = new std::string(*(other.playerColor));
        this->playerHand = new Hand(*(other.playerHand)); //Calling Hand copy constrcutor
 	   this->orderslist = new OrdersList(*(other.orderslist)); //Calling OrderList copy constrcutor
+       this->deck = other.deck; // all players must play with the same deck of cards.
 
        this->territories = new std::vector<TerritoriesWithArmies*>();
        // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
         for (TerritoriesWithArmies* territoriesWithArmies_ptr : *(other.territories)) {
             TerritoriesWithArmies* newTWA = new TerritoriesWithArmies;
             (*newTWA).armies = (*territoriesWithArmies_ptr).armies;
-            (*newTWA).territory = new Territory(*((*territoriesWithArmies_ptr).territory));
-            (*territories).push_back(newTWA);
+            (*newTWA).territory = (*territoriesWithArmies_ptr).territory;// Shallow copy as territories are owned by map
+			(*territories).push_back(newTWA); 
         }
 	}   
 
@@ -65,10 +68,11 @@ Player::~Player() {
         delete playerColor;
         delete playerHand;
         delete orderslist;
+     
 
        // Delete all territoriesWithArmies and their territory
         for (TerritoriesWithArmies* twa : *territories) {
-            delete (*twa).territory;
+          // delete (*twa).territory; the territories are shared don't delete them 
             delete twa;
         }
         delete territories;
@@ -95,12 +99,15 @@ Hand* Player::getHand() const {
 OrdersList* Player::getOrdersList() const {
         return orderslist;
     }
-//setter
+//setters
 void Player::setColor(const std::string& color) {
 		delete this->playerColor; 
         this->playerColor = new std::string(color);
     }
-    
+void Player::setHand(Hand& hand) {
+    delete this->playerHand;
+	this->playerHand = &hand;
+}
  
 //Stream insertion operator
 std::ostream& operator<<(std::ostream& os, const Player& player)
@@ -135,7 +142,8 @@ Player& Player::operator= (const Player& otherPlayer) {
     this->playerColor = new std::string(*(otherPlayer.playerColor));
     this->playerHand = new Hand(*(otherPlayer.playerHand)); //calling Hand copy constructor
     this->orderslist = new OrdersList(*(otherPlayer.orderslist)); //calling orderList copy constructor
-
+	
+	this->deck = otherPlayer.deck; // all players must play with the same deck of cards.
     this->territories = new std::vector<TerritoriesWithArmies*>(); // default constructor assigns null pointers. 
     // For every pointer to the struct containing territories and armies, do deep copies of territories and armies.
     for (TerritoriesWithArmies* territoriesWithArmies_ptr : *(otherPlayer.territories)) {
@@ -144,7 +152,6 @@ Player& Player::operator= (const Player& otherPlayer) {
         (*newTWA).territory = new Territory(*((*territoriesWithArmies_ptr).territory)); 
         (*territories).push_back(newTWA);
     }
-    
     }
     
 // ------------------ ToDefend() ------------------
@@ -239,13 +246,14 @@ void Player::issueOrder() {
         std::cout << "Here are the possible orders" << std::endl;
         std::cout << "1. Deploy" << std::endl;
         std::cout << "2. Advance" << std::endl;
-        std::cout << "From the cards available in your hand" << std::endl;
-        int i = 3;
-        for (Cards* c : (*((*playerHand).hand))) {
-            
-            std::cout << i << "  " << (*c).getName() << std::endl;
-            i++;
+        std::cout << "From the cards available in your hand : \n" << std::endl;
+        
+
+        for (int i = 0; i < (*playerHand).getSize(); i++) {
+            std::cout << (i+3) <<". " << playerHand->getCard(i)->getName() << std::endl;
         }
+       
+       
         bool validInput = false;
         int choice;
         while (!validInput)
@@ -253,7 +261,7 @@ void Player::issueOrder() {
             std::cout << "Please chose an order number" << std::endl;
             
             std::cin >> choice;
-            if (choice < 1 || choice > 2 + (*(*playerHand).hand).size()) {
+            if (choice < 1 || choice > 2 + (*playerHand).getSize()) {
                 std::cout << "Invalid choice. Please try again." << std::endl;
             };
             validInput = true;
@@ -275,10 +283,10 @@ void Player::issueOrder() {
         }
 			
         else {
-            std::string cardName = (*(*(*playerHand).hand)[choice-3]).getName();
+            std::string cardName = playerHand->getCard(choice - 3)->getName();
             std::cout << " Creationg an " << cardName  << " order and adding it to the orders list" << std::endl;
             // the card pay() returns an Order
-            Order* cardOrder = (*((*(*playerHand).hand)[choice-3])).play(cardName);
+            Order* cardOrder = playerHand->getCard(choice - 3)->play(*playerHand, *deck);
 			// add the order to the player's list of orders 
 			(*orderslist).add(cardOrder);
         }          

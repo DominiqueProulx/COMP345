@@ -15,80 +15,6 @@
 #include "Cards.h"
 
 
-// --------DUMMY CLASSES --------
-//to Stub Implementation from other team members for now
-
-//class DummyOrders {
-//public:
-//	std::string type;
-//	DummyOrders() {
-//		type = "deploy";
-//	}
-//	DummyOrders(std::string t) : type(t) {}
-//	void validate() { std::cout << "Dummy Order validate\n"; };
-//	void execute() { std::cout << "Dummy Order Execute\n"; };
-//
-//	friend std::ostream& operator<<(std::ostream& os, const DummyOrders& order) {
-//		os << "Order: " << order.type;
-//		return os;
-//		
-//	}
-//};
-
-//class DummyOrderList {
-//public:
-//	std::vector<DummyOrders*>* orders;
-//	DummyOrderList() {
-//		orders = new std::vector<DummyOrders*>();
-//	}
-//	std::vector<DummyOrders*>* getOrderList() { return orders; }
-//	void move() { std::cout << "Dummy Orderlist move\n"; }
-//	void remove() { std::cout << "Dummy Orderlist remove\n"; }
-//	void execute() { std::cout << "Dummy Orderlist execute\n"; }
-//	void validate() { std::cout << "Dummy Orderlist validate\n"; }
-//};
-
-//class DummyCards {
-//
-//private:
-//	std::string name;
-//public:
-//	DummyCards() {
-//		name = "deploy";
-//	}
-//	DummyCards(std::string t) : name(t) {}
-//	Order* play() {
-//		std::cout << "Card processing. This returns an order\n";
-//		return new Advance();
-//	}
-//	Order* play(std::string& cardName) {
-//		std::cout << "Dummy Cards processing. This returns an order\n";
-//		return new Advance();
-//	}
-//	const std::string getName() const{ return name; }
-//
-//};
-//
-//class DummyHand {
-//public:
-//	std::vector<DummyCards*>* hand;
-//	DummyHand() {
-//		hand = new std::vector<DummyCards*>();
-//	}
-//	void addCard(DummyCards* card) 
-//		{
-//			(*hand).push_back(card);
-//		}
-//	
-//};
-
-
-//Setup the Dummy classes 
-//using Hand = DummyHand;
-//using OrderList = DummyOrderList;
-//using Territory = DummyTerritory;
-//using Orders =  DummyOrders;
-//using Cards = DummyCards;
 
 // ------------------ Struct to keep track of the armies ------------------
 
@@ -139,7 +65,7 @@ public:
 
 //Constructor
 Player();
-Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories);
+Player(const std::string& color, const std::vector<TerritoriesWithArmies*>& initialTerritories, Deck* deck);
 //Copy Constructor
 Player(const Player& other); 
 
@@ -155,6 +81,7 @@ Player(const Player& other);
 	OrdersList* getOrdersList() const;
 
 	void setColor(const std::string& color);
+	void setHand(Hand& hand);
 
 	//Steam insertion operator
 	friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -175,6 +102,7 @@ private:
 	std::vector<TerritoriesWithArmies*>* territories;
 	Hand* playerHand;
 	OrdersList* orderslist;
+	Deck* deck;
 };
 
 #endif
