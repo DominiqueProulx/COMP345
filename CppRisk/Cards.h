@@ -26,43 +26,43 @@ protected:
 };
 
 //declarations for child classes that inherit from Card
-class Bomb : public Card {
+class BombCard : public Card {
 public:
-	Bomb();
-	~Bomb();
+	BombCard();
+	~BombCard();
 	Order* play(Hand& hand, Deck& deck) override;
 	Card* copy() const override;
 	
 };
 
-class Reinforcement : public Card {
+class ReinforcementCard : public Card {
 	public:
-	Reinforcement();
-	~Reinforcement();
+	ReinforcementCard();
+	~ReinforcementCard();
 	Order* play(Hand& hand, Deck& deck) override;
 	Card* copy() const override;
 };
 
-class Blockade : public Card {
+class BlockadeCard : public Card {
 	public:
-	Blockade();
-	~Blockade();
+	BlockadeCard();
+	~BlockadeCard();
 	Order* play(Hand& hand, Deck& deck) override;
 	Card* copy() const override;
 };
 
-class Airlift : public Card {
+class AirliftCard : public Card {
 	public:
-	Airlift();
-	~Airlift();
+	AirliftCard();
+	~AirliftCard();
 	Order* play(Hand& hand, Deck& deck) override;
 	Card* copy() const override;
 };
 
-class Diplomacy : public Card {
+class DiplomacyCard : public Card {
 	public:
-	Diplomacy();
-	~Diplomacy();
+	DiplomacyCard();
+	~DiplomacyCard();
 	Order* play(Hand& hand, Deck& deck) override;
 	Card* copy() const override;
 };

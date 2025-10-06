@@ -20,12 +20,12 @@ int main(void)
 {
 	// run all driver test functions
 	testLoadMaps();
-	//testPlayers();
-	//testOrdersLists();
-	testCards();
-	//testGameStates();
+	testPlayers();
 	testOrdersLists();
-	//testCards();
+	testCards();
+	testGameStates();
+	testOrdersLists();
+	testCards();
 	testGameStates();
 
 	return 0;

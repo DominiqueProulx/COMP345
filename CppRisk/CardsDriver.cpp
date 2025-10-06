@@ -1,5 +1,5 @@
 #include "Cards.h"
-#include "DummyOrder.h"
+#include "Orders.h"
 #include <iostream>
 
 void testCards() {
@@ -27,7 +27,7 @@ void testCards() {
             Order* returnedOrder = cardToPlay->play(hand, deck);
 
             if (returnedOrder) {
-                std::cout << "Card's play() method returned an order of type: " << returnedOrder->getType() << "\n" << std::endl;
+                std::cout << "Card's play() method returned " << *returnedOrder << "\n" << std::endl;
 
                 // Delete Order to prevent memory leak
                 delete returnedOrder;
