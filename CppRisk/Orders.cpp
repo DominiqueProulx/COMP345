@@ -8,31 +8,6 @@
 #include "Orders.h"
 #include <iostream>
 
-// Player placeholder implementation
-Player::Player(const std::string& name) {
-	playerName = new std::string(name);
-}
-
-Player::Player(const Player& other) {
-	playerName = new std::string(*other.playerName);
-}
-
-Player& Player::operator=(const Player& other) {
-	if (this != &other) {
-		delete playerName;
-		playerName = new std::string(*other.playerName);
-	}
-	return *this;
-}
-
-Player::~Player() {
-	delete playerName;
-}
-
-std::string Player::getName() const {
-	return *playerName;
-}
-
 // ============================================================================
 // ORDER BASE CLASS IMPLEMENTATION
 // ============================================================================
