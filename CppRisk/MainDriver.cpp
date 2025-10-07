@@ -3,7 +3,7 @@
 #include "Orders.h"
 #include "Cards.h"
 #include "GameEngine.h"
-#include <crtdbg.h>
+
 
 // Declare test functions
 void testLoadMaps();
@@ -19,17 +19,8 @@ int main(void)
 
 
 	//testPlayers();
-	try {
-		testPlayers();
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Exception: " << e.what() << "\n";
-	}
-	catch (...) {
-		std::cerr << "Unknown exception!\n";
-	}
-
-
+	
+	testPlayers();
 	testLoadMaps();
 	testOrdersLists();
 	testCards();
