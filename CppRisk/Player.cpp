@@ -56,10 +56,15 @@ Player::Player(const Player& other) {
 //Destructor
 Player::~Player() {
         delete playerID;
+        playerID = nullptr;
         delete playerColor;
+        playerColor = nullptr;
         delete playerHand;
+        playerHand = nullptr;
         delete orderslist;
+        orderslist = nullptr;
         delete territoriesOwned;
+        territoriesOwned = nullptr;
     }
 
 //getters

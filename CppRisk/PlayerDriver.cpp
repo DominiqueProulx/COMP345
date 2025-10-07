@@ -61,12 +61,12 @@ void testPlayers() {
 	std::cout <<  player1 << std::endl;
 
 	std::cout << "\nCreate and set the player1 hand. " << std::endl;
-	Hand player1Hand;
+	Hand* player1Hand = new Hand();
 	// Draw 5 cards from the deck to the player's hand
 	for (int i = 0; i < 5; ++i) {
-		deck.draw(&player1Hand);
+		deck.draw(player1Hand);
 	}
-	player1.setHand(player1Hand);
+	player1.setHand(*player1Hand);
 
 	std::cout << "\nWhat is the Player2 color" << std::endl;
 	std::string color2;
@@ -78,12 +78,12 @@ void testPlayers() {
 		std::cout << player2 << std::endl;
 
 	std::cout << "\nCreate and set the player2 hand " << std::endl;
-	Hand player2Hand;
+	Hand* player2Hand = new Hand();
 		// Draw 5 cards from the deck to the player's hand
 		for (int i = 0; i < 5; ++i) {
-			deck.draw(&player2Hand);
+			deck.draw(player2Hand);
 		}
-		player2.setHand(player2Hand);
+		player2.setHand(*player2Hand);
 
 	//setup the random generator using the current time
 	std::srand(std::time(0));
