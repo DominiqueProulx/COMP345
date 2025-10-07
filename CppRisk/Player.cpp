@@ -245,14 +245,14 @@ void Player::issueOrder() {
         }
 
         if(choice == 1){
-            std::cout << " Creationg a Deploy order and adding it to the orders list" << std::endl;
+            std::cout << " Creating a Deploy order and adding it to the orders list" << std::endl;
             // Create a deploy order and add it to the player's list of orders
             Order* deployOrder = new Deploy();
             (*orderslist).add(deployOrder);
            
         }
         else if(choice == 2 ){
-            std::cout << " Creationg a Advance order and adding it to the orders list" << std::endl;
+            std::cout << " Creating a Advance order and adding it to the orders list" << std::endl;
             // Create a advance order and add it to the player's list of orders
             Order* advanceOrder = new Advance();
             (*orderslist).add(advanceOrder);
@@ -261,7 +261,7 @@ void Player::issueOrder() {
 			
         else {
             std::string cardName = playerHand->getCard(choice - 3)->getName();
-            std::cout << " Creationg an " << cardName  << " order and adding it to the orders list" << std::endl;
+            std::cout << " Creating an " << cardName  << " order and adding it to the orders list" << std::endl;
             // the card pay() returns an Order
             Order* cardOrder = playerHand->getCard(choice - 3)->play(*playerHand, *deck);
 			// add the order to the player's list of orders 

@@ -1,6 +1,6 @@
 // COMP 345 - Fall 2025
 // Risk Game Project
-// Part 2 : Player 
+// Part 2 : Player
 // File: PlayerDriver.cpp
 
 #include "Player.h"
@@ -9,16 +9,19 @@
 #include <ctime>
 
 void testPlayers() {
-	//create a map 
+	std::cout << "========================================" << std::endl;
+	std::cout << "            TESTING PLAYERS" << std::endl;
+	std::cout << "========================================" << std::endl << std::endl;
+
+	//create a map
 	MapLoader loader;
 	std::string error;
 	Map* map = loader.load("MAP.txt", &error);
 
 	if (!map) {
 		std::cerr << "Failed to load map: " << error << std::endl;
-		return ;
+		return;
 	}
-
 
 	std::cout << "Map loaded successfully!\n" << std::endl;
 
@@ -26,16 +29,15 @@ void testPlayers() {
 	Deck deck;
 	deck.initializeDeck();
 	deck.getSize();
-	
+
 	std::cout << "Allocating Territories to players for testing purposes:\n";
 	std::vector<Territory*> territoryPlayer1;
 	std::vector<Territory*> territoryPlayer2;
 	int count = 0;
 
-	
 	for (Territory* t : map->getTerritories()) {
-		if(count % 2 == 0) {
-			std::cout << " Player 1 - " << t->getName() << std::endl; 
+		if (count % 2 == 0) {
+			std::cout << " Player 1 - " << t->getName() << std::endl;
 			territoryPlayer1.push_back(t);
 		}
 		else {
@@ -43,22 +45,18 @@ void testPlayers() {
 			territoryPlayer2.push_back(t);
 		}
 		count++;
-		
+
 	}
 
-	
-
 	std::cout << "------------------ Testing Player Class ------------------" << std::endl;
-	
-	
+
 	std::cout << "\nWhat is the Player1 color" << std::endl;
 	std::string color;
 	std::cin >> color;
 
-
 	Player player1(color, territoryPlayer1, &deck);
 	std::cout << "\nPlayer 1 created with attributes : " << std::endl;
-	std::cout <<  player1 << std::endl;
+	std::cout << player1 << std::endl;
 
 	std::cout << "\nCreate and set the player1 hand. " << std::endl;
 	Hand* player1Hand = new Hand();
@@ -72,18 +70,17 @@ void testPlayers() {
 	std::string color2;
 	std::cin >> color2;
 
-
-	Player player2(color, territoryPlayer2, &deck);
+	Player player2(color2, territoryPlayer2, &deck);
 	std::cout << "\nPlayer 2 created with attributes : " << std::endl;
-		std::cout << player2 << std::endl;
+	std::cout << player2 << std::endl;
 
 	std::cout << "\nCreate and set the player2 hand " << std::endl;
 	Hand* player2Hand = new Hand();
-		// Draw 5 cards from the deck to the player's hand
-		for (int i = 0; i < 5; ++i) {
-			deck.draw(player2Hand);
-		}
-		player2.setHand(*player2Hand);
+	// Draw 5 cards from the deck to the player's hand
+	for (int i = 0; i < 5; ++i) {
+		deck.draw(player2Hand);
+	}
+	player2.setHand(*player2Hand);
 
 	//setup the random generator using the current time
 	std::srand(std::time(0));
@@ -92,7 +89,7 @@ void testPlayers() {
 	std::cout << "\nTesting toDefend() method for Player 1" << std::endl;
 	std::vector<Territory*> territoriesToDefend1 = player1.toDefend();
 	std::cout << "Player 1 has chosen to defend " << territoriesToDefend1.size() << " territories." << std::endl;
-	std::cout << "The territories to defend are: " << std::endl; 
+	std::cout << "The territories to defend are: " << std::endl;
 	int vectorsize3 = territoriesToDefend1.size();
 	for (int i = 0; i < vectorsize3; i++) {
 		std::cout << (territoriesToDefend1[i]->getName()) << std::endl;
@@ -127,15 +124,12 @@ void testPlayers() {
 		std::cout << (territoriesToAttack2[i]->getName()) << std::endl;
 	}
 
-
-
 	//Testing issueOrder() method
 	std::cout << "\nCreating cards and adding them to the hand of the player to test orders" << std::endl;
-	
 
 	std::cout << "\nTesting issueOrder() method for Player 1" << std::endl;
 	bool endOrder = false;
-	while(!endOrder) {
+	while (!endOrder) {
 		player1.issueOrder();
 		std::cout << "\nDo you want to issue another order ? (y/n)" << std::endl;
 		char answer;
@@ -145,14 +139,12 @@ void testPlayers() {
 		}
 	}
 
-		std::cout << "\nHere is the list of all the orders that are part of the player's order list: " <<  std::endl;
-		std::cout << *(player1.getOrdersList()) << std::endl;
-		
+	std::cout << "\nHere is the list of all the orders that are part of the player's order list: " << std::endl;
+	std::cout << *(player1.getOrdersList()) << std::endl;
 
-		delete map; // all territories will also be deleted
-		
-	
-	std::cout << "\nEnd of Tests for Player Class "<< std::endl;
+	delete map; // all territories will also be deleted
+
+	std::cout << "\nEnd of Tests for Player Class " << std::endl;
 
 }
 

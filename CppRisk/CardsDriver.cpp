@@ -3,6 +3,10 @@
 #include <iostream>
 
 void testCards() {
+	std::cout << "========================================" << std::endl;
+	std::cout << "            TESTING CARDS" << std::endl;
+	std::cout << "========================================" << std::endl << std::endl;
+
 	// Create a deck and initialize it
 	Deck deck;
 	deck.initializeDeck();
@@ -18,29 +22,29 @@ void testCards() {
 	hand.printHand();
 	std::cout << "Hand size: " << hand.getSize() << std::endl;
 
-    while (hand.getSize() > 0) {
-        //begins to play cards beginning from index 0
-        Card* cardToPlay = hand.getCard(0);
+	while (hand.getSize() > 0) {
+		//begins to play cards beginning from index 0
+		Card* cardToPlay = hand.getCard(0);
 
-        if (cardToPlay) {
-            //sets order for testing play function
-            Order* returnedOrder = cardToPlay->play(hand, deck);
+		if (cardToPlay) {
+			//sets order for testing play function
+			Order* returnedOrder = cardToPlay->play(hand, deck);
 
-            if (returnedOrder) {
-                std::cout << "Card's play() method returned " << *returnedOrder << "\n" << std::endl;
+			if (returnedOrder) {
+				std::cout << "Card's play() method returned " << *returnedOrder << "\n" << std::endl;
 
-                // Delete Order to prevent memory leak
-                delete returnedOrder;
-                returnedOrder = nullptr;
-            }
+				// Delete Order to prevent memory leak
+				delete returnedOrder;
+				returnedOrder = nullptr;
+			}
 
-            hand.printHand();
-            std::cout << "Hand size: " << hand.getSize() << std::endl;
-        }
+			hand.printHand();
+			std::cout << "Hand size: " << hand.getSize() << std::endl;
+		}
 
-        else {
-            std::cout << "Hand is empty, cannot test playing a card." << std::endl;
-        }
-    }
+		else {
+			std::cout << "Hand is empty, cannot test playing a card." << std::endl;
+		}
+	}
 
 }
