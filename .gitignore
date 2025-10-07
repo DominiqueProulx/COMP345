@@ -7,6 +7,9 @@
 # compilation outputs
 /out
 /out/intermediates
+*.obj
+*.ilk
+*.pdb
 
 # executables
-**.exe
+*.exe
