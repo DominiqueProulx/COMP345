@@ -9,18 +9,23 @@
 
 using namespace std;
 
+/* -------------------------- */
+/* -- MAP IMPLEMENTATION ---- */
+/* -------------------------- */
+
 //CONTINENT-----------------------------------------------------------------------------------------------------------------------
-//normal constructor
+
+// Default constructor, initializes an empty continent object with no data.
 Continent::Continent(const string& n, int b)
     : name(new string(n)), bonus(new int(b)), territories(new vector<Territory*>()) {}
 
-//copy constructor
+//Copy constructor
 Continent::Continent(const Continent& other)
     : name(new string(*other.name)),
     bonus(new int(*other.bonus)),
     territories(new vector<Territory*>()) {}
 
-//assignment operator
+//Assignment operator
 Continent& Continent::operator=(const Continent& other) {
     if (this != &other) {
         *name  = *other.name;
@@ -46,12 +51,12 @@ void Continent::addTerritory(Territory* territory) {
     }
 }
 
+//getters
 const vector<Territory*>& Continent::getTerritories() const { return *territories; }
-
 int Continent::getBonus() const { return *bonus; }
 string Continent::getName() const { return *name; }
 
-//pretty print
+//printing continent info
 ostream& operator<<(ostream& out, const Continent& continent) {
     out << "Continent{name=" << continent.getName()
         << ", bonus=" << continent.getBonus()
@@ -67,7 +72,9 @@ ostream& operator<<(ostream& out, const Continent& continent) {
 
 
 //COUNTRY-----------------------------------------------------------------------------------------------------------------------
-//Regular constructor
+
+
+// Default constructor, initializes an empty territory object with no data.
 Territory::Territory(const string& n, int xCord, int yCord)
     : name(new string(n)),
     x(new int(xCord)),
@@ -83,7 +90,7 @@ Territory::Territory(const Territory& other)
     numberOfArmies(new int(*other.numberOfArmies)),
     adjacentTerritories(new vector<Territory*>()) {}
 
-//when territory already exists
+//Assignment operator
 Territory& Territory::operator=(const Territory& other) {
     if (this != &other) {
         *name            = *other.name;
@@ -117,6 +124,7 @@ const vector<Territory*>& Territory::getAdjacentTerritories() const {
     return *adjacentTerritories;
 }
 
+//getters and setters
 string Territory::getName() const { return *name; }
 int Territory::getX() const { return *x; }
 int Territory::getY() const { return *y; }
@@ -127,7 +135,7 @@ void Territory::setX(int xCord) { *x = xCord; }
 void Territory::setY(int yCord) { *y = yCord; }
 void Territory::setNumberOfArmies(int numOfArmies) { *numberOfArmies = numOfArmies; }
 
-//pretty print (e.g look into <boost/pfr.hpp>)
+//printing territory info
 ostream& operator<<(ostream& out, const Territory& territory) {
     out << "Territory{name=" << territory.getName()
         << ", x=" << territory.getX()
@@ -145,7 +153,8 @@ ostream& operator<<(ostream& out, const Territory& territory) {
 
 
 //MAP-----------------------------------------------------------------------------------------------------------------------
-//normal constructor
+
+// Default constructor, initializes an empty map object with no data.
 Map::Map(const string &scr, const string &auth,
         const string &nm, bool wp, bool wn)
     : scroll(new string(scr)),
@@ -203,6 +212,7 @@ Map::Map(const Map &other)
     }
 }
 
+//Assignment operator
 Map &Map::operator=(const Map &other)
 {
     if (this != &other)
@@ -275,6 +285,7 @@ Map::~Map()
     delete continents;
 }
 
+//add territory if not null or present already
 void Map::addTerritory(Territory *territory)
 {
     if (!territory)
@@ -285,6 +296,7 @@ void Map::addTerritory(Territory *territory)
     }
 }
 
+//add continent if not null or present already
 void Map::addContinent(Continent *continent)
 {
     if (!continent)
@@ -295,6 +307,7 @@ void Map::addContinent(Continent *continent)
     }
 }
 
+//getters
 string Map::getScroll() const { return *scroll; }
 string Map::getAuthor() const { return *author; }
 string Map::getName() const { return *name; }
@@ -305,7 +318,7 @@ const vector<Continent *> &Map::getContinents() const { return *continents; }
 const vector<Territory*>& Map::getTerritories() const { return *territories; }
 
 
-
+//DFS helper function for connectivity check
 void Map::dfs(Territory *start, unordered_set<Territory *> &visited) const
 {
     if (!start || visited.count(start))
@@ -328,6 +341,7 @@ void Map::dfs(Territory *start, unordered_set<Territory *> &visited) const
     }
 }
 
+//check if all territories are connected
 bool Map::isConnected() const
 {
     if (territories->empty())
@@ -337,6 +351,7 @@ bool Map::isConnected() const
     return visited.size() == territories->size();
 }
 
+//check if each continent is a connected subgraph
 bool Map::areContinentsInterconnected() const
 {
 
@@ -373,6 +388,7 @@ bool Map::areContinentsInterconnected() const
     return true;
 }
 
+//check if each territory belongs to exactly one continent
 bool Map::areTerritoriesUniqueToContinents() const
 {
     
@@ -382,10 +398,11 @@ bool Map::areTerritoriesUniqueToContinents() const
         for (auto *c : *continents)
         {
             const auto &ts = c->getTerritories();
-            count += static_cast<int>(count_if(ts.begin(), ts.end(),
-                                               [&](auto *item)
-                                            { return item == t; }));
-        }
+            int localCount = 0;
+            for (auto *item : ts) {
+                if (item == t) localCount++;
+            }
+            count += localCount; }
         if (count != 1)
             return false;
     }
@@ -405,7 +422,7 @@ bool Map::validate() const
     return true;
 }
 
-//pretty print
+//printing map info
 ostream &operator<<(ostream &out, const Map &map)
 {
     out << "Map{name=" << map.getName()
@@ -424,6 +441,7 @@ ostream &operator<<(ostream &out, const Map &map)
 //MAPLOADER-----------------------------------------------------------------------------------------------------------------------
 
 namespace {
+    //parse int and bool from string
     bool parseInt(const string& s, int& out) {
         try {
             size_t idx = 0; int v = stoi(s, &idx);
@@ -431,6 +449,7 @@ namespace {
             out = v; return true;
         } catch (...) { return false; }
     }
+    //parse bool from string
     bool parseBool(const string& s, bool& out) {
         string t = s; for (auto& ch: t) ch = tolower(ch);
         if (t == "yes" || t == "true" || t == "1") { out = true; return true; }
@@ -439,11 +458,13 @@ namespace {
     }
 }
 
+// Default constructor, copy constructor, assignment operator, and destructor
 MapLoader::MapLoader() = default;
 MapLoader::MapLoader(const MapLoader&) = default;
 MapLoader& MapLoader::operator=(const MapLoader&) = default;
 MapLoader::~MapLoader() = default;
 
+// Load a map from a file at the given path. If an error occurs,  optionally set errorOut.
 Map* MapLoader::load(const string& path, string* errorOut) const {
     ifstream in(path);
     if (!in) {
@@ -458,7 +479,7 @@ Map* MapLoader::load(const string& path, string* errorOut) const {
     bool wrap = false;
     bool warn = false;
 
-
+//parsing file into attributes, continents, territories
     unordered_map<string, int> contBonus;
     struct Row { int x; int y; string continent; vector<string> adj; };
     unordered_map<string, Row> rows;
@@ -563,6 +584,7 @@ ostream& operator<<(ostream& os, const MapLoader&) {
     return os;
 }
 
+//trim whitespace from both ends of a string
 string MapLoader::trim(const string& s) {
     size_t b=0, e=s.size();
     while (b<e && isspace(static_cast<unsigned char>(s[b]))) ++b;
@@ -570,6 +592,7 @@ string MapLoader::trim(const string& s) {
     return s.substr(b, e-b);
 }
 
+//split a CSV line into parts
 vector<string> MapLoader::splitCSV(const string& line) {
     vector<string> out; string cur;
     istringstream ss(line);

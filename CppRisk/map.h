@@ -14,6 +14,7 @@ class Territory;
 //MAP LOADER-----------------------------------------------------------------------------------------------------------------------
 class MapLoader {
 public:
+//constructors, destructor, assignment operator
     MapLoader();
     MapLoader(const MapLoader& other);
     MapLoader& operator=(const MapLoader& other);
@@ -24,6 +25,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const MapLoader&);
 
 private:
+//helper functions
     static std::string trim(const std::string& s);
     static std::vector<std::string> splitCSV(const std::string& line);
 };
@@ -31,7 +33,7 @@ private:
 //TERRITORY-----------------------------------------------------------------------------------------------------------------------
 class Territory {
 public:
-    
+    //
     Territory(const std::string& n, int xCord, int yCord);
     Territory(const Territory& other);
     Territory& operator=(const Territory& other);
@@ -41,7 +43,7 @@ public:
     void addAdjacentTerritory(Territory* territory);
     const std::vector<Territory*>& getAdjacentTerritories() const;
 
-    
+    //getters and setters
     std::string getName() const;
     int getX() const;
     int getY() const;
@@ -68,7 +70,7 @@ private:
 //CONTINENT-----------------------------------------------------------------------------------------------------------------------
 class Continent {
 public:
-    
+    //constructors, destructor, assignment operator
     Continent(const std::string& n, int bonus);
     Continent(const Continent& other);
     Continent& operator=(const Continent& other);
@@ -78,7 +80,7 @@ public:
     void addTerritory(Territory* territory);
     const std::vector<Territory*>& getTerritories() const;
 
-    
+    //getters
     int getBonus() const;
     std::string getName() const;
 
@@ -94,7 +96,7 @@ private:
 //MAP-----------------------------------------------------------------------------------------------------------------------
 class Map {
 public:
-    
+    //constructors, destructor, assignment operator
     Map(const std::string& scroll, const std::string& author,
         const std::string& name, bool wp, bool wn);
     Map(const Map& other);
@@ -105,7 +107,7 @@ public:
     void addTerritory(Territory* territory);
     void addContinent(Continent* continent);
 
-    
+    //getters
     std::string getScroll() const;
     std::string getAuthor() const;
     std::string getName() const;
@@ -121,7 +123,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const Map& map);
 
 private:
-    
+    //helper functions for validation
     void dfs(Territory* start, std::unordered_set<Territory*>& visited) const;
     bool isConnected() const;
     bool areContinentsInterconnected() const;
