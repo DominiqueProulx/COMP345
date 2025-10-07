@@ -9,7 +9,7 @@ void testLoadMaps() {
 	vector<string> paths = {
 		"MAP.txt",
 		"MAP2.txt",
-		"test.map"
+		"test.txt"
 	};
 
 	cout << "========================================" << endl;
