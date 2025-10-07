@@ -238,10 +238,12 @@ void Player::issueOrder() {
             std::cout << "Please chose an order number" << std::endl;
             
             std::cin >> choice;
-            if (choice < 1 || choice > 2 + (*playerHand).getSize()) {
+            if (choice < 1 || choice >( 2 + (*playerHand).getSize())) {
                 std::cout << "Invalid choice. Please try again." << std::endl;
-            };
-            validInput = true;
+               
+            }
+            else { validInput = true; }
+           
         }
 
         if(choice == 1){
