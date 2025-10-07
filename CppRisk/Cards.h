@@ -76,7 +76,6 @@ public:
 
 	//functions
 	void addCard(Card* card);
-	//Order* playFromHand(int index, Deck& deck);
 	Card* getCard(int index);
 	void printHand() const;
 	int getSize();

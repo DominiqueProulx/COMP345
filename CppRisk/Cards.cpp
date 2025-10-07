@@ -255,21 +255,6 @@ Card* Hand::getCard(int index) {
 	}
 }
 
-//this would make more sense game design wise but i think it fails the rubric, i don't know. 
-//Order* Hand::playFromHand(int index, Deck& deck) {
-//        if (index < 0 || index >= hand.size()) {
-//            std::cout << "Invalid index or hand empty. Cannot play card." << std::endl;
-//            return nullptr;
-//        }
-//
-//        // Get the card at the specified index from the private vector.
-//        Card* cardToPlay = hand[index];
-//
-//        // Call the card's own play method. It will handle its removal
-//        // from the hand and return to the deck.
-//        return cardToPlay->play(*this, deck);
-//    }
-
 void Hand::removeCard(Card* card) {
     //creates an iterator to find the card in hand (start, end, value)
     std::vector<Card*>::iterator iterator = std::find(hand->begin(), hand->end(), card);
