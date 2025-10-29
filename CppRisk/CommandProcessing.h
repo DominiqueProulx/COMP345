@@ -16,7 +16,8 @@ public:
 	~Command();
 	friend ostream& operator<<(ostream& os, const Command& cmd);
 
-	string saveEffect() const;
+	void saveEffect(const string& effect);
+	string getEffect() const;
 
 };
 
