@@ -4,10 +4,11 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "LoggingObserver.h"
 
 // -------- ORDER BASE CLASS --------
 // Abstract base class for all order types
-class Order {
+class Order : public Subject, public ILoggable {
 public:
 	// Constructors and destructor
 	Order(const std::string& orderType);
@@ -23,6 +24,9 @@ public:
 
 	// Virtual clone method for deep copying in OrdersList
 	virtual Order* clone() const = 0;
+
+	// logging function
+	std::string stringToLog() const override;
 
 	// Getters
 	std::string getType() const;
@@ -120,7 +124,7 @@ public:
 
 // -------- ORDERSLIST CLASS --------
 // Manages a collection of orders with operations to manipulate the list
-class OrdersList {
+class OrdersList : public Subject, public ILoggable {
 public:
 	// Constructors and destructor
 	OrdersList();
@@ -134,6 +138,9 @@ public:
 	void add(Order* order);                    // Add order to end of list
 	void remove(int index);                     // Remove order at index
 	void move(int fromIndex, int toIndex);      // Move order from one position to another
+
+	// logging function
+	std::string stringToLog() const override;
 
 	// Getters
 	int size() const;

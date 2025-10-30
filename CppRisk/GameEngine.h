@@ -5,9 +5,10 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include "LoggingObserver.h"
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
-class GameEngine
+class GameEngine : public Subject, public ILoggable
 {
 private:
 	/* -- STATE OBJECT DEFINITION (GAME ENGINE COMPONENT) -- */
@@ -72,6 +73,10 @@ public:
 	void addParentStates(const std::initializer_list<State*>& states);
 	void addChildStates(State* parent, const std::initializer_list<State*>& states);
 	void addChildTransition(State* from, const std::string& cmd, State* to);
+	static void initializeRiskFSM(GameEngine& engine);
+
+	// logging function
+	std::string stringToLog() const override;
 
 	// accessors
 	State* getActiveStatePtr() const;

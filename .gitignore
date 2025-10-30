@@ -11,5 +11,8 @@
 *.ilk
 *.pdb
 
+# text files
+*.txt
+
 # executables
 *.exe

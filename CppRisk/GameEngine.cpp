@@ -167,7 +167,7 @@ GameEngine::GameEngine()
 }
 
 // Duplicates an existing GameEngine into a new distinct object.
-GameEngine::GameEngine(const GameEngine& other)
+GameEngine::GameEngine(const GameEngine& other) : Subject(other)
 {
 	activeParentState = other.activeParentState;
 	activeState = other.activeState;
@@ -193,6 +193,8 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
 	// short-circuit self-assignment
 	if (this == &other)
 		return *this;
+
+	Subject::operator=(other);
 
 	// deep copy other's fields and clear old memory
 	activeParentState = other.activeParentState;
@@ -271,6 +273,57 @@ void GameEngine::addChildTransition(State* from, const std::string& cmd, State* 
 	from->addTransition(cmd, to);
 }
 
+// Initializes the Finite State Machine (FSM) for C++ Risk based on the assignment's diagram.
+void GameEngine::initializeRiskFSM(GameEngine& engine)
+{
+	// adding parent states to recreate the state diagram
+	GameState startup{ engine.createState("startup", true) };
+	GameState play{ engine.createState("play", true) };
+	GameState end{ engine.createState("end", true) };
+	engine.addParentStates({ startup, play, end });
+
+	// STARTUP
+	GameState start{ engine.createState("start", false) };
+	GameState mapLoaded{ engine.createState("map loaded", false) };
+	GameState mapValidated{ engine.createState("map validated", false) };
+	GameState playersAdded{ engine.createState("players added", false) };
+
+	engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
+	engine.addChildTransition(start, "loadmap", mapLoaded);
+	engine.addChildTransition(mapLoaded, "loadmap", mapLoaded);
+	engine.addChildTransition(mapLoaded, "validatemap", mapValidated);
+	engine.addChildTransition(mapValidated, "addplayer", playersAdded);
+	engine.addChildTransition(playersAdded, "addplayer", playersAdded);
+	engine.addChildTransition(playersAdded, "gamestart", play);
+	engine.setActiveState(startup->getInitialSubstatePtr());
+
+	// PLAY
+	GameState assignReinforcements{ engine.createState("assign reinforcements", false) };
+	GameState issueOrders{ engine.createState("issue orders", false) };
+	GameState executeOrders{ engine.createState("execute orders", false) };
+	GameState win{ engine.createState("win", false) };
+
+	engine.addChildStates(play, { assignReinforcements, issueOrders, executeOrders, win });
+	engine.addChildTransition(assignReinforcements, "issueorder", issueOrders);
+	engine.addChildTransition(issueOrders, "issueorder", issueOrders);
+	engine.addChildTransition(issueOrders, "issueordersend", executeOrders);
+	engine.addChildTransition(executeOrders, "execorder", executeOrders);
+	engine.addChildTransition(executeOrders, "endexecorders", assignReinforcements);
+	engine.addChildTransition(executeOrders, "win", win);
+	engine.addChildTransition(win, "replay", startup);
+	engine.addChildTransition(win, "end", end);
+
+	// END
+	GameState final{ engine.createState("quit", false) };
+	engine.addChildStates(end, { final });
+}
+
+// Returns a log string describing the GameEngine's current state.
+std::string GameEngine::stringToLog() const
+{
+	return "[ENGINE] Transitioned to new state: " + activeParentState->getName() + "/" + activeState->getName() + ".";
+}
+
 // Returns this GameEngine's active substate.
 GameEngine::State* GameEngine::getActiveStatePtr() const
 {
@@ -321,6 +374,9 @@ void GameEngine::changeGameState(const std::string& cmd)
 			activeState = newState;
 
 		std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
+
+		// log the state transition to gamelog.txt
+		notify(this);
 	}
 	else
 		std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";

@@ -5,8 +5,9 @@
 // File: Orders.cpp
 // -------------------------------
 
-#include "Orders.h"
 #include <iostream>
+#include <sstream>
+#include "Orders.h"
 
 // ============================================================================
 // ORDER BASE CLASS IMPLEMENTATION
@@ -20,7 +21,7 @@ Order::Order(const std::string& orderType) {
 }
 
 // Copy constructor
-Order::Order(const Order& other) {
+Order::Order(const Order& other) : Subject(other) {
 	orderType = new std::string(*other.orderType);
 	effect = other.effect ? new std::string(*other.effect) : nullptr;
 	executed = new bool(*other.executed);
@@ -36,6 +37,8 @@ Order::~Order() {
 // Assignment operator
 Order& Order::operator=(const Order& other) {
 	if (this != &other) {
+		Subject::operator=(other);
+
 		delete orderType;
 		delete effect;
 		delete executed;
@@ -45,6 +48,15 @@ Order& Order::operator=(const Order& other) {
 		executed = new bool(*other.executed);
 	}
 	return *this;
+}
+
+// Returns a log string describing an executed Order's effect.
+std::string Order::stringToLog() const
+{
+	if (executed)
+		return "[ORDER] Executed an order with the following effect: " + *effect + '.';
+	else
+		return "[ERR::ORDER] Attempted to log an unexecuted order...";
 }
 
 // Getters
@@ -101,6 +113,9 @@ void Deploy::execute() {
 		*executed = true;
 
 		std::cout << "Deploy order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Deploy order is invalid and cannot be executed." << std::endl;
@@ -142,6 +157,9 @@ void Advance::execute() {
 		*executed = true;
 
 		std::cout << "Advance order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Advance order is invalid and cannot be executed." << std::endl;
@@ -183,6 +201,9 @@ void Bomb::execute() {
 		*executed = true;
 
 		std::cout << "Bomb order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Bomb order is invalid and cannot be executed." << std::endl;
@@ -224,6 +245,9 @@ void Blockade::execute() {
 		*executed = true;
 
 		std::cout << "Blockade order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Blockade order is invalid and cannot be executed." << std::endl;
@@ -265,6 +289,9 @@ void Airlift::execute() {
 		*executed = true;
 
 		std::cout << "Airlift order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Airlift order is invalid and cannot be executed." << std::endl;
@@ -306,6 +333,9 @@ void Negotiate::execute() {
 		*executed = true;
 
 		std::cout << "Negotiate order executed successfully." << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
 	}
 	else {
 		std::cout << "Negotiate order is invalid and cannot be executed." << std::endl;
@@ -326,7 +356,7 @@ OrdersList::OrdersList() {
 }
 
 // Copy constructor - performs deep copy
-OrdersList::OrdersList(const OrdersList& other) {
+OrdersList::OrdersList(const OrdersList& other) : Subject(other) {
 	orders = new std::vector<Order*>();
 	for (Order* order : *other.orders) {
 		orders->push_back(order->clone());  // Deep copy using clone method
@@ -345,6 +375,8 @@ OrdersList::~OrdersList() {
 // Assignment operator
 OrdersList& OrdersList::operator=(const OrdersList& other) {
 	if (this != &other) {
+		Subject::operator=(other);
+
 		// Delete existing orders
 		for (Order* order : *orders) {
 			delete order;
@@ -364,6 +396,9 @@ void OrdersList::add(Order* order) {
 	if (order != nullptr) {
 		orders->push_back(order);
 		std::cout << "Order added to list: " << order->getType() << std::endl;
+
+		// log the added order to gamelog.txt
+		notify(this);
 	}
 }
 
@@ -398,9 +433,22 @@ void OrdersList::move(int fromIndex, int toIndex) {
 	}
 }
 
+// Returns a log string describing an added order to the OrderList.
+std::string OrdersList::stringToLog() const
+{
+	if (orders->empty())
+		return "[ERR::ORDERLIST] Attempted to log an empty order list...";
+	else
+	{
+		std::ostringstream orderAsStream{};
+		orderAsStream << *orders->back();
+		return "[ORDERLIST] Added a new order to a list: " + orderAsStream.str() + '.';
+	}
+}
+
 // Get size of orders list
 int OrdersList::size() const {
-	return orders->size();
+	return static_cast<int>(orders->size());
 }
 
 // Get order at specific index
