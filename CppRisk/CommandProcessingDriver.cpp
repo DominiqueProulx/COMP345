@@ -2,6 +2,8 @@
 #include <string>
 #include <sstream> 
 #include <vector>  
+#include <algorithm>
+#include <limits>
 
 #include "GameEngine.h"        
 #include "CommandProcessing.h" 
@@ -10,6 +12,12 @@
 #include "Cards.h" 
 
 using namespace std;
+
+// Helper function to trim whitespace from the start of a string
+std::string ltrim(const std::string& s) {
+    size_t start = s.find_first_not_of(" \t\n\r\f\v");
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
 
 // --- Stub Functions for Main Play Loop ---
 // This is the stub for the "assigncountries" command.
@@ -51,7 +59,7 @@ void setupGameStateMachine(GameEngine& engine)
     engine.addChildTransition(mapLoaded, "validatemap", mapValidated);
     engine.addChildTransition(mapValidated, "addplayer", playersAdded);
     engine.addChildTransition(playersAdded, "addplayer", playersAdded);
-    engine.addChildTransition(playersAdded, "assigncountries", play);
+    engine.addChildTransition(playersAdded, "gamestart", play);
 
     // Set initial state for the startup parent
     engine.setActiveState(startup->getInitialSubstatePtr());
@@ -66,11 +74,11 @@ void setupGameStateMachine(GameEngine& engine)
 
     engine.addChildTransition(assignReinforcements, "issueorder", issueOrders);
     engine.addChildTransition(issueOrders, "issueorder", issueOrders);
-    engine.addChildTransition(issueOrders, "endissueorders", executeOrders);
+    engine.addChildTransition(issueOrders, "issueordersend", executeOrders);
     engine.addChildTransition(executeOrders, "execorder", executeOrders);
     engine.addChildTransition(executeOrders, "endexecorders", assignReinforcements);
     engine.addChildTransition(executeOrders, "win", win);
-    engine.addChildTransition(win, "play", startup);
+    engine.addChildTransition(win, "replay", startup);
     engine.addChildTransition(win, "end", end);
 
     // END child state
@@ -110,7 +118,11 @@ void testCommandProcessor() {
         string argument;
         stringstream ss(fullCommandStr);
         ss >> baseCommand; // Get the first word
-        ss >> argument;    // Get the second word (if it exists)
+        //get the second word
+        // Use getline to get the REST of the string as the argument**
+        std::getline(ss, argument);
+        // Trim leading whitespace (like the first space) from the argument
+        argument = ltrim(argument);
 
         // Handle 'quit' immediately
         if (baseCommand == "quit") {
@@ -133,6 +145,7 @@ void testCommandProcessor() {
 
             // if/else if block to handle each command
             if (baseCommand == "loadmap") {
+                std::cout << " > DEBUG: Attempting to load with argument: [" << argument << "]" << std::endl;
                 string errorMsg;
                 Map* newMap = loader.load(argument, &errorMsg);
                 if (newMap) {
@@ -180,6 +193,25 @@ void testCommandProcessor() {
             else if (baseCommand == "gamestart") {
                 executionSuccess = startGame(gameMap, players);
             }
+
+            else if (baseCommand == "issueorder") {
+                executionSuccess = true; // valid command, allow state change
+            }
+            else if (baseCommand == "endexecorders") {
+                executionSuccess = true;
+            }
+
+            else if (baseCommand == "issueordersend") {
+                executionSuccess = true; // valid command, allow state change
+            }
+            else if (baseCommand == "execorder") {
+                executionSuccess = true;
+            }
+
+            else if (baseCommand == "win") {
+                executionSuccess = true;
+            }
+
             else if (baseCommand == "replay") {
                 executionSuccess = true; // Simple state change
                 // You would also reset the game state (delete players, map, etc.)

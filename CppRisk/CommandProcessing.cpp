@@ -74,7 +74,7 @@ ostream& operator<<(ostream& os, const CommandProcessor& cp) {
 Command CommandProcessor::readCommand(GameEngine& engine) {
 	string input;
 	cout << "Enter command: ";
-	cin >> input;
+	getline(cin, input);
 	Command newCommand = Command(input);
 	validate(newCommand, engine);
 	return newCommand;

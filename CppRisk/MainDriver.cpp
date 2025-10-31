@@ -4,6 +4,7 @@
 #include "Cards.h"
 #include "GameEngine.h"
 #include "CommandProcessing.h"
+#include <direct.h>
 
 // Declare test functions
 //void testLoadMaps();
@@ -42,6 +43,12 @@ int main(void)
 	//std::cout << "\n\nFinished testing GAME ENGINE. Enter any character to end the program. ";
 	//std::cin >> buffer;
 	//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	char buffer[FILENAME_MAX];
+	_getcwd(buffer, FILENAME_MAX);
+	std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "--- Place MAP.txt in the folder above ---" << std::endl;
 
 	testCommandProcessor();
 
