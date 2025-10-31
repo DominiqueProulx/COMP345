@@ -18,11 +18,10 @@ public:
 	~Command() = default;
 	friend ostream& operator<<(ostream& os, const Command& cmd);
 
-	string getCommandString() const {};
+	string getCommandString() const;
 	string getEffect() const;
 
 	void saveEffect(const string& effect);
-	string getEffect() const;
 
 };
 
@@ -38,7 +37,7 @@ public:
 	bool validate(Command& command, GameEngine& engine);
 
 protected:
-	Command readCommand();
+	Command readCommand(GameEngine& engine);
 	void saveCommand(const Command& command);
 
 	unique_ptr<vector<unique_ptr<Command>>> commands;

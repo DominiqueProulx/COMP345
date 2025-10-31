@@ -331,3 +331,18 @@ bool GameEngine::isActiveStateFinal() const
 {
 	return activeState->getTransitions().size() == 0;
 }
+
+bool GameEngine::isCommandValid(const std::string& cmd) const {
+	if (!activeState) return false;
+	return (activeState->resolveTransition(cmd) != nullptr);
+}
+
+std::string GameEngine::getCurrentStateName() const {
+	if (!activeState) return "Unknown";
+	return activeState->getName();
+}
+
+std::string GameEngine::getParentStateName() const {
+	if (!activeParentState) return "Unknown";
+	return activeParentState->getName();
+}

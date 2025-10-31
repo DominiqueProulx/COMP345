@@ -3,6 +3,7 @@
 #include <string>
 #include "CommandProcessing.h"
 #include "GameEngine.h"
+#include <sstream> 
 using namespace std;
 
 //Command Class
@@ -14,28 +15,21 @@ Command::Command(const Command& other) : command(make_unique<string>(*other.comm
 //assignment operator
 Command& Command::operator=(const Command& other) {
 	if (this != &other) {
-		delete command;
-		delete effect;
-		command = make_unique<string>(*other.command);
-		effect = make_unique<string>(*other.effect);
+		*command = *other.command;
+		*effect = *other.effect;
 	}
 	return *this;
 }
-//desctructor
-Command::~Command() {
-	delete command;
-	command = nullptr;
-	delete effect;
-	effect = nullptr;
-}
+
+
 //assignment operator overload for printing
 ostream& operator<<(ostream& os, const Command& cmd) {
 	os << "Command: " << *cmd.command << " | Effect: " << *cmd.effect;
 	return os;
 }
 
-void Command::saveEffect(string& effect) const {
-	this->effect = make_unique<string>(effect);
+void Command::saveEffect(const string& newEffect) {
+	*this->effect = newEffect;
 }
 
 string Command::getEffect() const {
@@ -49,9 +43,9 @@ string Command::getCommandString() const {
 //CommandProcessor Class
 
 //constructor
-CommandProcessor::CommandProcessor() : commands(new vector<Command*>()) {}
+CommandProcessor::CommandProcessor() : commands(make_unique<vector<unique_ptr<Command>>>()) {}
 //copy constructor
-CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(new vector<Command*>()){
+CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(make_unique<vector<unique_ptr<Command>>>()){
 	for (const auto& cmd : *other.commands) {
 		commands->push_back(make_unique<Command>(*cmd));
 	}
@@ -65,15 +59,6 @@ CommandProcessor& CommandProcessor::operator=(const CommandProcessor& other) {
 		}
 	}
 	return *this;
-}
-//desctructor
-CommandProcessor::~CommandProcessor() {
-	for (Command* cmd : *commands) {
-		delete cmd;
-	}
-	commands->clear();
-	delete commands;
-	commands = nullptr;
 }
 
 //assignment operator overload for printing
@@ -102,31 +87,40 @@ void CommandProcessor::saveCommand(const Command& command) {
 
 //validates command based on current game state
 bool CommandProcessor::validate(Command& command, GameEngine& engine) {
-	//Get the state pointer from the engine
-	GameEngine::State* currentState = engine.getActiveStatePtr();
-
-	//safety check to make sure there is a state
-	if (!currentState) {
-		command.saveEffect("No active state in game engine.");
-		return false;
-	}
 
 	string fullCommand = command.getCommandString();
+	string commandBase;
 
-	//extract first part of command (before any spaces)
-	string commandBase = fullCommand.substr(0, fullCommand.find(' '));
+	// Use stringstream to reliably get the first word
+	stringstream ss(fullCommand);
+	ss >> commandBase; // This extracts the first word, ignoring leading whitespace
 
-	//resolveTrasition returns a *State if valid, nullptr if invalid
-	if (currentState->resolveTransition(commandBase) != nullptr) {
-		command.saveEffect("Command '" + commandBase + "' is valid in state '" + currentState->getName() + "'.");
+	// Handle empty input
+	if (commandBase.empty()) {
+		command.saveEffect("Error: No command entered.");
+		return false; // Not valid
+	}
+
+	// Special case: 'quit' is always valid and doesn't need the engine
+	if (commandBase == "quit") {
+		command.saveEffect("Exiting...");
+		return true; 
+	}
+
+	// Since State is private, use helper functions to determine validity 
+	if (engine.isCommandValid(commandBase)) {
+		command.saveEffect("Command '" + commandBase + "' is valid in state '" + engine.getCurrentStateName() + "'.");
 		return true;
 	}
 	else {
-		command.saveEffect("Command '" + commandBase + "' is invalid in state '" + currentState->getName() + "'.");
+		command.saveEffect("Invalid command: '" + commandBase + "' is not recognized in state '" + engine.getCurrentStateName() + "'.");
 		return false;
 	}
 }
 
 Command* CommandProcessor::getCommand(GameEngine& engine) {
-	return readCommand(engine);
+	Command newCommand = readCommand(engine);
+	saveCommand(newCommand);
+	//return pointer to the last command in the vector
+	return commands->back().get();
 }
