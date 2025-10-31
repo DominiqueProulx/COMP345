@@ -1,20 +1,25 @@
 #pragma once
 #include <string>
 #include <vector>
-#iinclude <iostream>
+#include <iostream>
+#include <memory>
+#include "GameEngine.h"
 using namespace std;
 
 class Command {
 protected:
-	string* command;
-	string* effect;
+	unique_ptr<string> command;
+	unique_ptr<string> effect;
 
 public:
 	Command(const string& command);
 	Command(const Command& other);
 	Command& operator=(const Command& other);
-	~Command();
+	~Command() = default;
 	friend ostream& operator<<(ostream& os, const Command& cmd);
+
+	string getCommandString() const {};
+	string getEffect() const;
 
 	void saveEffect(const string& effect);
 	string getEffect() const;
@@ -27,14 +32,14 @@ public:
 	CommandProcessor(const CommandProcessor& other);
 	CommandProcessor& operator=(const CommandProcessor& other);
 	friend ostream& operator<<(ostream& os, const CommandProcessor& cp);
-	~CommandProcessor();
+	~CommandProcessor() = default;
 
-	Command* getCommand();
-	bool validate(Command& command);
+	Command* getCommand(GameEngine& engine);
+	bool validate(Command& command, GameEngine& engine);
 
 protected:
-	string readCommand();
+	Command readCommand();
 	void saveCommand(const Command& command);
 
-	vector<Command*>* commands;
+	unique_ptr<vector<unique_ptr<Command>>> commands;
 };
