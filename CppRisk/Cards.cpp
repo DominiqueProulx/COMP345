@@ -2,6 +2,7 @@
 #include "Cards.h"
 #include <iostream>
 #include <random>
+#include <algorithm>  // ADD THIS LINE for std::shuffle and std::find
 
 static const int handSizeValue = 5;
 const int* Hand::MAX_HAND_SIZE = &handSizeValue;
