@@ -1,5 +1,12 @@
 #include "GameEngine.h"
+#include "map.h"
+#include "Player.h"
+#include "Cards.h"
+#include "map.h"
 #include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <limits>
 
 /* -------------------------- */
 /* -- STATE IMPLEMENTATION -- */
@@ -164,6 +171,18 @@ GameEngine::GameEngine()
 	activeState = nullptr;
 	parentStates = new std::vector<State*>();
 	states = new std::vector<State*>();
+
+	//A2_P2
+	map=nullptr;
+	mapLoader= new MapLoader();
+	players = new std::vector <Player*>();
+	deck=nullptr;
+	reinforcementPool=new std::unordered_map<Player*,int>();
+	deck=new Deck();
+	deck->initializeDeck();
+
+
+
 }
 
 // Duplicates an existing GameEngine into a new distinct object.
@@ -173,6 +192,17 @@ GameEngine::GameEngine(const GameEngine& other)
 	activeState = other.activeState;
 	parentStates = new std::vector<State*>(*other.parentStates);
 	states = new std::vector<State*>(*other.states);
+
+	//A2_P2
+	map = other.map? new Map(*other.map):nullptr;
+	mapLoader=new MapLoader(*other.mapLoader);
+	players= new std::vector<Player*>(*other.players);
+	deck=other.deck? new Deck(*other.deck):nullptr;
+	reinforcementPool=new std::unordered_map<Player*, int>(*other.reinforcementPool);
+	deck=new Deck(*other.deck);
+
+
+
 }
 
 // Destroys a GameEngine object and ALL State objects created using this engine.
@@ -185,6 +215,18 @@ GameEngine::~GameEngine()
 		delete s;
 
 	delete states;
+
+	//A2_P2
+	if(deck) delete deck;
+	if(map) delete map;
+	if (mapLoader) delete mapLoader;
+	if (reinforcementPool) delete reinforcementPool;
+	if(deck) delete deck;
+
+	if (players){
+		for (auto* p:*players) delete p;
+		delete players;
+	}
 }
 
 // Reassigns this GameEngine instance to a new GameEngine object by deep copying all fields.
@@ -204,6 +246,27 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
 	delete states;
 	states = new std::vector<State*>(*other.states);
 
+	if (deck) delete deck;
+    deck = other.deck ? new Deck(*other.deck) : nullptr;
+
+    if (map) delete map;
+    map = other.map ? new Map(*other.map) : nullptr;
+
+	if(deck) delete deck;
+	deck=other.deck ? new Deck(*other.deck):nullptr;
+
+    if (mapLoader) delete mapLoader;
+    mapLoader = new MapLoader(*other.mapLoader);
+
+    if (players) {
+        for (auto* p : *players) delete p;
+        delete players;
+    }
+    players = new std::vector<Player*>(*other.players);
+
+    if (reinforcementPool) delete reinforcementPool;
+    reinforcementPool = new std::unordered_map<Player*, int>(*other.reinforcementPool);
+
 	return *this;
 }
 
@@ -221,6 +284,10 @@ std::ostream& operator<<(std::ostream& os, const GameEngine& engine)
 	os << "\tPARENT STATES (" << engine.parentStates->size() << "):\n";
 	for (const auto& s : *engine.parentStates)
 		os << "\t\t" << s->getName() << "(" << s->getSubstates().size() << " substates)\n";
+
+	os << "\tSTARTUP: players=" << (engine.players ? engine.players->size() : 0)
+    << ", map=" << (engine.map ? "loaded" : "null")
+    << ", deck=" << (engine.deck ? "ok" : "null") << '\n';
 
 	return os;
 }
@@ -346,3 +413,4 @@ std::string GameEngine::getParentStateName() const {
 	if (!activeParentState) return "Unknown";
 	return activeParentState->getName();
 }
+
