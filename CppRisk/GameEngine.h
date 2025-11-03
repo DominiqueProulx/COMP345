@@ -5,6 +5,14 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <iostream>
+
+class Player;
+class Deck;
+class Territory;
+class Map;
+class MapLoader;
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
@@ -55,6 +63,12 @@ private:
 	State::StateList* parentStates;
 	State::StateList* states;
 
+    Map*                                    map;
+    MapLoader*                              mapLoader;
+    std::vector<Player*>*                   players;
+    Deck*                                   deck;
+    std::unordered_map<Player*, int>*       reinforcementPool; //Jackson to test for now
+
 public:
 	using GameState = State*; // exposed publically so states can be initialized but not used directly externally
 
@@ -87,6 +101,26 @@ public:
 	bool isCommandValid(const std::string& cmd) const;
 	std::string getCurrentStateName() const;
 	std::string getParentStateName() const;
+
+    void startupPhase( std::istream& in=std::cin,std::ostream& out=std::cout);
+
+    const std::vector<Player*>* getPlayers() const { return players; }
+    const std::unordered_map<Player*, int>* getReinforcementPool() const { return reinforcementPool; }
+
+    friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
+
+private:
+        
+    bool cmdLoadMap(const std::string& filename, std::ostream& out);
+    bool cmdValidateMap(std::ostream& out);
+    bool cmdAddPlayer(const std::string& name, std::ostream& out);
+    bool cmdGameStart(std::ostream& out);
+
+    void fairDistributeTerritories(std::ostream& out);
+    void randomizePlayerOrder(std::ostream& out);
+    void grant50Reinforcements(std::ostream& out);
+    void initialCardDraws(std::ostream& out);
+
 
 };
 
