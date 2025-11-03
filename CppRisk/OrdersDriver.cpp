@@ -12,20 +12,22 @@ using namespace std;
 
 // Assignment 1 test function - kept for backward compatibility
 void testOrdersLists() {
-    cout << "========================================" << endl;
-    cout << "   TESTING ORDERS AND ORDERSLIST" << endl;
-    cout << "   (Assignment 1 - Basic Structure)" << endl;
-    cout << "========================================" << endl << endl;
+    cout << "\n========================================" << endl;
+    cout << "    TESTING ORDERS AND ORDERS LIST" << endl;
+    cout << "========================================\n" << endl;
+
+    // Create dummy objects using default constructors
+    Player* player1 = new Player();
+    player1->setColor("Red");
     
-    // Create test game state
-    Player* player1 = new Player("Player1");
-    Territory* terr1 = new Territory("Territory1");
-    Territory* terr2 = new Territory("Territory2");
+    Territory* terr1 = new Territory("Territory1", 0, 0);
+    Territory* terr2 = new Territory("Territory2", 1, 1);
     
-    player1->addTerritory(terr1);
     terr1->setNumberOfArmies(10);
     terr2->setNumberOfArmies(5);
     
+    player1->addTerritory(terr1);
+    player1->addTerritory(terr2);
     player1->setReinforcementPool(20);
     
     // Create orders
@@ -33,26 +35,50 @@ void testOrdersLists() {
     Order* advance = new Advance(player1, terr1, terr2, 3);
     Order* bomb = new Bomb(player1, terr2);
     
-    OrdersList* list = new OrdersList();
-    list->add(deploy);
-    list->add(advance);
-    list->add(bomb);
+    OrdersList* ordersList = new OrdersList();
+    ordersList->add(deploy);
+    ordersList->add(advance);
+    ordersList->add(bomb);
     
     cout << "Created OrdersList with 3 orders" << endl;
-    cout << *list << endl;
+    cout << *ordersList << endl;
     
     // Test move
     cout << "\nTesting move()..." << endl;
-    list->move(0, 2);
-    cout << *list << endl;
+    ordersList->move(0, 2);
+    cout << *ordersList << endl;
     
     // Test remove
     cout << "\nTesting remove()..." << endl;
-    list->remove(1);
-    cout << *list << endl;
+    ordersList->remove(1);
+    cout << *ordersList << endl;
+    
+    // Test copy constructor
+    cout << "\nTesting copy constructor..." << endl;
+    OrdersList copyList(*ordersList);
+    cout << "Original list:" << endl;
+    cout << *ordersList << endl;
+    cout << "Copied list:" << endl;
+    cout << copyList << endl;
+    
+    // Test assignment operator
+    cout << "\nTesting assignment operator..." << endl;
+    OrdersList assignedList;
+    assignedList = *ordersList;
+    cout << "Assigned list:" << endl;
+    cout << assignedList << endl;
+    
+    // Test executing orders
+    cout << "\nExecuting all orders in list..." << endl;
+    for (int i = 0; i < ordersList->size(); i++) {
+        Order* order = ordersList->getOrder(i);
+        cout << "\nExecuting: " << *order << endl;
+        order->execute();
+        cout << "After execution: " << *order << endl;
+    }
     
     // Cleanup
-    delete list;
+    delete ordersList;
     delete player1;
     delete terr1;
     delete terr2;
@@ -62,22 +88,26 @@ void testOrdersLists() {
 
 // Assignment 2 test function - demonstrates order execution with game rules
 void testOrderExecution() {
-    cout << "==========================================" << endl;
-    cout << "   TESTING ORDER EXECUTION" << endl;
-    cout << "   (Assignment 2 - Game Rules)" << endl;
-    cout << "==========================================" << endl << endl;
+    cout << "\n========================================" << endl;
+    cout << "  TESTING ORDER EXECUTION (Assignment 2)" << endl;
+    cout << "========================================\n" << endl;
+
+    // Create players
+    Player* player1 = new Player();
+    player1->setColor("Alice");
     
-    // Setup game state
-    Player* player1 = new Player("Alice");
-    Player* player2 = new Player("Bob");
-    Player* neutralPlayer = new Player("Neutral");
+    Player* player2 = new Player();
+    player2->setColor("Bob");
     
-    // Create territories with adjacency
-    Territory* terrA = new Territory("Territory_A");
-    Territory* terrB = new Territory("Territory_B");
-    Territory* terrC = new Territory("Territory_C");
-    Territory* terrD = new Territory("Territory_D");
-    Territory* terrE = new Territory("Territory_E");
+    Player* neutralPlayer = new Player();
+    neutralPlayer->setColor("Neutral");
+
+    // Create territories with coordinates
+    Territory* terrA = new Territory("Territory_A", 0, 0);
+    Territory* terrB = new Territory("Territory_B", 1, 0);
+    Territory* terrC = new Territory("Territory_C", 2, 0);
+    Territory* terrD = new Territory("Territory_D", 0, 1);
+    Territory* terrE = new Territory("Territory_E", 1, 1);
     
     // Set up adjacencies
     terrA->addAdjacentTerritory(terrB);
@@ -99,7 +129,7 @@ void testOrderExecution() {
     
     // Set initial armies
     terrA->setNumberOfArmies(10);
-    terrB->setNumberOfArmies(8);
+    terrB->setNumberOfArmies(15);  // Boosted for successful conquest
     terrC->setNumberOfArmies(5);
     terrD->setNumberOfArmies(6);
     terrE->setNumberOfArmies(3);
@@ -145,19 +175,19 @@ void testOrderExecution() {
     cout << "Before attack:" << endl;
     cout << *terrB << endl;
     cout << *terrC << endl;
-    cout << "Player1 territories: " << player1->ownedTerritories->size() << endl;
-    cout << "Player2 territories: " << player2->ownedTerritories->size() << endl << endl;
-    
-    cout << "--- Attacking Territory_C from Territory_B ---" << endl;
-    Advance* attackOrder = new Advance(player1, terrB, terrC, 7);
+    cout << "Player1 territories: " << player1->getTerritories()->size() << endl;
+    cout << "Player2 territories: " << player2->getTerritories()->size() << endl << endl;
+
+    cout << "--- Attacking Territory_C from Territory_B (14 armies vs 5) ---" << endl;
+    Advance* attackOrder = new Advance(player1, terrB, terrC, 14);  // Use 14 armies for victory
     attackOrder->execute();
     
     cout << "\nAfter attack:" << endl;
     cout << *terrB << endl;
     cout << *terrC << endl;
-    cout << "Player1 territories: " << player1->ownedTerritories->size() << endl;
-    cout << "Player2 territories: " << player2->ownedTerritories->size() << endl << endl;
-    
+    cout << "Player1 territories: " << player1->getTerritories()->size() << endl;
+    cout << "Player2 territories: " << player2->getTerritories()->size() << endl << endl;
+
     // ========================================
     // Requirement 3: Card awarded for conquering (max 1 per turn)
     // ========================================
@@ -165,7 +195,10 @@ void testOrderExecution() {
     
     cout << "Player1 conquered this turn: " 
          << (player1->hasConqueredThisTurn() ? "YES" : "NO") << endl;
-    cout << "Player would receive a card at end of turn" << endl << endl;
+    if (player1->hasConqueredThisTurn()) {
+        cout << "✓ Player would receive a card at end of turn!" << endl;
+    }
+    cout << endl;
     
     // Reset for next turn demonstration
     player1->setConqueredThisTurn(false);
@@ -198,18 +231,18 @@ void testOrderExecution() {
     
     cout << "Before blockade:" << endl;
     cout << *terrE << endl;
-    cout << "Player1 territories: " << player1->ownedTerritories->size() << endl;
-    cout << "Neutral territories: " << neutralPlayer->ownedTerritories->size() << endl << endl;
-    
+    cout << "Player1 territories: " << player1->getTerritories()->size() << endl;
+    cout << "Neutral territories: " << neutralPlayer->getTerritories()->size() << endl << endl;
+
     cout << "--- Issuing Blockade Order ---" << endl;
     Blockade* blockadeOrder = new Blockade(player1, terrE, neutralPlayer);
     blockadeOrder->execute();
     
     cout << "\nAfter blockade:" << endl;
     cout << *terrE << endl;
-    cout << "Player1 territories: " << player1->ownedTerritories->size() << endl;
-    cout << "Neutral territories: " << neutralPlayer->ownedTerritories->size() << endl << endl;
-    
+    cout << "Player1 territories: " << player1->getTerritories()->size() << endl;
+    cout << "Neutral territories: " << neutralPlayer->getTerritories()->size() << endl << endl;
+
     // ========================================
     // Requirement 6: All orders can be issued and executed
     // ========================================

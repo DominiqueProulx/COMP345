@@ -12,12 +12,12 @@
 #include <iostream>
 #include <set>
 #include "Map.h"
-// #include "Orders.h"
 #include "Cards.h"
 
-
+// Forward declarations to break circular dependency
 class OrdersList;
 class Order;
+
 // ------------------ CLASS PLAYER ------------------
 
 class Player {
@@ -76,9 +76,9 @@ private:
     Deck* deck;
     
     // Assignment 2 additions
-    int* reinforcementPool;  // Armies available to deploy
-    bool* conqueredTerritoryThisTurn;  // For card awarding
-    std::set<Player*>* negotiatedPlayers;  // Players we can't attack this turn
+    int* reinforcementPool;
+    bool* conqueredTerritoryThisTurn;
+    std::set<Player*>* negotiatedPlayers;
 };
 
 #endif
