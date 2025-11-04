@@ -112,13 +112,13 @@ void testStartupPhase() {
     GameState win         { engine.createState("win",                 false) };
     engine.addChildStates(play, { assignReinf, win });
 
-    // players added -> (gamestart) -> assignreinforcement
+
     engine.addChildTransition(playersAdded, "gamestart", assignReinf);
 
-    // For testing: allow moving from assignreinforcement to win
+    
     engine.addChildTransition(assignReinf, "win", win);
 
-    // End
+
     GameState quitFinal { engine.createState("quit", false) };
     engine.addChildStates(end, { quitFinal });
 

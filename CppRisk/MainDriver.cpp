@@ -5,6 +5,9 @@
 #include "GameEngine.h"
 #include "CommandProcessing.h"
 #include <direct.h>
+// #define _CRTDBG_MAP_ALLOC
+// #include <cstdlib>
+// #include <crtdbg.h>
 
 // Declare test functions
 //void testLoadMaps();
@@ -54,6 +57,7 @@ int main(void)
 	// testCommandProcessor();
 
 	testStartupPhase();
+	// _CrtDumpMemoryLeaks();
 
 	return 0;
 }
