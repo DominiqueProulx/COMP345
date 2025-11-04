@@ -1,5 +1,7 @@
 #include <iostream>
 #include "GameEngine.h"
+#include "CommandProcessing.h"
+#include <sstream>
 
 // for brevity
 using GameState = GameEngine::GameState;
@@ -79,4 +81,56 @@ void testGameStates()
 			shouldContinue = false;
 		}
 	}
+}
+
+
+void testStartupPhase() {
+    GameEngine engine;
+
+    // adding states to recreate the state diagram
+    GameState startup{ engine.createState("startup", true) };
+    GameState play   { engine.createState("play",    true) };
+    GameState end    { engine.createState("end",     true) };
+    engine.addParentStates({ startup, play, end });
+
+   // STARTUP
+    GameState start        { engine.createState("start",         false) };
+    GameState mapLoaded    { engine.createState("map loaded",    false) };
+    GameState mapValidated { engine.createState("map validated", false) };
+    GameState playersAdded { engine.createState("players added", false) };
+    engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
+
+    
+    engine.addChildTransition(start,        "loadmap",     mapLoaded);
+    engine.addChildTransition(mapLoaded,    "loadmap",     mapLoaded);
+    engine.addChildTransition(mapLoaded,    "validatemap", mapValidated);
+    engine.addChildTransition(mapValidated, "addplayer",   playersAdded);
+    engine.addChildTransition(playersAdded, "addplayer",   playersAdded);
+
+    // PLAY
+    GameState assignReinf { engine.createState("assignreinforcement", false) };
+    GameState win         { engine.createState("win",                 false) };
+    engine.addChildStates(play, { assignReinf, win });
+
+    // players added -> (gamestart) -> assignreinforcement
+    engine.addChildTransition(playersAdded, "gamestart", assignReinf);
+
+    // For testing: allow moving from assignreinforcement to win
+    engine.addChildTransition(assignReinf, "win", win);
+
+    // End
+    GameState quitFinal { engine.createState("quit", false) };
+    engine.addChildStates(end, { quitFinal });
+
+
+    engine.addChildTransition(win, "replay", startup->getInitialSubstatePtr());
+    engine.addChildTransition(win, "quit",   quitFinal);
+
+    engine.setActiveParentState(startup);
+    engine.setActiveState(startup->getInitialSubstatePtr());
+
+    engine.startupPhase(std::cin, std::cout);
+
+
+    
 }

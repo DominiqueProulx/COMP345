@@ -11,6 +11,8 @@
 #include "Player.h"
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
+#include <cstddef>
 
 // Initialize static member
 int Player::playerCount = 0; 
@@ -49,7 +51,7 @@ Player::Player(const Player& other) {
        this->deck = other.deck; // all players must play with the same deck of cards.
 	   this->territoriesOwned = new std::vector<Territory*>();
        for (Territory* t : *(other.territoriesOwned)) {
-		   territoriesOwned->push_back(t);
+		territoriesOwned->push_back(t);
        }
 	}   
 
@@ -206,7 +208,7 @@ std::vector<Territory*> Player::toAttack() {
         // Check that the territory was not already added, if not, add it
         Territory* territoryToAdd = possibleTerritories.at(randomTerritoryIndex);
         if (std::find(territoriesToAttack.begin(), territoriesToAttack.end(), territoryToAdd) == territoriesToAttack.end()) {
-          
+        
             territoriesToAttack.push_back(territoryToAdd);
         }
     }

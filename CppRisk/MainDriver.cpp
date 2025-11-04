@@ -12,7 +12,8 @@
 //void testOrdersLists();
 //void testCards();
 //void testGameStates();
-void testCommandProcessor();
+//void testCommandProcessor();
+void testStartupPhase();
 
 std::string buffer{};
 
@@ -44,13 +45,15 @@ int main(void)
 	//std::cin >> buffer;
 	//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	char buffer[FILENAME_MAX];
-	_getcwd(buffer, FILENAME_MAX);
-	std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout << "--- Place MAP.txt in the folder above ---" << std::endl;
+	// char buffer[FILENAME_MAX];
+	// _getcwd(buffer, FILENAME_MAX);
+	// std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
+	// std::cout << buffer << std::endl;
+	// std::cout << "--- Place MAP.txt in the folder above ---" << std::endl;
 
-	testCommandProcessor();
+	// testCommandProcessor();
+
+	testStartupPhase();
 
 	return 0;
 }

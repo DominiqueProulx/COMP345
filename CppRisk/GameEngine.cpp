@@ -415,13 +415,7 @@ std::string GameEngine::getParentStateName() const {
 	return activeParentState->getName();
 }
 
-// loadmap MAP.txt -> loadmap, MAP.txt
-static void splitLine(const std::string& s, std::vector<std::string>& out) {
-    out.clear();
-    std::istringstream iss(s);
-    std::string tok;
-    while (iss >> tok) out.push_back(tok);
-}
+
 
 void GameEngine::startupPhase(std::istream&, std::ostream& out)
 {
@@ -434,8 +428,8 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
         << "  validatemap\n"
         << "  addplayer <playername>\n"
         << "  gamestart\n"
-        << "  replay\n"
-        << "  quit\n";
+		<< "  replay\n"
+		<<"   quit\n";
 
     for (;;)
     {
@@ -450,25 +444,44 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
         std::getline(ss, arg);
         if (!arg.empty() && arg.front() == ' ') arg.erase(0, 1);
 
+		if (verb.empty()) { out << "Invalid command.\n"; continue; }
+
+
+        if (verb == "replay") {
+            if (!isCommandValid("replay")) { out << "State invalid.\n"; continue; }
+            out << "Replaying... transitioning to start.\n";
+            changeGameState("replay");
+            continue;
+        }
+
+
+        if (verb == "quit") {
+            if (!isCommandValid("quit")) { out << "State invalid.\n"; continue; }
+            out << "Exiting program.\n";
+            changeGameState("quit");
+            return;
+        }
         
         if (verb == "replay") {
             if (!isCommandValid("replay")) { out << "State invalid.\n"; continue; }
             out << "Replaying... transitioning to start.\n";
-            changeGameState("start");
+            changeGameState("replay");
+			changeGameState("win");
             continue;
         }
 
         if (verb == "quit") {
             if (!isCommandValid("quit")) { out << "State invalid.\n"; continue; }
             out << "Exiting program.\n";
+			changeGameState("win");
             return;
         }
 
         if (verb == "loadmap") {
             if (!isCommandValid("loadmap")) { out << "State invalid.\n"; continue; }
-            if (arg.empty()) { out << "Usage: loadmap <filename>\n"; continue; }
+            if (arg.empty()) { out << "Enter valid file name\n"; continue; }
             if (cmdLoadMap(arg, out)) {
-                changeGameState("maploaded"); // FSM: start/maploaded -> maploaded
+                changeGameState("loadmap");
             }
             continue;
         }
@@ -476,7 +489,7 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
         if (verb == "validatemap") {
             if (!isCommandValid("validatemap")) { out << "State invalid.\n"; continue; }
             if (cmdValidateMap(out)) {
-                changeGameState("mapvalidated"); // FSM: maploaded -> mapvalidated
+                changeGameState("validatemap");
             }
             continue;
         }
@@ -485,13 +498,13 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
             if (!isCommandValid("addplayer")) { out << "State invalid.\n"; continue; }
             if (arg.empty()) { out << "Usage: addplayer <playername>\n"; continue; }
             if (cmdAddPlayer(arg, out)) {
-                changeGameState("playersadded");
+                changeGameState("addplayer");
             }
             continue;
         }
 
         if (verb == "gamestart") {
-            if (!isCommandValid("playersadded")) { out << "State invalid.\n"; continue; }
+            if (!isCommandValid("gamestart")) { out << "State invalid.\n"; continue; }
             if (!players || players->size() < 2 || players->size() > 6) {
                 out << "Need 2–6 players before 'gamestart'.\n"; continue;
             }
@@ -499,8 +512,8 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
 
             if (cmdGameStart(out)) {
                 changeGameState("assignreinforcement");
-                out << "Switching to PLAY phase...\n";
-                return;
+                out << "SKIP to win phase...\n"; //have to do the proper state in GameEngineDriver
+                
             }
             continue;
         }
@@ -565,4 +578,70 @@ bool GameEngine::cmdGameStart(std::ostream& out)
     return true;
 }
 
+void GameEngine::fairDistributeTerritories(std::ostream& out)
+{
+    if (!map || !players || players->empty()) {
+        out << "No map or players to distribute.\n";
+        return;
+    }
+
+    const auto& ts = map->getTerritories();
+    if (ts.empty()) {
+        out << "No territories to distribute.\n";
+        return;
+    }
+
+    for (auto* p : *players) {
+        auto* owned = const_cast<std::vector<Territory*>*>(p->getTerritories());
+        if (owned) owned->clear();
+    }
+
+    std::size_t i = 0;
+    for (auto* t : ts) {
+        Player* owner = (*players)[i % players->size()];
+        auto* owned = const_cast<std::vector<Territory*>*>(owner->getTerritories());
+        if (owned) owned->push_back(t);
+        ++i;
+    }
+
+    out << "Distributed " << ts.size() << " territories among " << players->size() << " players.\n";
+}
+
+
+void GameEngine::randomizePlayerOrder(std::ostream& out)
+{
+    if (!players) { out << "No players list.\n"; return; }
+    std::mt19937 rng(42); // fixed seed for reproducible order
+    std::shuffle(players->begin(), players->end(), rng);
+
+    out << "Randomized Play Order (Seed=42):\n";
+    for (std::size_t i = 0; i < players->size(); ++i) {
+        const std::string* label = (*players)[i]->getColor(); // using color as name/label
+        out << "  " << (i + 1) << ") " << (label ? *label : std::string{"(unnamed)"}) << "\n";
+    }
+}
+
+void GameEngine::grant50Reinforcements(std::ostream& out)
+{
+    if (!players || !reinforcementPool) { out << "Reinforcement pool not ready.\n"; return; }
+    for (auto* p : *players) {
+        (*reinforcementPool)[p] = 50;
+    }
+    out << "Assigned 50 armies to each player's reinforcement pool.\n";
+}
+
+
+void GameEngine::initialCardDraws(std::ostream& out)
+{
+
+    if (!players) { out << "No players to draw.\n"; return; }
+
+    for (auto* p : *players) {
+        // Ensure the player has a Hand*
+        p->getHand();
+        deck->draw(p->getHand());
+        deck->draw(p->getHand());
+    }
+    out << "Each player drew 2 cards.\n";
+}
 
