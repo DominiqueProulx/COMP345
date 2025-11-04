@@ -6,7 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <limits>
+#include <random>
+#include "CommandProcessing.h"
 
 /* -------------------------- */
 /* -- STATE IMPLEMENTATION -- */
@@ -413,4 +414,155 @@ std::string GameEngine::getParentStateName() const {
 	if (!activeParentState) return "Unknown";
 	return activeParentState->getName();
 }
+
+// loadmap MAP.txt -> loadmap, MAP.txt
+static void splitLine(const std::string& s, std::vector<std::string>& out) {
+    out.clear();
+    std::istringstream iss(s);
+    std::string tok;
+    while (iss >> tok) out.push_back(tok);
+}
+
+void GameEngine::startupPhase(std::istream&, std::ostream& out)
+{
+    
+    CommandProcessor cp;
+
+    out << "=== STARTUP PHASE ===\n"
+        << "Commands:\n"
+        << "  loadmap <filename>\n"
+        << "  validatemap\n"
+        << "  addplayer <playername>\n"
+        << "  gamestart\n"
+        << "  replay\n"
+        << "  quit\n";
+
+    for (;;)
+    {
+        
+        Command* cmdObj = cp.getCommand(*this);
+        const std::string full = cmdObj->getCommandString();
+
+        
+        std::istringstream ss(full);
+        std::string verb, arg;
+        ss >> verb;
+        std::getline(ss, arg);
+        if (!arg.empty() && arg.front() == ' ') arg.erase(0, 1);
+
+        
+        if (verb == "replay") {
+            if (!isCommandValid("replay")) { out << "State invalid.\n"; continue; }
+            out << "Replaying... transitioning to start.\n";
+            changeGameState("start");
+            continue;
+        }
+
+        if (verb == "quit") {
+            if (!isCommandValid("quit")) { out << "State invalid.\n"; continue; }
+            out << "Exiting program.\n";
+            return;
+        }
+
+        if (verb == "loadmap") {
+            if (!isCommandValid("loadmap")) { out << "State invalid.\n"; continue; }
+            if (arg.empty()) { out << "Usage: loadmap <filename>\n"; continue; }
+            if (cmdLoadMap(arg, out)) {
+                changeGameState("maploaded"); // FSM: start/maploaded -> maploaded
+            }
+            continue;
+        }
+
+        if (verb == "validatemap") {
+            if (!isCommandValid("validatemap")) { out << "State invalid.\n"; continue; }
+            if (cmdValidateMap(out)) {
+                changeGameState("mapvalidated"); // FSM: maploaded -> mapvalidated
+            }
+            continue;
+        }
+
+        if (verb == "addplayer") {
+            if (!isCommandValid("addplayer")) { out << "State invalid.\n"; continue; }
+            if (arg.empty()) { out << "Usage: addplayer <playername>\n"; continue; }
+            if (cmdAddPlayer(arg, out)) {
+                changeGameState("playersadded");
+            }
+            continue;
+        }
+
+        if (verb == "gamestart") {
+            if (!isCommandValid("playersadded")) { out << "State invalid.\n"; continue; }
+            if (!players || players->size() < 2 || players->size() > 6) {
+                out << "Need 2–6 players before 'gamestart'.\n"; continue;
+            }
+        
+
+            if (cmdGameStart(out)) {
+                changeGameState("assignreinforcement");
+                out << "Switching to PLAY phase...\n";
+                return;
+            }
+            continue;
+        }
+
+        out << "Invalid command.\n";
+    }
+}
+
+
+
+bool GameEngine::cmdLoadMap(const std::string& filename, std::ostream& out)
+{
+    std::string error;
+    Map* loaded = mapLoader->load(filename, &error);
+    if (!loaded) {
+        out << "Failed to load map: " << error << "\n";
+        return false;
+    }
+    if (map) delete map;
+    map = loaded;
+    out << " Loaded map '" << map->getName() << "' with "
+        << map->getTerritories().size() << " territories.\n";
+    return true;
+}
+
+bool GameEngine::cmdValidateMap(std::ostream& out)
+{
+    if (!map) { out << "No map loaded.\n"; return false; }
+    bool ok = map->validate();
+    out << (ok ? "Map validation succeeded.\n" : "Map validation failed.\n");
+    return ok;
+}
+
+bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
+{
+    if (players->size() >= 6) { out << "Max 6 players reached.\n"; return false; }
+    Player* p = new Player();
+    p->setColor(name); //There's no name in player
+    players->push_back(p);
+    (*reinforcementPool)[p] = 0;
+    out << "Player added: " << name << " (Total " << players->size() << ")\n";
+    return true;
+}
+
+bool GameEngine::cmdGameStart(std::ostream& out)
+{
+    if (!map || !map->validate()) {
+        out << "Map must be loaded and validated first.\n";
+        return false;
+    }
+    if (players->size() < 2) {
+        out << "At least 2 players required.\n";
+        return false;
+    }
+
+    fairDistributeTerritories(out);
+    randomizePlayerOrder(out);
+    grant50Reinforcements(out);
+    initialCardDraws(out);
+
+    out << "GameStart complete.\n";
+    return true;
+}
+
 
