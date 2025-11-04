@@ -462,20 +462,6 @@ void GameEngine::startupPhase(std::istream&, std::ostream& out)
             return;
         }
         
-        if (verb == "replay") {
-            if (!isCommandValid("replay")) { out << "State invalid.\n"; continue; }
-            out << "Replaying... transitioning to start.\n";
-            changeGameState("replay");
-			changeGameState("win");
-            continue;
-        }
-
-        if (verb == "quit") {
-            if (!isCommandValid("quit")) { out << "State invalid.\n"; continue; }
-            out << "Exiting program.\n";
-			changeGameState("win");
-            return;
-        }
 
         if (verb == "loadmap") {
             if (!isCommandValid("loadmap")) { out << "State invalid.\n"; continue; }
