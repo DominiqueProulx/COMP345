@@ -92,7 +92,7 @@ private:
 // Bomb order: destroy half armies on enemy adjacent territory
 class Bomb : public Order {
 public:
-    Bomb();  // Default constructor for Assignment 1 compatibility - ADD THIS
+    Bomb();  // Default constructor for Assignment 1 compatibility
     Bomb(Player* player, Territory* target);
     Bomb(const Bomb& other);
     ~Bomb();
@@ -110,7 +110,7 @@ private:
 // Blockade order: double armies and transfer to Neutral player
 class Blockade : public Order {
 public:
-    Blockade();  // Default constructor for Assignment 1 compatibility - ADD THIS
+    Blockade();  // Default constructor for Assignment 1 compatibility 
     Blockade(Player* player, Territory* target, Player* neutral);
     Blockade(const Blockade& other);
     ~Blockade();
@@ -129,7 +129,7 @@ private:
 // Airlift order: move armies between any owned territories
 class Airlift : public Order {
 public:
-    Airlift();  // Default constructor for Assignment 1 compatibility - ADD THIS
+    Airlift();  // Default constructor for Assignment 1 compatibility 
     Airlift(Player* player, Territory* source, Territory* target, int numArmies);
     Airlift(const Airlift& other);
     ~Airlift();
@@ -149,7 +149,7 @@ private:
 // Negotiate order: prevent attacks between two players for remainder of turn
 class Negotiate : public Order {
 public:
-    Negotiate();  // Default constructor for Assignment 1 compatibility - ADD THIS
+    Negotiate();  // Default constructor for Assignment 1 compatibility 
     Negotiate(Player* player, Player* targetPlayer);
     Negotiate(const Negotiate& other);
     ~Negotiate();

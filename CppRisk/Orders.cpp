@@ -224,6 +224,14 @@ bool Advance::validate() {
                   << " does not own source " << sourceTerritory->getName() << std::endl;
         return false;
     }
+            // If target belongs to player, this is a move (not attack), still need to validate
+            // If target belongs to someone else or is neutral, this is an attack
+        if (targetTerritory->getOwner() && 
+        !player->ownsTerritory(targetTerritory) && 
+        targetTerritory->getOwner() != player) {
+        // This is an attack - additional validation needed
+    }
+    
     
     if (!sourceTerritory->isAdjacentTo(targetTerritory)) {
         std::cout << "Advance INVALID: " << sourceTerritory->getName() 
@@ -237,6 +245,7 @@ bool Advance::validate() {
         return false;
     }
     
+    // Check negotiate
     if (targetTerritory->getOwner() != player && 
         targetTerritory->getOwner() != nullptr &&
         player->hasNegotiationWith(targetTerritory->getOwner())) {

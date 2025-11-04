@@ -54,7 +54,6 @@ const vector<Territory*>& Continent::getTerritories() const {
 int Continent::getBonus() const { return *bonus; }
 string Continent::getName() const { return *name; }
 
-//pretty print
 ostream& operator<<(ostream& out, const Continent& continent) {
     out << "Continent{name=" << continent.getName()
         << ", bonus=" << continent.getBonus()
@@ -153,7 +152,6 @@ void Territory::setOwner(Player* newOwner) {
     owner = newOwner;
 }
 
-//pretty print (e.g look into <boost/pfr.hpp>)
 ostream& operator<<(ostream& out, const Territory& territory) {
     out << "Territory{name=" << territory.getName()
         << ", x=" << territory.getX()
@@ -431,7 +429,6 @@ bool Map::validate() const
     return true;
 }
 
-//pretty print
 ostream &operator<<(ostream &out, const Map &map)
 {
     out << "Map{name=" << map.getName()
@@ -596,9 +593,12 @@ string MapLoader::trim(const string& s) {
     return s.substr(b, e-b);
 }
 
+// Split a CSV line into parts
 vector<string> MapLoader::splitCSV(const string& line) {
-    vector<string> out; string cur;
+    vector<string> out; 
+    string cur;
     istringstream ss(line);
-    while (getline(ss, cur, ',')) out.push_back(cur);
+    while (getline(ss, cur, ',')) 
+        out.push_back(cur);
     return out;
 }
