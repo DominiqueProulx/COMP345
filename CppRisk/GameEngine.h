@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>  
 #include <unordered_map>
+#include "orders.h"  // contaisn player and map includes
+std::vector<Player*>* createFakePlayers(); //FLAG:remove this line when integrating Jackson's code.
 
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
@@ -55,6 +57,13 @@ private:
 	State* activeParentState;
 	State::StateList* parentStates;
 	State::StateList* states;
+	std::vector<Player*>* players; //*** placeholder for Jackson's code , to be removed. 
+	
+	//main game loop phases & helpers
+	bool validatePlayerStays(Player* player);
+	void reinforcementPhase();
+	void issueOrdersPhase();
+	void executeOrdersPhase();
 
 public:
 	using GameState = State*; // exposed publically so states can be initialized but not used directly externally
@@ -83,6 +92,9 @@ public:
 	std::string readCommand() const;
 	void changeGameState(const std::string& cmd);
 	bool isActiveStateFinal() const;
+
+	// main Game Loop
+	void mainGameLoop();
 
 };
 

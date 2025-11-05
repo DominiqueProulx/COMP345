@@ -121,6 +121,10 @@ void Player::setHand(Hand& hand) {
 }
 
 // Assignment 2 methods
+
+void Player::addToReinforcementPool(int armies) {
+    *reinforcementPool += armies;
+}
 bool Player::ownsTerritory(Territory* territory) const {
     for (Territory* t : *territoriesOwned) {
         if (t == territory) {
@@ -317,4 +321,18 @@ void Player::issueOrder() {
         Order* cardOrder = playerHand->getCard(choice - 3)->play(*playerHand, *deck);
         (*orderslist).add(cardOrder);
     }          
+}
+
+Order* Player::getNextOrderToExecute(){
+    if (orderslist->size() == 0) {
+        std::cout << "No orders to execute." << std::endl;
+        return nullptr;
+    }
+    else {
+        std::cout << "Getting next order to execute." << std::endl;
+        Order* nextOrder = orderslist->getOrder(0);
+        orderslist->remove(0); //TODO: ensure that it is my resposnability to remove this
+        return nextOrder;
+	}
+	
 }

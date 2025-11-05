@@ -1,6 +1,7 @@
 #include "GameEngine.h"
 #include <iostream>
 
+
 /* -------------------------- */
 /* -- STATE IMPLEMENTATION -- */
 /* -------------------------- */
@@ -164,6 +165,9 @@ GameEngine::GameEngine()
 	activeState = nullptr;
 	parentStates = new std::vector<State*>();
 	states = new std::vector<State*>();
+	
+	players = createFakePlayers();//FLAG : remove all that is below this line when integrating Jackson's code.
+	
 }
 
 // Duplicates an existing GameEngine into a new distinct object.
@@ -330,4 +334,132 @@ void GameEngine::changeGameState(const std::string& cmd)
 bool GameEngine::isActiveStateFinal() const
 {
 	return activeState->getTransitions().size() == 0;
+}
+
+bool GameEngine::validatePlayerStays(Player* player) {
+	if(player->getTerritories()->size() == 0) {
+		std::cout << "Player " << player->getName() << " has no territories left and is eliminated from the game." << std::endl;
+		auto playerIndex = std::find(players->begin(), players->end(), player);
+		if (playerIndex != players->end()) {
+			players->erase(playerIndex); 
+		}
+		else {
+			std::cerr << "ERROR: Player " << player->getName() << " not found in active players list." << std::endl;
+		}
+		return false;
+	}
+	else { 
+		std::cout << "Player " << player->getName() << " still has territories and remains in the game." << std::endl;
+		return true;
+	}
+}
+
+// main game loop
+void GameEngine::reinforcementPhase() {
+	std::cout << "Reinforcement Phase begins." << std::endl;
+	for (Player* player : *players) {
+		//calculate reinforcements based on territories owned
+		int numTerritories = player->getTerritories()->size();
+		int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
+		std::cout << "Player " << player->getName() << " receives " << reinforcements << " reinforcements." << std::endl;
+		player->addToReinforcementPool(reinforcements);
+		//add continent bonus 
+		//TODO : implement continent bonus calculation
+
+
+	}
+}
+void GameEngine::issueOrdersPhase() {
+
+	std::cout << "Issuing Orders Phase begins." << std::endl;
+	std::unordered_map<Player*, bool> playersDoneIssuing;
+	for( Player* player : *players) {
+		playersDoneIssuing[player] = false; //initialize all players as not done issuing orders
+	}
+
+	bool allPlayersDone = false;
+	while (!allPlayersDone) {
+		for (Player* player : *players) {
+			std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
+			player->issueOrder();
+			//check if player wants to issue more orders
+			std::cout << "Does Player " << player->getName() << " want to issue another order? (y/n)" << std::endl;
+			char answer;
+			std::cin >> answer;
+			if (answer == 'n' || answer == 'N') {
+				playersDoneIssuing[player] = false;
+			}
+			else {
+				playersDoneIssuing[player] = true;
+			}
+		}
+
+		//check if all players are done issuing orders
+		for(const auto& [player, done] : playersDoneIssuing) {
+			if (done) {
+				allPlayersDone = false;
+				break;
+			}
+			else {
+				allPlayersDone = true;
+				std::cout << "All players have finished issuing orders." << std::endl;
+			}
+		}
+	}
+}
+void GameEngine::executeOrdersPhase() {
+	std::unordered_map<Player*, bool> playersDoneExecuting;
+	for (Player* player : *players) {
+		playersDoneExecuting[player] = false; //initialize all players as not done executing orders
+	}
+
+	std::cout << "Executing Orders Phase begins." << std::endl;
+	bool noMoreOrders = false;
+	while (!noMoreOrders) {
+		for (Player* player : *players) {
+			Order* nextOrder = player->getNextOrderToExecute();
+			if (nextOrder != nullptr) {
+				std::cout << "Player " << player->getName() << " is executing order: " << *nextOrder << std::endl;
+				nextOrder->execute();
+			}
+			else if (!playersDoneExecuting[player]) {
+				playersDoneExecuting[player] = true;
+				std::cout << "Player " << player->getName() << " has no more orders to execute." << std::endl;
+			}
+		}
+
+		//check if all players are done issuing orders
+		for (const auto& [player, done] : playersDoneExecuting) {
+			if (done) {
+				noMoreOrders = false;
+				break;
+			}
+			else {
+				noMoreOrders = true;
+				std::cout << "All players have finished Executing orders." << std::endl;
+			}
+		}
+
+	}
+
+
+}
+void GameEngine::mainGameLoop() {
+	bool gameContinues = true;
+	while (gameContinues) {
+		reinforcementPhase();
+		issueOrdersPhase();
+		executeOrdersPhase();
+		for (Player* player : *players) {
+			validatePlayerStays(player);
+		}
+		//check if a player has won 
+		if (players->size() == 1) {
+			std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
+			gameContinues = false;
+			changeGameState("win"); 
+		}
+
+
+	}
 }

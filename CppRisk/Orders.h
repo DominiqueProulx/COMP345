@@ -180,6 +180,7 @@ public:
     
     int size() const;
     Order* getOrder(int index) const;
+	std::vector<Order*> getOrders() const;
     
     friend std::ostream& operator<<(std::ostream& os, const OrdersList& list);
     

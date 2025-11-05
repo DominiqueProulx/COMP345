@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include "Orders.h"
 
 void testPlayers() {
 	std::cout << "========================================" << std::endl;
@@ -148,3 +149,48 @@ void testPlayers() {
 
 }
 
+std::vector<Player*>* createFakePlayers() {
+	MapLoader loader;
+	std::string error;
+	Map* map = loader.load("MAP.txt", &error);
+
+	if (!map) {
+		std::cerr << "Failed to load map: " << error << std::endl;
+		return nullptr;
+	}
+
+	Deck* deck = new Deck();
+	deck->initializeDeck();
+
+	std::vector<Territory*> territoryPlayer1;
+	std::vector<Territory*> territoryPlayer2;
+	int count = 0;
+
+	for (Territory* t : map->getTerritories()) {
+		if (count % 2 == 0) territoryPlayer1.push_back(t);
+		else territoryPlayer2.push_back(t);
+		count++;
+	}
+
+	std::string color1, color2;
+	std::cin >> color1 >> color2;
+
+	Player* player1 = new Player(color1, territoryPlayer1, deck);
+	Player* player2 = new Player(color2, territoryPlayer2, deck);
+
+	// create hands
+	Hand* hand1 = new Hand();
+	Hand* hand2 = new Hand();
+	for (int i = 0; i < 5; ++i) {
+		deck->draw(hand1);
+		deck->draw(hand2);
+	}
+	player1->setHand(*hand1);
+	player2->setHand(*hand2);
+
+	auto* players = new std::vector<Player*>();
+	players->push_back(player1);
+	players->push_back(player2);
+
+	return players;
+}//FLAG :: remove this function when integrating Jackson's code.

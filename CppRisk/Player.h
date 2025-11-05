@@ -49,12 +49,14 @@ public:
     void removeTerritory(Territory* territory);
     int getReinforcementPool() const;
     void setReinforcementPool(int armies);
+	void addToReinforcementPool(int armies);
     bool hasConqueredThisTurn() const;
     void setConqueredThisTurn(bool conquered);
     void addNegotiatedPlayer(Player* player);
     void clearNegotiations();
     bool hasNegotiationWith(Player* player) const;
     std::string getName() const;
+    Order* getNextOrderToExecute();
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
