@@ -375,6 +375,7 @@ void GameEngine::issueOrdersPhase() {
 	std::unordered_map<Player*, bool> playersDoneIssuing;
 	for( Player* player : *players) {
 		playersDoneIssuing[player] = false; //initialize all players as not done issuing orders
+		player->resetDefendAndAttack();   // reset the toDefend and toAttack lists for the new turn
 	}
 
 	bool allPlayersDone = false;

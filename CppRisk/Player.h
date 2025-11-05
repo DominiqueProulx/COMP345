@@ -57,6 +57,7 @@ public:
     bool hasNegotiationWith(Player* player) const;
     std::string getName() const;
     Order* getNextOrderToExecute();
+    void resetDefendAndAttack();
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -65,8 +66,8 @@ public:
     Player& operator= (const Player& otherplayer);
 
     // Methods
-    std::vector<Territory*> toDefend();
-    std::vector<Territory*> toAttack();
+    std::vector<Territory*>* toDefend();
+    std::vector<Territory*>* toAttack();
     void issueOrder();
 
 private:
@@ -81,6 +82,8 @@ private:
     int* reinforcementPool;
     bool* conqueredTerritoryThisTurn;
     std::set<Player*>* negotiatedPlayers;
+    std::vector<Territory*>* territoriesToDefend;
+    std::vector<Territory*>* territoriesToAttack;
 };
 
 #endif
