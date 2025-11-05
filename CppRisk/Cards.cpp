@@ -2,6 +2,7 @@
 #include "Cards.h"
 #include <iostream>
 #include <random>
+#include <algorithm>  
 
 static const int handSizeValue = 5;
 const int* Hand::MAX_HAND_SIZE = &handSizeValue;
