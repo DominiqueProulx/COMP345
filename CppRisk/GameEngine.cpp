@@ -165,7 +165,6 @@ GameEngine::GameEngine()
 	activeState = nullptr;
 	parentStates = new std::vector<State*>();
 	states = new std::vector<State*>();
-	
 	players = createFakePlayers();//FLAG : remove all that is below this line when integrating Jackson's code.
 	
 }
@@ -374,37 +373,43 @@ void GameEngine::issueOrdersPhase() {
 	std::cout << "Issuing Orders Phase begins." << std::endl;
 	std::unordered_map<Player*, bool> playersDoneIssuing;
 	for( Player* player : *players) {
+		std::cout << "reset toDefend and ToAttack lists for the new issue Order Phase" << std::endl;
 		playersDoneIssuing[player] = false; //initialize all players as not done issuing orders
 		player->resetDefendAndAttack();   // reset the toDefend and toAttack lists for the new turn
 	}
 
 	bool allPlayersDone = false;
-	while (!allPlayersDone) {
+	while (!allPlayersDone) {  //TODO : simplify this if you have time
 		for (Player* player : *players) {
-			std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
-			player->issueOrder();
-			//check if player wants to issue more orders
-			std::cout << "Does Player " << player->getName() << " want to issue another order? (y/n)" << std::endl;
-			char answer;
-			std::cin >> answer;
-			if (answer == 'n' || answer == 'N') {
-				playersDoneIssuing[player] = false;
+			if (!playersDoneIssuing[player]) {
+				std::cout << "---------------------------------------------------------" << std::endl;
+				std::cout << "---------- Player " << player->getName() << " turn ------" << std::endl;
+				std::cout << "---------------------------------------------------------" << std::endl;
+				std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
+				player->issueOrder();
+				//check if player is done with his orders in this phase
+				std::cout << "Does Player " << player->getName() << " want to issue another order? (y/n)" << std::endl;
+				char answer;
+				std::cin >> answer;
+				if (answer == 'n' || answer == 'N') {
+					playersDoneIssuing[player] = true;
+				}
+				else {
+					playersDoneIssuing[player] = false; //redundant but explicit
+				}
 			}
-			else {
-				playersDoneIssuing[player] = true;
+		}
+		allPlayersDone = true;
+		//check if all players are done issuing orders
+		for (const auto& [player, done] : playersDoneIssuing) {
+			if (!done) {
+				allPlayersDone = false; // found someone still issuing
+				break;                 
 			}
 		}
 
-		//check if all players are done issuing orders
-		for(const auto& [player, done] : playersDoneIssuing) {
-			if (done) {
-				allPlayersDone = false;
-				break;
-			}
-			else {
-				allPlayersDone = true;
-				std::cout << "All players have finished issuing orders." << std::endl;
-			}
+		if (allPlayersDone) {
+			std::cout << "All players have finished issuing orders." << std::endl;
 		}
 	}
 }
@@ -464,3 +469,4 @@ void GameEngine::mainGameLoop() {
 
 	}
 }
+

@@ -1,4 +1,5 @@
 #include "Orders.h"
+#include "Player.h"
 #include "Cards.h"
 #include <iostream>
 #include <random>
@@ -6,6 +7,7 @@
 
 static const int handSizeValue = 5;
 const int* Hand::MAX_HAND_SIZE = &handSizeValue;
+
 
 //constructor and destructor for base virtual class
 Card::Card(const std::string& name) : name(new std::string(name)) {}

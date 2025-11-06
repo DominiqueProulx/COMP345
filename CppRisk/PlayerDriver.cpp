@@ -162,29 +162,32 @@ std::vector<Player*>* createFakePlayers() {
 	Deck* deck = new Deck();
 	deck->initializeDeck();
 
+	std::cout << "allocating territories " << std::endl;
 	std::vector<Territory*> territoryPlayer1;
 	std::vector<Territory*> territoryPlayer2;
 	int count = 0;
 
 	for (Territory* t : map->getTerritories()) {
+		std::cout << " Territory : " << t->getName() << std::endl;
 		if (count % 2 == 0) territoryPlayer1.push_back(t);
 		else territoryPlayer2.push_back(t);
 		count++;
 	}
+	std::cout << "Create the players" << std::endl;
+	std::cout << "Create the players" << std::endl;
+	std::string color1("blue"), color2("red");
 
-	std::string color1, color2;
-	std::cin >> color1 >> color2;
-
+	std::cout << "Create the players" << std::endl;
 	Player* player1 = new Player(color1, territoryPlayer1, deck);
 	Player* player2 = new Player(color2, territoryPlayer2, deck);
-
-	// create hands
+	std::cout << "Create the players hands" << std::endl;
 	Hand* hand1 = new Hand();
 	Hand* hand2 = new Hand();
 	for (int i = 0; i < 5; ++i) {
 		deck->draw(hand1);
 		deck->draw(hand2);
 	}
+
 	player1->setHand(*hand1);
 	player2->setHand(*hand2);
 
@@ -193,4 +196,5 @@ std::vector<Player*>* createFakePlayers() {
 	players->push_back(player2);
 
 	return players;
-}//FLAG :: remove this function when integrating Jackson's code.
+}
+//FLAG :: remove this function when integrating Jackson's code.

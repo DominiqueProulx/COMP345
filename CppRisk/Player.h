@@ -18,11 +18,22 @@
 class OrdersList;
 class Order;
 
+
 // ------------------ CLASS PLAYER ------------------
 
 class Player {
 public:
     static int playerCount;
+
+    //I wanted to add this to order but it gave me issues with circular dependency
+    enum class OrderType {
+        ADVANCE,
+        DEPLOY,
+        BOMB,
+        BLOCKADE,
+        AIRLIFT,
+        NEGOTIATE
+    };
 
     // Constructor
     Player();
@@ -56,8 +67,25 @@ public:
     void clearNegotiations();
     bool hasNegotiationWith(Player* player) const;
     std::string getName() const;
+
     Order* getNextOrderToExecute();
     void resetDefendAndAttack();
+    Territory* choseFromToDefend();
+    Territory* choseFromToAttack();
+    Order* issueAdvanceOrder();
+    Order* issueDeployOrder();
+    Order* issueBombOrder();
+    Order* issueBlackadeOrder();
+    Order* issueAirliftOrder();
+    Order* issueNegotiateOrder();
+    Order* orderFactory(
+        Player::OrderType type,
+		Territory* sourceTerritory = nullptr,
+		Territory* targetTerritory = nullptr,
+		Player* targetOrNeutral = nullptr,
+		int armies = 0
+    );
+
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -69,6 +97,8 @@ public:
     std::vector<Territory*>* toDefend();
     std::vector<Territory*>* toAttack();
     void issueOrder();
+
+  
 
 private:
     const int* playerID;
@@ -84,6 +114,9 @@ private:
     std::set<Player*>* negotiatedPlayers;
     std::vector<Territory*>* territoriesToDefend;
     std::vector<Territory*>* territoriesToAttack;
+
+	
+
 };
 
 #endif

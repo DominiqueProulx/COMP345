@@ -10,6 +10,7 @@ void testPlayers();
 void testOrdersLists();
 void testCards();
 void testGameStates();
+void testMainGameLoop();
 
 std::string buffer{};
 
@@ -21,12 +22,12 @@ int main(void)
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	testPlayers();
+	/*testPlayers();
 	std::cout << "\n\nFinished testing PLAYERS. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
 
-	testOrdersLists();
+	/*testOrdersLists();
 	std::cout << "\n\nFinished testing ORDER LISTS. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -34,12 +35,15 @@ int main(void)
 	testCards();
 	std::cout << "\n\nFinished testing CARDS. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
 
-	testGameStates();
+	/*testGameStates();
 	std::cout << "\n\nFinished testing GAME ENGINE. Enter any character to end the program. ";
 	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
+
+	testMainGameLoop();
+
 
 	return 0;
 }

@@ -39,6 +39,8 @@ public:
     
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Order& order);
+
+  
     
 protected:
     std::string* orderType;
