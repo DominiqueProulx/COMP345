@@ -177,8 +177,6 @@ GameEngine::GameEngine()
 	map=nullptr;
 	mapLoader= new MapLoader();
 	players = new std::vector <Player*>();
-	deck=nullptr;
-	reinforcementPool=new std::unordered_map<Player*,int>();
 	deck=new Deck();
 	deck->initializeDeck();
 
@@ -199,8 +197,6 @@ GameEngine::GameEngine(const GameEngine& other)
 	mapLoader=new MapLoader(*other.mapLoader);
 	players= new std::vector<Player*>(*other.players);
 	deck=other.deck? new Deck(*other.deck):nullptr;
-	reinforcementPool=new std::unordered_map<Player*, int>(*other.reinforcementPool);
-	deck=new Deck(*other.deck);
 
 
 
@@ -221,7 +217,6 @@ GameEngine::~GameEngine()
 	if(deck) delete deck;
 	if(map) delete map;
 	if (mapLoader) delete mapLoader;
-	if (reinforcementPool) delete reinforcementPool;
 	if(deck) delete deck;
 
 	if (players){
@@ -265,8 +260,6 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
     }
     players = new std::vector<Player*>(*other.players);
 
-    if (reinforcementPool) delete reinforcementPool;
-    reinforcementPool = new std::unordered_map<Player*, int>(*other.reinforcementPool);
 
 	return *this;
 }
@@ -539,7 +532,6 @@ bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
     Player* p = new Player();
     p->setColor(name); //There's no name in player
     players->push_back(p);
-    (*reinforcementPool)[p] = 0;
     out << "Player added: " << name << " (Total " << players->size() << ")\n";
     return true;
 }
@@ -557,7 +549,7 @@ bool GameEngine::cmdGameStart(std::ostream& out)
 
     fairDistributeTerritories(out);
     randomizePlayerOrder(out);
-    grant50Reinforcements(out);
+    //grant50Reinforcements(out); #NEED TO FIX WITH CORRECT METHOD
     initialCardDraws(out);
 
     out << "GameStart complete.\n";
@@ -607,14 +599,6 @@ void GameEngine::randomizePlayerOrder(std::ostream& out)
     }
 }
 
-void GameEngine::grant50Reinforcements(std::ostream& out)
-{
-    if (!players || !reinforcementPool) { out << "Reinforcement pool not ready.\n"; return; }
-    for (auto* p : *players) {
-        (*reinforcementPool)[p] = 50;
-    }
-    out << "Assigned 50 armies to each player's reinforcement pool.\n";
-}
 
 
 void GameEngine::initialCardDraws(std::ostream& out)

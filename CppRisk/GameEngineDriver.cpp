@@ -83,7 +83,7 @@ void testGameStates()
 	}
 }
 
-
+//TODO: FIX transition to REINFORCMENT + WIN
 void testStartupPhase() {
     GameEngine engine;
 
