@@ -28,7 +28,7 @@ void testCards() {
 
 		if (cardToPlay) {
 			//sets order for testing play function
-			Order* returnedOrder = cardToPlay->play(hand, deck);
+			Order* returnedOrder = cardToPlay->play(hand, deck, new Player());
 
 			if (returnedOrder) {
 				std::cout << "Card's play() method returned " << *returnedOrder << "\n" << std::endl;

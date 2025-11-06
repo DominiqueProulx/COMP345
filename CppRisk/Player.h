@@ -75,7 +75,7 @@ public:
     Order* issueAdvanceOrder();
     Order* issueDeployOrder();
     Order* issueBombOrder();
-    Order* issueBlackadeOrder();
+    Order* issueBlockadeOrder();
     Order* issueAirliftOrder();
     Order* issueNegotiateOrder();
     Order* orderFactory(

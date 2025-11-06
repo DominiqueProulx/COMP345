@@ -416,39 +416,37 @@ void GameEngine::issueOrdersPhase() {
 void GameEngine::executeOrdersPhase() {
 	std::unordered_map<Player*, bool> playersDoneExecuting;
 	for (Player* player : *players) {
-		playersDoneExecuting[player] = false; //initialize all players as not done executing orders
+		playersDoneExecuting[player] = false;
 	}
-
 	std::cout << "Executing Orders Phase begins." << std::endl;
 	bool noMoreOrders = false;
 	while (!noMoreOrders) {
 		for (Player* player : *players) {
+			if (playersDoneExecuting[player]) continue;
+
 			Order* nextOrder = player->getNextOrderToExecute();
 			if (nextOrder != nullptr) {
 				std::cout << "Player " << player->getName() << " is executing order: " << *nextOrder << std::endl;
 				nextOrder->execute();
 			}
-			else if (!playersDoneExecuting[player]) {
+			else {
 				playersDoneExecuting[player] = true;
 				std::cout << "Player " << player->getName() << " has no more orders to execute." << std::endl;
 			}
 		}
-
-		//check if all players are done issuing orders
+		//check if all players are done executing orders
+		noMoreOrders = true;
 		for (const auto& [player, done] : playersDoneExecuting) {
-			if (done) {
+			if (!done) {
 				noMoreOrders = false;
 				break;
 			}
-			else {
-				noMoreOrders = true;
-				std::cout << "All players have finished Executing orders." << std::endl;
-			}
 		}
 
+		if (noMoreOrders) {
+			std::cout << "All players have finished executing orders." << std::endl;
+		}
 	}
-
-
 }
 void GameEngine::mainGameLoop() {
 	bool gameContinues = true;

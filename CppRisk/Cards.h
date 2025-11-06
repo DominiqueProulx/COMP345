@@ -6,13 +6,14 @@
 class Order; //forward declaration for DummyOrder class
 class Deck; //forward declaration for Deck class
 class Hand; //forward declaration for Hand class
+class Player; //forward declaration for Hand class
 
 //declaration for virtual parent class 
 class Card {
 public:
 	Card(const std::string& name);
 	virtual ~Card();
-	virtual Order* play(Hand& hand, Deck& deck) = 0;
+	virtual Order* play(Hand& hand, Deck& deck, Player* player) = 0;
 	virtual Card* copy() const = 0;
 
 	//getter function
@@ -30,7 +31,7 @@ class BombCard : public Card {
 public:
 	BombCard();
 	~BombCard();
-	Order* play(Hand& hand, Deck& deck) override;
+	Order* play(Hand& hand, Deck& deck, Player* player) override;
 	Card* copy() const override;
 	
 };
@@ -39,7 +40,7 @@ class ReinforcementCard : public Card {
 	public:
 	ReinforcementCard();
 	~ReinforcementCard();
-	Order* play(Hand& hand, Deck& deck) override;
+	Order* play(Hand& hand, Deck& deck, Player* player) override;
 	Card* copy() const override;
 };
 
@@ -47,7 +48,7 @@ class BlockadeCard : public Card {
 	public:
 	BlockadeCard();
 	~BlockadeCard();
-	Order* play(Hand& hand, Deck& deck) override;
+	Order* play(Hand& hand, Deck& deck, Player* player) override;
 	Card* copy() const override;
 };
 
@@ -55,7 +56,7 @@ class AirliftCard : public Card {
 	public:
 	AirliftCard();
 	~AirliftCard();
-	Order* play(Hand& hand, Deck& deck) override;
+	Order* play(Hand& hand, Deck& deck, Player* player) override;
 	Card* copy() const override;
 };
 
@@ -63,7 +64,7 @@ class DiplomacyCard : public Card {
 	public:
 	DiplomacyCard();
 	~DiplomacyCard();
-	Order* play(Hand& hand, Deck& deck) override;
+	Order* play(Hand& hand, Deck& deck, Player* player) override;
 	Card* copy() const override;
 };
 

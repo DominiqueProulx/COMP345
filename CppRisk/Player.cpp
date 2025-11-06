@@ -378,8 +378,9 @@ Order* Player::issueAdvanceOrder() {
 	while (!validInput) {
 		std::cin >> choice;
 		if (choice == 'd' || choice == 'D') {
-			Territory* fromTerritory;
-			while (fromTerritory != nullptr || fromTerritory->getNumberOfArmies() < 1) {
+            Territory* fromTerritory = nullptr;
+            Territory* toTerritory = nullptr;
+			while (fromTerritory == nullptr || fromTerritory->getNumberOfArmies() < 1) {
 				// chose the territory to move armies from
 				std::cout << "chose the territory you want to move armies from: " << std::endl;
 				fromTerritory = choseFromToDefend();
@@ -389,7 +390,7 @@ Order* Player::issueAdvanceOrder() {
 			}
 
 			std::cout << "chose the territory you want to move armies to: " << std::endl;
-			Territory* toTerritory = choseFromToDefend();
+			toTerritory = choseFromToDefend();
 
 
 			int armiestoMove;
@@ -415,19 +416,20 @@ Order* Player::issueAdvanceOrder() {
 		}
 		else if (choice == 'a' || choice == 'A') {
 			// chose the territory to move armies from
-			Territory* fromTerritory;
-			while (fromTerritory != nullptr || fromTerritory->getNumberOfArmies() < 1) {
+            Territory* fromTerritory = nullptr;
+            Territory* toTerritory = nullptr;
+			while (fromTerritory == nullptr && fromTerritory->getNumberOfArmies() < 1) {
 
-				std::cout << "chose the territory you want to move armies from: " << std::endl;
+				std::cout << "Choose the territory you want to move armies from: " << std::endl;
 				fromTerritory = choseFromToDefend();
 				if (fromTerritory->getNumberOfArmies() < 1) {
-					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please chose another Territory " << std::endl;
+					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please choose another Territory " << std::endl;
 				}
 			}
 
 			//list territories to attack          
 			std::cout << "chose the territory you want to move armies to: " << std::endl;
-			Territory* toTerritory = choseFromToAttack();
+			 toTerritory = choseFromToAttack();
 			int armiestoMove;
 			bool validArmiesInput = false;
 			while (!validArmiesInput) {
@@ -451,6 +453,7 @@ Order* Player::issueAdvanceOrder() {
 			std::cout << "Invalid choice. Please try again." << std::endl;
 		}
 	}
+    return nullptr;
 }
 Order* Player::issueDeployOrder() {
 
@@ -491,7 +494,7 @@ Order* Player::issueBombOrder() {
     return bombOrder;
 }
 
-Order* Player::issueBlackadeOrder() {
+Order* Player::issueBlockadeOrder() {
     // choose target territory
     std::cout << "choose the territory you want to blockade: " << std::endl;
     Territory* targetTerritory = choseFromToDefend();
@@ -625,7 +628,7 @@ void Player::issueOrder() {
 			// Issue Order from hand
 			std::string cardName = playerHand->getCard(choice - 2)->getName();
 			std::cout << "Playing the card" << cardName << ", it will create the order and add it to the orders list" << std::endl;
-			Order* cardOrder = playerHand->getCard(choice - 2)->play(*playerHand, *deck);
+			Order* cardOrder = playerHand->getCard(choice - 2)->play(*playerHand, *deck, this);
 			if (cardOrder != nullptr) { (*orderslist).add(cardOrder); }
 		}
 	}

@@ -35,14 +35,15 @@ Card* BombCard::copy() const {
     return new BombCard(*this);
 }
 
-Order* BombCard::play(Hand& hand, Deck& deck) {
+Order* BombCard::play(Hand& hand, Deck& deck, Player* player) {
     std::cout << "Bomb card played" << std::endl;
 	//returns to deck
     deck.returnCard(this);
     //removes from hand
 	hand.removeCard(this);
-    //returns order for order list
-    return new Bomb();
+    //returns order for order list  
+    Order* bombOrder = player->issueBombOrder();
+    return bombOrder;
 }
 
 //definitions for Reinforcement class - consructor, destructor, play, print
@@ -52,14 +53,15 @@ Card* ReinforcementCard::copy() const {
     return new ReinforcementCard(*this);
 }
 
-Order* ReinforcementCard::play(Hand& hand, Deck& deck) {
+Order* ReinforcementCard::play(Hand& hand, Deck& deck, Player* player) {
     std::cout << "Reinforcement card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Deploy();
+    Order* deployOrder = player->issueDeployOrder();
+    return deployOrder;
 }
 
 //definitions for Blockade class - consructor, destructor, play, print
@@ -69,14 +71,15 @@ Card* BlockadeCard::copy() const {
     return new BlockadeCard(*this);
 }
 
-Order* BlockadeCard::play(Hand& hand, Deck& deck) {
+Order* BlockadeCard::play(Hand& hand, Deck& deck, Player* player) {
     std::cout << "Blockade card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Blockade();
+    Order* blockadeOrder = player->issueBlockadeOrder();
+    return blockadeOrder;
 }
 
 //definitions for Airlift class - consructor, destructor, play, print
@@ -86,14 +89,15 @@ Card* AirliftCard::copy() const {
     return new AirliftCard(*this);
 }
 
-Order* AirliftCard::play(Hand& hand, Deck& deck) {
+Order* AirliftCard::play(Hand& hand, Deck& deck, Player* player) {
     std::cout << "Airlift card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    return new Airlift();
+    Order* airliftOrder = player->issueAirliftOrder();
+    return airliftOrder;
 }
 
 //definitions for Diplomacy class - consructor, destructor, play, print
@@ -103,14 +107,15 @@ Card* DiplomacyCard::copy() const {
     return new DiplomacyCard(*this);
 }
 
-Order* DiplomacyCard::play(Hand& hand, Deck& deck) {
+Order* DiplomacyCard::play(Hand& hand, Deck& deck, Player* player) {
     std::cout << "Diplomacy card played" << std::endl;
     //returns to deck
     deck.returnCard(this);
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-	return new Negotiate();
+    Order* negociatetOrder = player->issueNegotiateOrder();
+	return negociatetOrder;
 }
 
 //Deck Class constructors and destructors
