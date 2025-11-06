@@ -106,7 +106,6 @@ public:
     void startupPhase( std::istream& in=std::cin,std::ostream& out=std::cout);
 
     const std::vector<Player*>* getPlayers() const { return players; }
-    const std::unordered_map<Player*, int>* getReinforcementPool() const { return reinforcementPool; }
 
     friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
 

@@ -248,9 +248,6 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
     if (map) delete map;
     map = other.map ? new Map(*other.map) : nullptr;
 
-	if(deck) delete deck;
-	deck=other.deck ? new Deck(*other.deck):nullptr;
-
     if (mapLoader) delete mapLoader;
     mapLoader = new MapLoader(*other.mapLoader);
 
