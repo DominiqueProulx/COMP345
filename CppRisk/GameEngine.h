@@ -1,9 +1,9 @@
 #pragma once
 #ifndef GAMEENGINE_H
 #define GAMEENGINE_H
-
 #include <memory>
 #include <string>
+#include <vector>  
 #include <unordered_map>
 #include <vector>
 #include <iostream>
@@ -13,6 +13,7 @@ class Deck;
 class Territory;
 class Map;
 class MapLoader;
+
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
