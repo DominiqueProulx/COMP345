@@ -252,6 +252,16 @@ std::vector<Territory*>* Player::toDefend() {
         std::cout << "Enter the number of the territory to add to defend list (0 to finish): ";
         int choice;
         std::cin >> choice;
+
+        if (std::cin.fail()) {
+            std::cin.clear(); // clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cout << "Invalid input. Please enter a number." << std::endl;
+            continue; // go back to start of loop
+        }
+
+
+
         if (choice == 0) {
             doneAdding = true;
         }
@@ -301,9 +311,18 @@ Territory* Player::choseFromToAttack() {
         index++;
     }
     int choice;
+
+
+
     bool validInputto = false;
     while (!validInputto) {
         std::cin >> choice;
+        if (std::cin.fail()) {
+            std::cin.clear(); // clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cout << "Invalid input. Please enter a number." << std::endl;
+            continue; // go back to start of loop
+        }
         if (choice < 1 || choice > territoriesToAttack->size()) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
@@ -368,8 +387,14 @@ std::vector<Territory*>* Player::toAttack() {
 }
 
 void Player::resetDefendAndAttack() {
-    if (territoriesToDefend) territoriesToDefend->clear();
-    if (territoriesToAttack) territoriesToAttack->clear();
+    if (territoriesToDefend) {
+        delete territoriesToDefend;
+        territoriesToDefend = nullptr;
+    }
+    if (territoriesToAttack) {
+        delete territoriesToAttack;
+        territoriesToAttack = nullptr;
+    }
 }
 Order* Player::issueAdvanceOrder() {
 	std::cout << "You want to advance armies to defend your own territories or to attack a neighboring territory, press d for defend and a for attack" << std::endl;
@@ -418,7 +443,7 @@ Order* Player::issueAdvanceOrder() {
 			// chose the territory to move armies from
             Territory* fromTerritory = nullptr;
             Territory* toTerritory = nullptr;
-			while (fromTerritory == nullptr && fromTerritory->getNumberOfArmies() < 1) {
+			while (fromTerritory == nullptr || fromTerritory->getNumberOfArmies() < 1) {
 
 				std::cout << "Choose the territory you want to move armies from: " << std::endl;
 				fromTerritory = choseFromToDefend();
@@ -576,6 +601,8 @@ Order* Player::orderFactory(Player::OrderType type,
     // issueOrder()
 void Player::issueOrder() {
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase
+    
+
     if (territoriesToDefend == nullptr || territoriesToAttack == nullptr) {
         territoriesToDefend = new std::vector<Territory*>();
         territoriesToAttack = new std::vector<Territory*>();
@@ -588,13 +615,14 @@ void Player::issueOrder() {
 
     std::cout << "\nHere are the possible orders you can issue" << std::endl;
     // Only deploy order is available if the reinforcement pool is not empty
-    if (*reinforcementPool != 0) {
+    
+    if (  *reinforcementPool != 0) {
         std::cout << "\nYour reinforcement pool is not empty, please Deploy your armies first" << std::endl;
-        std::cout << *reinforcementPool << " armies need to be deployed." << std::endl;
+        std::cout << (*reinforcementPool) << " armies need to be deployed." << std::endl;
         // Deploy order to assign reinforcements to owned territories
         Order* deployOrder =  issueDeployOrder();
         if (deployOrder != nullptr) { (*orderslist).add(deployOrder); }
-       
+       //TODO:  add that you can only deploy on first turn , since everything else needs armies on the territories. 
     } else {
        
         
@@ -643,8 +671,11 @@ Order* Player::getNextOrderToExecute(){
     else {
         std::cout << "Getting next order to execute." << std::endl;
         Order* nextOrder = orderslist->getOrder(0);
-        orderslist->remove(0); //TODO: ensure that it is my resposnability to remove this
         return nextOrder;
 	}
 	
+}
+void Player::removeExecutedOrder() {
+    orderslist->remove(0);
+
 }

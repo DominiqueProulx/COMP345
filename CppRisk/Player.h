@@ -69,6 +69,7 @@ public:
     std::string getName() const;
 
     Order* getNextOrderToExecute();
+    void removeExecutedOrder();
     void resetDefendAndAttack();
     Territory* choseFromToDefend();
     Territory* choseFromToAttack();
@@ -107,6 +108,7 @@ private:
     Hand* playerHand;
     OrdersList* orderslist;
     Deck* deck;
+
     
     // Assignment 2 additions
     int* reinforcementPool;

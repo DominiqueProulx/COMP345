@@ -362,9 +362,22 @@ void GameEngine::reinforcementPhase() {
 		int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
 		std::cout << "Player " << player->getName() << " receives " << reinforcements << " reinforcements." << std::endl;
 		player->addToReinforcementPool(reinforcements);
-		//add continent bonus 
-		//TODO : implement continent bonus calculation
-
+		// continent bonuses
+	/*	for (Continent* c : map->getContinents()) {   //TODO :FLAG: re-enable when map is integrated 
+			bool ownsAll = true;
+			for (Territory* t : c->getTerritories()) {
+				if (t->getOwner() != p) {
+					ownsAll = false;
+					break;
+				}
+			}
+			if (ownsAll) {
+				reinforcements += c->getBonus();
+			}
+		}*/
+		player->addToReinforcementPool(reinforcements);
+		
+		
 
 	}
 }
@@ -426,8 +439,9 @@ void GameEngine::executeOrdersPhase() {
 
 			Order* nextOrder = player->getNextOrderToExecute();
 			if (nextOrder != nullptr) {
-				std::cout << "Player " << player->getName() << " is executing order: " << *nextOrder << std::endl;
+				std::cout << "Player " << player->getName() << " is executing order" << std::endl;
 				nextOrder->execute();
+				player->removeExecutedOrder();
 			}
 			else {
 				playersDoneExecuting[player] = true;
