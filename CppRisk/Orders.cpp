@@ -121,15 +121,19 @@ bool Deploy::validate() {
         return false;
     }
     
-    if (player->getReinforcementPool() < *armiesToDeploy) {
+    // Calculate available armies = pool - already committed armies
+    int availableArmies = player->getReinforcementPool() - player->getPendingDeployments();
+    
+    if (availableArmies < *armiesToDeploy) {
         std::cout << "Deploy INVALID: Not enough reinforcements (have " 
-                  << player->getReinforcementPool() << ", need " 
+                  << availableArmies << " available, need " 
                   << *armiesToDeploy << ")" << std::endl;
         return false;
     }
     
     std::cout << "Deploy VALID: Deploying " << *armiesToDeploy 
-              << " armies to " << targetTerritory->getName() << std::endl;
+              << " armies to " << targetTerritory->getName() 
+              << " (available: " << availableArmies << ")" << std::endl;
     return true;
 }
 
@@ -146,7 +150,13 @@ void Deploy::execute() {
         }
         
         // Assignment 2 execution
+        // Track this deployment as committed
+        player->addPendingDeployment(*armiesToDeploy);
+
+        
         player->setReinforcementPool(player->getReinforcementPool() - *armiesToDeploy);
+        
+        // Add armies to territory
         targetTerritory->setNumberOfArmies(
             targetTerritory->getNumberOfArmies() + *armiesToDeploy
         );

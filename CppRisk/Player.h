@@ -55,6 +55,11 @@ public:
     void clearNegotiations();
     bool hasNegotiationWith(Player* player) const;
     std::string getName() const;
+    
+    // Pending deployments tracking (for issuing phase)
+    int getPendingDeployments() const;
+    void addPendingDeployment(int armies);
+    void clearPendingDeployments();
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -77,6 +82,7 @@ private:
     
     // Assignment 2 additions
     int* reinforcementPool;
+    int* pendingDeployments;  // Tracks armies committed during issuing phase
     bool* conqueredTerritoryThisTurn;
     std::set<Player*>* negotiatedPlayers;
 };

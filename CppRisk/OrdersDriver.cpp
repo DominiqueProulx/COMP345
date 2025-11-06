@@ -281,6 +281,12 @@ void testOrderExecution() {
     cout << "✓ Requirement 6: All orders can be executed" << endl;
     cout << "==========================================" << endl << endl;
     
+
+    // Clear pending deployments at turn end
+    player1->clearPendingDeployments();
+    player2->clearPendingDeployments();
+    neutralPlayer->clearPendingDeployments();
+
     // Cleanup
     delete deploy1;
     delete deploy2;
