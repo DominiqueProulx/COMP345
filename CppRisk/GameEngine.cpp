@@ -546,7 +546,7 @@ bool GameEngine::cmdGameStart(std::ostream& out)
 
     fairDistributeTerritories(out);
     randomizePlayerOrder(out);
-    //grant50Reinforcements(out); #NEED TO FIX WITH CORRECT METHOD
+    grant50Reinforcements(out);
     initialCardDraws(out);
 
     out << "GameStart complete.\n";
@@ -596,7 +596,15 @@ void GameEngine::randomizePlayerOrder(std::ostream& out)
     }
 }
 
+void GameEngine::grant50Reinforcements(std::ostream& out)
+{
+	if (!players) { out << "No players to grant reinforcements.\n"; return; }
 
+	for (auto* p : *players) {
+		p->setReinforcementPool(50);
+	}
+	out << "Granted each player 50 reinforcement armies.\n";
+}
 
 void GameEngine::initialCardDraws(std::ostream& out)
 {
