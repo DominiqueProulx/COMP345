@@ -84,6 +84,11 @@ public:
 	void changeGameState(const std::string& cmd);
 	bool isActiveStateFinal() const;
 
+	//bea added helper functions for command processing
+	bool isCommandValid(const std::string& cmd) const;
+	std::string getCurrentStateName() const;
+	std::string getParentStateName() const;
+
 };
 
 #endif
