@@ -17,26 +17,23 @@ Subject::Subject()
 // Subject does NOT have an ownership relationship with its Observers, it does not clear the Observer memory.
 Subject::~Subject()
 {
-	if (observers)
-	{
-		delete observers;
-	}
+	if (observers) delete observers;
 }
 
-// Does NOT copy the Subject object, instead initializes it with an empty observers vector.
-// As Subjects do not own their observers, the observers vector CANNOT be copied over
+// Copies a subject subject by shallow copying the observers array.
+// As Subjects do not own their observers, the observers vector CANNOT be deep copied.
 Subject::Subject(const Subject& other)
 {
-	observers = new std::vector<Observer*>{};
+	observers = new std::vector<Observer*>{ *other.observers };
 }
 
-// Copy-assigns a Subject instance, the observers vector is not carried over.
+// Copy-assigns a Subject instance, the observers vector is shallow copied.
 Subject& Subject::operator=(const Subject& other)
 {
 	if (this == &other) return *this;
 
 	delete observers;
-	observers = new std::vector<Observer*>{};
+	observers = new std::vector<Observer*>{ *other.observers };
 
 	return *this;
 }

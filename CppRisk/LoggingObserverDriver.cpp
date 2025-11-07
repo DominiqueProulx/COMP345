@@ -2,6 +2,7 @@
 #include <fstream>
 #include "GameEngine.h"
 #include "Orders.h"
+#include "CommandProcessing.h"
 
 // Tests that the LogObserver MVC pattern is implemented correctly by demonstrating that certain actions performed by
 // ILoggable and Subject objects are recorded in gamelog.txt.
@@ -18,39 +19,54 @@ void testLoggingObserver()
 
 	LogObserver obConsoleView{};
 
-	// !!!!!!!!!!!!!!!!!!!
-	// TBA - CommandProcessor and Command logic, awaiting Pt. 1 integration
-	// !!!!!!!!!!!!!!!!!!!
+	// 1 - log Command effect saving
+	Command cmd{ "testcommand" };
 
-	// 1 - log OrderList list changes
+	std::cout << "-- 1. \nAttaching an observer to the Command.\n";
+	cmd.attachObserver(&obConsoleView);
+
+	std::cout << "Executing Command::saveEffect()..." << std::endl;
+	cmd.saveEffect("Test action completed successfully");
+
+	// 2 - log command processor saving command objects
+	CommandProcessor cmdProc{};
+	FileCommandProcessorAdapter fileCmdProc{ "commands.txt" };
+	GameEngine engine{};
+	GameEngine::initializeRiskFSM(engine);
+
+	std::cout << "\n--2. \nAttaching an observer to the CommandProcessor and FileCommandProcessorAdapter.\n";
+	cmdProc.attachObserver(&obConsoleView);
+	fileCmdProc.attachObserver(&obConsoleView);
+
+	std::cout << "Executing CommandProcessor::saveCommand()...\n";
+	cmdProc.getCommand(engine); // saveCommand is called implicitly through this function
+	std::cout << "Excecuting FileCommandProcessorAdapter::saveCommand()..." << std::endl;
+	fileCmdProc.readCommand(engine); // same here
+
+	// 3 - log OrderList list changes
 	OrdersList olist{};
-	Deploy deployOrder{};
-	Order* orderPtr{ &deployOrder };
+	Order* orderPtr{ new Deploy() };
 
-	std::cout << "-- 1.\nAttaching an observer to the OrderList.\n";
+	std::cout << "\n-- 3.\nAttaching an observer to the OrderList.\n";
 	olist.attachObserver(&obConsoleView);
 
 	std::cout << "Executing OrdersList::add()..." << std::endl;
 	olist.add(orderPtr);
 
-	// 2 - log Order execution effect
+	// 4 - log Order execution effect
 
-	std::cout << "\n-- 2.\nAttaching an observer to the DeployOrder.\n";
-	deployOrder.attachObserver(&obConsoleView);
+	std::cout << "\n-- 4.\nAttaching an observer to the DeployOrder.\n";
+	orderPtr->attachObserver(&obConsoleView);
 
 	std::cout << "Executing Order::execute()..." << std::endl;
-	deployOrder.execute();
+	orderPtr->execute();
 
-	// 3 - log GameEngine state changes
-	GameEngine engine{};
-	GameEngine::initializeRiskFSM(engine);
-
-	std::cout << "\n-- 3.\nAttaching an observer to the GameEngine.\n";
+	// 5 - log GameEngine state changes
+	std::cout << "\n-- 5.\nAttaching an observer to the GameEngine.\n";
 	engine.attachObserver(&obConsoleView);
 
-	std::cout << "Executing GameEngine::changeGameState() twice..." << std::endl;
+	std::cout << "Executing GameEngine::changeGameState()..." << std::endl;
 	engine.changeGameState("loadmap");
-	engine.changeGameState("validatemap");
 
-	std::cout << "\nAll 3 logged functions have been called. Please check gamelog.txt to see the results." << std::endl;
+	std::cout << "\nAll 5 logged functions have been called. Please check gamelog.txt to see the results." << std::endl;
 }

@@ -321,7 +321,8 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
 // Returns a log string describing the GameEngine's current state.
 std::string GameEngine::stringToLog() const
 {
-	return "[ENGINE] Transitioned to new state: " + activeParentState->getName() + "/" + activeState->getName() + ".";
+	return "[ENGINE] Transitioned to new state: { "
+		+ activeParentState->getName() + "/" + activeState->getName() + " }.";
 }
 
 // Returns this GameEngine's active substate.
