@@ -1,9 +1,9 @@
 #pragma once
 #ifndef GAMEENGINE_H
 #define GAMEENGINE_H
-
 #include <memory>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include "LoggingObserver.h"
 
@@ -87,6 +87,11 @@ public:
 	std::string readCommand() const;
 	void changeGameState(const std::string& cmd);
 	bool isActiveStateFinal() const;
+
+	//bea added helper functions for command processing
+	bool isCommandValid(const std::string& cmd) const;
+	std::string getCurrentStateName() const;
+	std::string getParentStateName() const;
 
 };
 

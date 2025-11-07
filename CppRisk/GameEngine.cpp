@@ -387,3 +387,20 @@ bool GameEngine::isActiveStateFinal() const
 {
 	return activeState->getTransitions().size() == 0;
 }
+
+//helper commands for validate function in command processor
+//If the command is allowed in the current state, it returns the State of the next state
+bool GameEngine::isCommandValid(const std::string& cmd) const {
+	if (!activeState) return false;
+	return (activeState->resolveTransition(cmd) != nullptr);
+}
+
+std::string GameEngine::getCurrentStateName() const {
+	if (!activeState) return "Unknown";
+	return activeState->getName();
+}
+
+std::string GameEngine::getParentStateName() const {
+	if (!activeParentState) return "Unknown";
+	return activeParentState->getName();
+}
