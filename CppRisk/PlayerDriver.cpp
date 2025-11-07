@@ -140,7 +140,7 @@ void testPlayers() {
 	}
 
 	std::cout << "\nHere is the list of all the orders that are part of the player's order list: " << std::endl;
-	std::cout << *(player1.getOrdersList()) << std::endl;
+	std::cout << player1.getOrdersList() << std::endl;
 
 	delete map; // all territories will also be deleted
 

@@ -1,25 +1,24 @@
-#include <iostream>
-#include <vector>
-#include <string>
 #include "CommandProcessing.h"
-#include "GameEngine.h"
-#include <sstream> 
+#include <sstream>
 #include <fstream>
 using namespace std;
 
 //Command Class
 //
 //constructor
-Command::Command(const string& command) 
-	: command(make_unique<string>(command)), 
-	effect(make_unique<string>("")), 
-	valid(make_unique<bool>(false)) 
-{};
+Command::Command(const string& command)
+	: command(make_unique<string>(command)),
+	effect(make_unique<string>("")),
+	valid(make_unique<bool>(false))
+{
+};
 //copy constructor
-Command::Command(const Command& other) 
-	: command(make_unique<string>(*other.command)), 
-	effect(make_unique<string>(*other.effect)), 
-	valid(make_unique<bool>(*other.valid)) {};
+Command::Command(const Command& other)
+	: command(make_unique<string>(*other.command)),
+	effect(make_unique<string>(*other.effect)),
+	valid(make_unique<bool>(*other.valid))
+{
+};
 //assignment operator
 Command& Command::operator=(const Command& other) {
 	if (this != &other) {
@@ -29,7 +28,6 @@ Command& Command::operator=(const Command& other) {
 	}
 	return *this;
 }
-
 
 //assignment operator overload for printing
 ostream& operator<<(ostream& os, const Command& cmd) {
@@ -62,7 +60,7 @@ void Command::setValid(bool v) {
 //constructor
 CommandProcessor::CommandProcessor() : commands(make_unique<vector<unique_ptr<Command>>>()) {}
 //copy constructor
-CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(make_unique<vector<unique_ptr<Command>>>()){
+CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(make_unique<vector<unique_ptr<Command>>>()) {
 	for (const auto& cmd : *other.commands) {
 		commands->push_back(make_unique<Command>(*cmd));
 	}
@@ -121,11 +119,11 @@ bool CommandProcessor::validate(Command& command, GameEngine& engine) {
 	// Special case: 'quit' is always valid and doesn't need the engine
 	if (commandBase == "quit") {
 		command.saveEffect("Exiting...");
-		return true; 
+		return true;
 	}
 
-	// Since State is private, use helper functions to determine validity 
-	//"isCommandValid()" checks if the command is valid in the current state from the engine. Couldn't read state from here directly 
+	// Since State is private, use helper functions to determine validity
+	//"isCommandValid()" checks if the command is valid in the current state from the engine. Couldn't read state from here directly
 	// due to encapsulation
 	if (engine.isCommandValid(commandBase)) {
 		command.setValid(true);
