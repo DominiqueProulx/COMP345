@@ -83,54 +83,43 @@ void testGameStates()
 	}
 }
 
-//TODO: FIX transition to REINFORCMENT + WIN
 void testStartupPhase() {
     GameEngine engine;
 
-    // adding states to recreate the state diagram
+    // Parents
     GameState startup{ engine.createState("startup", true) };
     GameState play   { engine.createState("play",    true) };
     GameState end    { engine.createState("end",     true) };
     engine.addParentStates({ startup, play, end });
 
-   // STARTUP
+    // STARTUP substates
     GameState start        { engine.createState("start",         false) };
     GameState mapLoaded    { engine.createState("map loaded",    false) };
     GameState mapValidated { engine.createState("map validated", false) };
     GameState playersAdded { engine.createState("players added", false) };
+    GameState win          { engine.createState("win",           false) };
     engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
 
-    
+
     engine.addChildTransition(start,        "loadmap",     mapLoaded);
     engine.addChildTransition(mapLoaded,    "loadmap",     mapLoaded);
     engine.addChildTransition(mapLoaded,    "validatemap", mapValidated);
     engine.addChildTransition(mapValidated, "addplayer",   playersAdded);
     engine.addChildTransition(playersAdded, "addplayer",   playersAdded);
-
-    // PLAY
-    GameState assignReinf { engine.createState("assignreinforcement", false) };
-    GameState win         { engine.createState("win",                 false) };
-    engine.addChildStates(play, { assignReinf, win });
-
-
-    engine.addChildTransition(playersAdded, "gamestart", assignReinf);
-
-    
-    engine.addChildTransition(assignReinf, "win", win);
+    // FLAG: playersAdded --gamestart--> win
+    engine.addChildTransition(playersAdded, "gamestart",   win);
 
 
     GameState quitFinal { engine.createState("quit", false) };
     engine.addChildStates(end, { quitFinal });
 
 
-    engine.addChildTransition(win, "replay", startup->getInitialSubstatePtr());
+    engine.addChildTransition(win, "replay", startup->getInitialSubstatePtr()); // back to "start"
     engine.addChildTransition(win, "quit",   quitFinal);
+
 
     engine.setActiveParentState(startup);
     engine.setActiveState(startup->getInitialSubstatePtr());
 
     engine.startupPhase(std::cin, std::cout);
-
-
-    
 }

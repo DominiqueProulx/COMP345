@@ -105,6 +105,8 @@ public:
 
     void startupPhase( std::istream& in=std::cin,std::ostream& out=std::cout);
 
+	void processStartupCommand(const std::string& full, std::ostream& out);
+	
     const std::vector<Player*>* getPlayers() const { return players; }
 
     friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);

@@ -409,10 +409,10 @@ std::string GameEngine::getParentStateName() const {
 	return activeParentState->getName();
 }
 
-
-
 void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
-    out << "=== Testing Command Line Processor ===" << endl;
+    using std::numeric_limits;
+    using std::streamsize;
+
     out << "Choose to read from Command Line (1) or File (2) or Quit (0): ";
 
     int choice;
@@ -422,113 +422,119 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
         out << "Invalid input.\n";
         return;
     }
-    in.ignore(numeric_limits<streamsize>::max(), '\n'); // flush newline
+    in.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    unique_ptr<CommandProcessor> processor;
 
     if (choice == 1) {
-        out << "\n[Using Command Line Input]\n";
-        processor = make_unique<CommandProcessor>();
-    }
-    else if (choice == 2) {
-        out << "Enter file name (e.g., commands.txt): ";
-        string filename;
-        in >> filename;
-        in.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        try {
-            out << "\n[Using File Input: " << filename << "]\n";
-            processor = make_unique<FileCommandProcessorAdapter>(filename);
-        } catch (const exception& e) {
-            out << "Error: " << e.what() << '\n';
-            return;
-        }
-    }
-    else if (choice == 0) {
-        out << "Exiting Command Processor Test." << endl;
-        return;
-    }
-    else {
-        out << "Invalid choice.\n";
-        return;
-    }
-
-    // === STARTUP PHASE ===
-    out << "=== STARTUP PHASE ===\n"
+        
+        out << "=== STARTUP PHASE ===\n"
         << "Commands:\n"
         << "  loadmap <filename>\n"
         << "  validatemap\n"
         << "  addplayer <playername>\n"
         << "  gamestart\n"
-        << "  replay\n"
-        << "  quit\n";
+        << "  replay \n"
+        << "  quit   \n";
 
-    for (;;) {
-        unique_ptr<Command> cmdObj(processor->getCommand(*this));
-        if (!cmdObj) {
-            out << "No more commands (input ended).\n";
-            break;
+        CommandProcessor cp;
+        for (;;) {
+            Command* c = cp.getCommand(*this);
+            if (!c) { out << "No more commands.\n"; break; }
+            processStartupCommand(c->getCommandString(), out);
+            if (getActiveStatePtr() && getActiveStatePtr()->getName() == "quit") break;
         }
-
-        const string full = cmdObj->getCommandString();
-        istringstream ss(full);
-        string verb, arg;
-        ss >> verb;
-        getline(ss, arg);
-        if (!arg.empty() && arg.front() == ' ') arg.erase(0, 1);
-
-        if (verb.empty()) { out << "Invalid command.\n"; continue; }
-
-        if (verb == "replay") {
-            if (!isCommandValid("replay")) { out << "State invalid.\n"; continue; }
-            out << "Replaying... transitioning to start.\n";
-            changeGameState("replay");
-            continue;
-        }
-
-        if (verb == "quit") {
-            if (!isCommandValid("quit")) { out << "State invalid.\n"; continue; }
-            out << "Exiting program.\n";
-            changeGameState("quit");
-            return;
-        }
-
-        if (verb == "loadmap") {
-            if (!isCommandValid("loadmap")) { out << "State invalid.\n"; continue; }
-            if (arg.empty()) { out << "Enter valid file name\n"; continue; }
-            if (cmdLoadMap(arg, out)) changeGameState("loadmap");
-            continue;
-        }
-
-        if (verb == "validatemap") {
-            if (!isCommandValid("validatemap")) { out << "State invalid.\n"; continue; }
-            if (cmdValidateMap(out)) changeGameState("validatemap");
-            continue;
-        }
-
-        if (verb == "addplayer") {
-            if (!isCommandValid("addplayer")) { out << "State invalid.\n"; continue; }
-            if (arg.empty()) { out << "Usage: addplayer <playername>\n"; continue; }
-            if (cmdAddPlayer(arg, out)) 
-			changeGameState("addplayer");
-            continue;
-        }
-
-        if (verb == "gamestart") {
-            if (!isCommandValid("gamestart")) { out << "State invalid.\n"; continue; }
-            if (!players || players->size() < 2 || players->size() > 6) {
-                out << "Need 2–6 players before 'gamestart'.\n"; continue;
-            }
-            if (cmdGameStart(out)) {
-                changeGameState("win");
-                out << "SKIP to win phase...\n";
-            }
-            continue;
-        }
-
-        out << "Invalid command.\n";
+        return;
     }
+
+    if (choice == 2) {
+    
+        out << "Enter file name (e.g., commands.txt): ";
+        std::string filename;
+        in >> filename;
+        in.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        try {
+            FileCommandProcessorAdapter f(filename);
+            for (;;) {
+                Command* raw = f.readCommand(*this);   // new Command or nullptr at EOF
+                if (!raw) { out << "No more commands (input ended).\n"; break; }
+                processStartupCommand(raw->getCommandString(), out);
+                delete raw; // avoid leak of the temporary created by adapter
+                if (getActiveStatePtr() && getActiveStatePtr()->getName() == "quit") break;
+            }
+        } catch (const std::exception& e) {
+            out << "Error: " << e.what() << '\n';
+        }
+        return;
+    }
+
+    if (choice == 0) {
+        out << "Exiting Command Processor Test.\n";
+        return;
+    }
+
+    out << "Invalid choice.\n";
 }
+
+
+void GameEngine::processStartupCommand(const std::string& full, std::ostream& out) {
+    std::istringstream ss(full);
+    std::string verb, arg;
+    ss >> verb;
+    std::getline(ss, arg);
+    if (!arg.empty() && arg.front() == ' ') arg.erase(0, 1);
+
+    if (verb.empty()) { out << "Invalid command.\n"; return; }
+
+    
+    if (verb == "replay") {
+        if (!isCommandValid("replay")) { out << "State invalid.\n"; return; }
+        out << "Replaying... transitioning to start.\n";
+        changeGameState("replay");
+        return;
+    }
+    if (verb == "quit") {
+        if (!isCommandValid("quit")) { out << "State invalid.\n"; return; }
+        out << "Exiting program.\n";
+        changeGameState("quit");
+        return;
+    }
+
+    
+    if (verb == "loadmap") {
+        if (!isCommandValid("loadmap")) { out << "State invalid.\n"; return; }
+        if (arg.empty()) { out << "Enter valid file name\n"; return; }
+        if (cmdLoadMap(arg, out)) changeGameState("loadmap");
+        return;
+    }
+
+    if (verb == "validatemap") {
+        if (!isCommandValid("validatemap")) { out << "State invalid.\n"; return; }
+        if (cmdValidateMap(out)) changeGameState("validatemap");
+        return;
+    }
+
+    if (verb == "addplayer") {
+        if (!isCommandValid("addplayer")) { out << "State invalid.\n"; return; }
+        if (arg.empty()) { out << "Usage: addplayer <playername>\n"; return; }
+        if (cmdAddPlayer(arg, out)) changeGameState("addplayer");
+        return;
+    }
+
+    if (verb == "gamestart") {
+        if (!isCommandValid("gamestart")) { out << "State invalid.\n"; return; }
+        if (!players || players->size() < 2 || players->size() > 6) {
+            out << "Need 2–6 players before 'gamestart'.\n"; return;
+        }
+        if (cmdGameStart(out)) {
+            changeGameState("gamestart");
+        }
+        return;
+    }
+
+    out << "Invalid command.\n";
+}
+
 
 
 
@@ -612,6 +618,10 @@ void GameEngine::fairDistributeTerritories(std::ostream& out)
     }
 
     out << "Distributed " << ts.size() << " territories among " << players->size() << " players.\n";
+
+        for (auto* p : *players) {
+            cout << *p;
+}
 }
 
 

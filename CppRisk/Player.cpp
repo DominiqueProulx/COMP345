@@ -183,7 +183,7 @@ std::string Player::getName() const {
 std::ostream& operator<<(std::ostream& os, const Player& player) {
     os << "\nPlayer ID : " << *(player.playerID)
        << "\nPlayer Color : " << *(player.playerColor)
-       << "\nPlayer Territories: " << std::endl;
+        << "\nPlayer Territories: " << std::endl;
 
     for (Territory* t : *(player.territoriesOwned)) {
         std::cout << *t << std::endl;
