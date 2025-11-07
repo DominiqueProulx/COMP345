@@ -500,10 +500,10 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
         try {
             FileCommandProcessorAdapter f(filename);
             for (;;) {
-                Command* raw = f.readCommand(*this);   // new Command or nullptr at EOF
+                Command* raw = f.readCommand(*this);
                 if (!raw) { out << "No more commands (input ended).\n"; break; }
                 processStartupCommand(raw->getCommandString(), out);
-                delete raw; // avoid leak of the temporary created by adapter
+                delete raw;
                 if (getActiveStatePtr() && getActiveStatePtr()->getName() == "quit") break;
             }
         } catch (const std::exception& e) {
@@ -672,12 +672,12 @@ void GameEngine::fairDistributeTerritories(std::ostream& out)
 void GameEngine::randomizePlayerOrder(std::ostream& out)
 {
     if (!players) { out << "No players list.\n"; return; }
-    std::mt19937 rng(42); // fixed seed for reproducible order
+    std::mt19937 rng(42); /
     std::shuffle(players->begin(), players->end(), rng);
 
     out << "Randomized Play Order (Seed=42):\n";
     for (std::size_t i = 0; i < players->size(); ++i) {
-        const std::string* label = (*players)[i]->getColor(); // using color as name/label
+        const std::string* label = (*players)[i]->getColor(); // using color as name
         out << "  " << (i + 1) << ") " << (label ? *label : std::string{"(unnamed)"}) << "\n";
     }
 }
@@ -698,7 +698,6 @@ void GameEngine::initialCardDraws(std::ostream& out)
     if (!players) { out << "No players to draw.\n"; return; }
 
     for (auto* p : *players) {
-        // Ensure the player has a Hand*
         p->getHand();
         deck->draw(p->getHand());
         deck->draw(p->getHand());
