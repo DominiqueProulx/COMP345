@@ -3,7 +3,7 @@
 #define GAMEENGINE_H
 #include <memory>
 #include <string>
-#include <vector>  
+#include <vector>
 #include <unordered_map>
 #include <vector>
 #include <iostream>
@@ -13,7 +13,6 @@ class Deck;
 class Territory;
 class Map;
 class MapLoader;
-
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
@@ -87,6 +86,7 @@ public:
 	void addParentStates(const std::initializer_list<State*>& states);
 	void addChildStates(State* parent, const std::initializer_list<State*>& states);
 	void addChildTransition(State* from, const std::string& cmd, State* to);
+	static void initializeRiskFSM(GameEngine& engine);
 
 	// accessors
 	State* getActiveStatePtr() const;
