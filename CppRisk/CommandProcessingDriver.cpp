@@ -14,13 +14,12 @@
 using namespace std;
 
 // Helper function to trim whitespace from the start of a string
-std::string ltrim(const std::string& s) {
+string ltrim(const std::string& s) {
     size_t start = s.find_first_not_of(" \t\n\r\f\v");
     return (start == std::string::npos) ? "" : s.substr(start);
 }
 
 // --- Stub Functions for Main Play Loop ---
-// This is the stub for the "assigncountries" command.
 bool startGame(Map* map, vector<Player*>& players) {
     std::cout << " > EXECUTING: Assigning countries..." << std::endl;
     if (!map) {
@@ -90,7 +89,7 @@ void setupGameStateMachine(GameEngine& engine)
 }
 
 
-void testCommandProcessor() {
+void testCommandLineProcessor() {
     //setup engine and processor
 	GameEngine engine;
 	CommandProcessor processor;
@@ -103,14 +102,13 @@ void testCommandProcessor() {
     Deck* gameDeck = new Deck();
     gameDeck->initializeDeck();
 
-    // --- GAME LOOP (Test Driver) ---
-    // This loop waits for user input.
+    // GAME LOOP
     while (true) {
-        std::cout << "\n------------------------------------" << std::endl;
-        std::cout << "Current State: " << engine.getActiveStatePtr()->getName() << std::endl;
+        cout << "\n------------------------------------" << std::endl;
+        cout << "Current State: " << engine.getActiveStatePtr()->getName() << std::endl;
 
-        // --- VALIDATION PHASE ---
-        // getCommand() calls readCommand() (which gets input) and validate()
+        //  VALIDATION PHASE 
+        // getCommand() calls readCommand() (which gets input and validate()
         Command* newCommand = processor.getCommand(engine);
 
         string fullCommandStr = newCommand->getCommandString();
@@ -118,13 +116,12 @@ void testCommandProcessor() {
         string argument;
         stringstream ss(fullCommandStr);
         ss >> baseCommand; // Get the first word
-        //get the second word
-        // Use getline to get the REST of the string as the argument**
-        std::getline(ss, argument);
-        // Trim leading whitespace (like the first space) from the argument
+        //get the second word. Use getline to get the REST of the string as the argument
+        getline(ss, argument);
+        // Trim leading whitespace from the argument
         argument = ltrim(argument);
 
-        // Handle 'quit' immediately
+        // Handle 'quit' 
         if (baseCommand == "quit") {
             if (fullCommandStr == "quit") {
                 std::cout << "Exiting program." << std::endl;
@@ -135,23 +132,21 @@ void testCommandProcessor() {
 
         std::cout << "Effect: " << newCommand->getEffect() << std::endl;
 
-        // --- EXECUTION PHASE ---
-        // Check if the validation *passed*
-        bool isValid = (newCommand->getEffect().find("Invalid") == string::npos &&
-            newCommand->getEffect().find("Error") == string::npos);
+        // EXECUTION PHASE 
+        // Check if the validate() passed
+		bool isValid = newCommand->isValid();
 
         if (isValid) {
             bool executionSuccess = false;
 
             // if/else if block to handle each command
             if (baseCommand == "loadmap") {
-                std::cout << " > DEBUG: Attempting to load with argument: [" << argument << "]" << std::endl;
                 string errorMsg;
                 Map* newMap = loader.load(argument, &errorMsg);
                 if (newMap) {
                     delete gameMap; 
                     gameMap = newMap;
-                    std::cout << " > SUCCESS: Map '" << gameMap->getName() << "' loaded." << std::endl;
+                    cout << " > SUCCESS: Map loaded." << std::endl;
                     executionSuccess = true;
                 }
                 else {
@@ -195,14 +190,14 @@ void testCommandProcessor() {
             }
 
             else if (baseCommand == "issueorder") {
-                executionSuccess = true; // valid command, allow state change
+                executionSuccess = true; 
             }
             else if (baseCommand == "endexecorders") {
                 executionSuccess = true;
             }
 
             else if (baseCommand == "issueordersend") {
-                executionSuccess = true; // valid command, allow state change
+                executionSuccess = true; 
             }
             else if (baseCommand == "execorder") {
                 executionSuccess = true;
@@ -213,12 +208,15 @@ void testCommandProcessor() {
             }
 
             else if (baseCommand == "replay") {
-                executionSuccess = true; // Simple state change
-                // You would also reset the game state (delete players, map, etc.)
+                executionSuccess = true; 
+                // reset the game state (delete players, map, etc.)
                 std::cout << " > ACTION: Resetting game to 'start' state." << std::endl;
                 delete gameMap;
                 gameMap = nullptr;
-                for (Player* p : players) { delete p; }
+                for (Player* p : players) { 
+                    delete p; 
+                    p = nullptr; 
+                }
                 players.clear();
                 // Also reset the deck
                 delete gameDeck;
@@ -226,7 +224,7 @@ void testCommandProcessor() {
                 gameDeck->initializeDeck();
             }
 
-            // If the specific action was successful, change the game state
+            // change the game state
             if (executionSuccess) {
                 engine.changeGameState(baseCommand);
             }
@@ -239,17 +237,186 @@ void testCommandProcessor() {
 		newCommand = nullptr;
     }
 
-    // --- CLEANUP ---
+    // CLEANUP
     delete gameMap;
-    gameMap = nullptr;
-
-    for (Player* p : players) {
-        delete p;
-    }
+    for (Player* p : players) delete p;
+    delete gameDeck;
     players.clear();
 
-    // Delete the shared deck
+}
+
+void testFileCommandProcessor(const std::string& filename) {
+    // Setup engine and file processor
+    GameEngine engine;
+    FileCommandProcessorAdapter fileProcessor(filename); // your adapter should open file in constructor
+    setupGameStateMachine(engine);
+
+    // Setup game objects
+    MapLoader loader;
+    Map* gameMap = nullptr;
+    std::vector<Player*> players;
+    Deck* gameDeck = new Deck();
+    gameDeck->initializeDeck();
+
+    // GAME LOOP
+    while (true) {
+        std::cout << "\n------------------------------------" << std::endl;
+        std::cout << "Current State: " << engine.getActiveStatePtr()->getName() << std::endl;
+
+        // Get next valid command from file
+        Command* newCommand = fileProcessor.readCommand(engine);
+        if (!newCommand) {
+            std::cout << "End of command file reached." << std::endl;
+            break; // stop at EOF
+        }
+
+        std::string fullCommandStr = newCommand->getCommandString();
+        std::string baseCommand, argument;
+        std::stringstream ss(fullCommandStr);
+        ss >> baseCommand;
+        std::getline(ss, argument);
+        argument = ltrim(argument);
+
+        // Handle quit BEFORE checking validity, since it's not valid in the game engine
+        if (baseCommand == "quit" && fullCommandStr == "quit") {
+            cout << "Quit order. Exiting program." << std::endl;
+            delete newCommand;
+            break;
+        }
+
+        if (!newCommand->isValid()) {
+            std::cout << " > ERROR: Invalid command '" << newCommand->getCommandString() << "'" << std::endl;
+            delete newCommand;
+            continue; // Skip execution and state change
+        }
+
+        std::cout << "Effect: " << newCommand->getEffect() << std::endl;
+
+        // Execute command
+        bool executionSuccess = false;
+
+        if (baseCommand == "loadmap") {
+            std::string errorMsg;
+            Map* newMap = loader.load(argument, &errorMsg);
+            if (newMap) {
+                delete gameMap;
+                gameMap = newMap;
+                std::cout << " > SUCCESS: Map loaded." << std::endl;
+                executionSuccess = true;
+            }
+            else {
+                std::cout << " > ERROR: " << errorMsg << std::endl;
+            }
+        }
+        else if (baseCommand == "validatemap") {
+            if (!gameMap) {
+                std::cout << " > ERROR: No map loaded to validate." << std::endl;
+            }
+            else if (gameMap->validate()) {
+                std::cout << " > SUCCESS: Map is valid." << std::endl;
+                executionSuccess = true;
+            }
+            else {
+                std::cout << " > ERROR: Map is invalid." << std::endl;
+            }
+        }
+        else if (baseCommand == "addplayer") {
+            if (argument.empty()) {
+                std::cout << " > ERROR: No player name provided." << std::endl;
+            }
+            else {
+                Player* newPlayer = new Player(argument, {}, gameDeck);
+                players.push_back(newPlayer);
+                std::cout << " > SUCCESS: Player '" << argument << "' added." << std::endl;
+                executionSuccess = true;
+            }
+        }
+
+        else if (baseCommand == "gamestart") {
+            executionSuccess = startGame(gameMap, players);
+        }
+        else if (baseCommand == "issueorder") {
+            executionSuccess = true;
+        }
+        else if (baseCommand == "endexecorders") {
+            executionSuccess = true;
+        }
+
+        else if (baseCommand == "issueordersend") {
+            executionSuccess = true;
+        }
+        else if (baseCommand == "execorder") {
+            executionSuccess = true;
+        }
+
+        else if (baseCommand == "win") {
+            executionSuccess = true;
+        }
+
+        else if (baseCommand == "replay") {
+            std::cout << " > ACTION: Resetting game to 'start' state." << std::endl;
+            delete gameMap;
+            gameMap = nullptr;
+            for (Player* p : players) delete p;
+            players.clear();
+            delete gameDeck;
+            gameDeck = new Deck();
+            gameDeck->initializeDeck();
+            executionSuccess = true;
+        }
+
+        else {
+            std::cout << " > ERROR: Unrecognized command '" << baseCommand << "'." << std::endl;
+			executionSuccess = false; //prevents transition on invalid command
+        }
+
+        // Update engine state if execution succeeded
+        if (executionSuccess) {
+            engine.changeGameState(baseCommand);
+        }
+        else {
+            std::cout << "--- Action failed. State not changed. ---" << std::endl;
+        }
+
+        delete newCommand;
+        newCommand = nullptr;
+    }
+
+    // Cleanup
+    delete gameMap;
+    for (Player* p : players) delete p;
     delete gameDeck;
-    gameDeck = nullptr;
+    players.clear();
+}
+
+void testCommandProcessor() {
+
+    while (true) {
+        cout << "=== Testing Command Line Processor ===" << endl;
+        cout << "Choose to read from Command Line (1) or File (2) or Quit(0): ";
+        int choice;
+        cin >> choice;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // flush leftover newline
+
+        if (choice == 1) {
+            testCommandLineProcessor();
+        }
+
+        else if (choice == 2) {
+            cout << "Enter file name: ";
+            string filename;
+            cin >> filename;
+            testFileCommandProcessor(filename);
+        }
+
+        else if (choice == 0) {
+            cout << "Exiting Command Processor Test." << endl;
+            break;
+		}
+
+        else {
+            cout << "Invalid choice." << endl;
+        }
+    }
 
 }

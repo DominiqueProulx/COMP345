@@ -10,6 +10,7 @@ class Command {
 protected:
 	unique_ptr<string> command;
 	unique_ptr<string> effect;
+	unique_ptr<bool> valid;
 
 public:
 	Command(const string& command);
@@ -22,6 +23,9 @@ public:
 	string getEffect() const;
 
 	void saveEffect(const string& effect);
+
+	bool isValid() const;
+	void setValid(bool v);
 
 };
 
@@ -36,9 +40,24 @@ public:
 	Command* getCommand(GameEngine& engine);
 	bool validate(Command& command, GameEngine& engine);
 
+	void runFromFile(const string& filename, GameEngine& engine);
+
 protected:
 	Command readCommand(GameEngine& engine);
 	void saveCommand(const Command& command);
 
 	unique_ptr<vector<unique_ptr<Command>>> commands;
+};
+
+class FileCommandProcessorAdapter : public CommandProcessor {
+private:
+	unique_ptr<ifstream> file;
+
+public:
+	FileCommandProcessorAdapter(const string& filename);
+	FileCommandProcessorAdapter(const FileCommandProcessorAdapter& other);
+	FileCommandProcessorAdapter& operator=(const FileCommandProcessorAdapter& other);
+	~FileCommandProcessorAdapter();
+	Command* readCommand(GameEngine& engine);
+	
 };
