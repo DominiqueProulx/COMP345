@@ -672,7 +672,7 @@ void GameEngine::fairDistributeTerritories(std::ostream& out)
 void GameEngine::randomizePlayerOrder(std::ostream& out)
 {
     if (!players) { out << "No players list.\n"; return; }
-    std::mt19937 rng(42); /
+    std::mt19937 rng(42);
     std::shuffle(players->begin(), players->end(), rng);
 
     out << "Randomized Play Order (Seed=42):\n";
