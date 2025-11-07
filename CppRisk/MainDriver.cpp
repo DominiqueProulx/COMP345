@@ -15,8 +15,7 @@
 //void testOrdersLists();
 //void testCards();
 //void testGameStates();
-//void testCommandProcessor();
-void testStartupPhase();
+void testCommandProcessor();
 
 std::string buffer{};
 
@@ -61,3 +60,4 @@ int main(void)
 
 	return 0;
 }
+
