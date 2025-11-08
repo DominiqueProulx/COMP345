@@ -397,7 +397,7 @@ void Player::resetDefendAndAttack() {
     }
 }
 Order* Player::issueAdvanceOrder() {
-	std::cout << "You want to advance armies to defend your own territories or to attack a neighboring territory, press d for defend and a for attack" << std::endl;
+	std::cout << "You want to advance armies to defend your own territories or to attack a neighboring territory,\n press\" d \"for defend and \"a\" for attack. press 0 to cancel." << std::endl;
 	bool validInput = false;
 	char choice;
 	while (!validInput) {
@@ -473,6 +473,10 @@ Order* Player::issueAdvanceOrder() {
 				validInput = true;
                 return advanceOrder;
 			}
+		}
+        else if (choice == '0') {
+            std::cout << "Advance order cancelled." << std::endl;
+            validInput = true;
 		}
 		else {
 			std::cout << "Invalid choice. Please try again." << std::endl;
@@ -622,11 +626,12 @@ void Player::issueOrder() {
         // Deploy order to assign reinforcements to owned territories
         Order* deployOrder =  issueDeployOrder();
         if (deployOrder != nullptr) { (*orderslist).add(deployOrder); }
-       //TODO:  add that you can only deploy on first turn , since everything else needs armies on the territories. 
+      
     } else {
        
         
         std::cout << "\nHere are the possible orders" << std::endl;
+        std::cout << " 0. end turn" << std::endl; 
         std::cout << "1. Advance" << std::endl;
         std::cout << "From the cards available in your hand : \n" << std::endl;
 
@@ -639,18 +644,21 @@ void Player::issueOrder() {
         while (!validInput) {
             std::cout << "Please choose an order number" << std::endl;
             std::cin >> choice;
-            if (choice < 1 || choice > (1 + (*playerHand).getSize())) {
+
+            if (choice < 0 || choice > (1 + (*playerHand).getSize())) {
                 std::cout << "Invalid choice. Please try again." << std::endl;
             } else {
                 validInput = true;
             }
         }
+        if (choice == 0 ) {
 
-        if (choice == 1) {
+            return;
+        }
+        else if (choice == 1) {
 			// Advance order (to defend or attack)
            Order* advanceOrder =  issueAdvanceOrder();
            if (advanceOrder != nullptr) (*orderslist).add(advanceOrder);
-
 		}
 		else {
 			// Issue Order from hand
