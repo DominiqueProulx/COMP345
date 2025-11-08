@@ -144,6 +144,9 @@ Command* CommandProcessor::getCommand(GameEngine& engine) {
 	return commands->back().get();
 }
 
+//FILE COMMAND PROCESSOR ADAPTER
+
+//constructor, copy constructor, assignment operator, destructor
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const string& filename)
 	: CommandProcessor(), file(make_unique<ifstream>(filename)) {
 	if (!file->is_open()) {
@@ -178,9 +181,9 @@ Command* FileCommandProcessorAdapter::readCommand(GameEngine& engine) {
 			continue; // skip empty lines
 		}
 
-		Command* newCommand = new Command(line);
+		Command* newCommand = new Command(line); 
 		validate(*newCommand, engine);
-		saveCommand(*newCommand);
+		saveCommand(*newCommand); 
 
 		return newCommand;
 
