@@ -573,11 +573,11 @@ Map* MapLoader::load(const string& path, string* errorOut) const {
         }
     }
 
-    if (!map->validate()) {
-        if (errorOut) *errorOut = "Invalid map (validation check failed).";
-        delete map;
-        return nullptr;
-    }
+    // if (!map->validate()) {
+    //     if (errorOut) *errorOut = "Invalid map check failed).";
+    //     delete map;
+    //     return nullptr;
+    // }
     return map;
 }
 

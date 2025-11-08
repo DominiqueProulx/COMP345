@@ -1,7 +1,9 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <vector> 
+#include <vector>
+#include <algorithm>
+#include <random>
 
 class Order; //forward declaration for DummyOrder class
 class Deck; //forward declaration for Deck class

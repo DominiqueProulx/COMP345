@@ -3,11 +3,16 @@
 #define GAMEENGINE_H
 #include <memory>
 #include <string>
-#include <vector>  
+#include <vector>
 #include <unordered_map>
 #include "orders.h"  // contaisn player and map includes
 std::vector<Player*>* createFakePlayers(); //FLAG:remove this line when integrating Jackson's code.
 
+class Player;
+class Deck;
+class Territory;
+class Map;
+class MapLoader;
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine
@@ -57,8 +62,13 @@ private:
 	State* activeParentState;
 	State::StateList* parentStates;
 	State::StateList* states;
-	std::vector<Player*>* players; //*** placeholder for Jackson's code , to be removed. 
-	
+	Map* map;
+	MapLoader* mapLoader;
+	std::vector<Player*>* players;
+	Deck* deck;
+	std::unordered_map<Player*, int>* reinforcementPool; //Jackson to test for now
+
+
 	//main game loop phases & helpers
 	bool validatePlayerStays(Player* player);
 	void reinforcementPhase();
@@ -82,6 +92,7 @@ public:
 	void addParentStates(const std::initializer_list<State*>& states);
 	void addChildStates(State* parent, const std::initializer_list<State*>& states);
 	void addChildTransition(State* from, const std::string& cmd, State* to);
+	static void initializeRiskFSM(GameEngine& engine);
 
 	// accessors
 	State* getActiveStatePtr() const;
@@ -93,9 +104,33 @@ public:
 	void changeGameState(const std::string& cmd);
 	bool isActiveStateFinal() const;
 
+	//bea added helper functions for command processing
+	bool isCommandValid(const std::string& cmd) const;
+	std::string getCurrentStateName() const;
+	std::string getParentStateName() const;
+
+    void startupPhase( std::istream& in=std::cin,std::ostream& out=std::cout);
+
+	void processStartupCommand(const std::string& full, std::ostream& out);
+	
+    const std::vector<Player*>* getPlayers() const { return players; }
+
+    friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
+
+private:
+        
+    bool cmdLoadMap(const std::string& filename, std::ostream& out);
+    bool cmdValidateMap(std::ostream& out);
+    bool cmdAddPlayer(const std::string& name, std::ostream& out);
+    bool cmdGameStart(std::ostream& out);
+
+    void fairDistributeTerritories(std::ostream& out);
+    void randomizePlayerOrder(std::ostream& out);
+    void grant50Reinforcements(std::ostream& out);
+    void initialCardDraws(std::ostream& out);
+
 	// main Game Loop
 	void mainGameLoop();
-
 };
 
 #endif

@@ -1,5 +1,6 @@
 # ide specific configs
 /.vs
+/.vscode
 
 # user specified configs
 **/*.vcxproj.user

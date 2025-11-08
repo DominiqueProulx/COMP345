@@ -9,6 +9,7 @@
 
 // Forward declaration
 class Player;
+
 class Map;
 class Continent;
 class Territory;

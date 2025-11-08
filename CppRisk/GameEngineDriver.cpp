@@ -1,5 +1,7 @@
 #include <iostream>
 #include "GameEngine.h"
+#include "CommandProcessing.h"
+#include <sstream>
 
 // for brevity
 using GameState = GameEngine::GameState;
@@ -19,9 +21,9 @@ void testGameStates()
 
 	// STARTUP
 	GameState start{ engine.createState("start", false) };
-	GameState mapLoaded{ engine.createState("map loaded", false) };
-	GameState mapValidated{ engine.createState("map validated", false) };
-	GameState playersAdded{ engine.createState("players added", false) };
+	GameState mapLoaded{ engine.createState("maploaded", false) };
+	GameState mapValidated{ engine.createState("mapvalidated", false) };
+	GameState playersAdded{ engine.createState("playersadded", false) };
 
 	engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
 	engine.addChildTransition(start, "loadmap", mapLoaded);
@@ -131,4 +133,45 @@ std::cout << "========================================" << std::endl;
 
 	engine.mainGameLoop();
 
+}
+
+void testStartupPhase() {
+    GameEngine engine;
+
+    // Parents
+    GameState startup{ engine.createState("startup", true) };
+    GameState play   { engine.createState("play",    true) };
+    GameState end    { engine.createState("end",     true) };
+    engine.addParentStates({ startup, play, end });
+
+    // STARTUP substates
+    GameState start        { engine.createState("start",         false) };
+    GameState mapLoaded    { engine.createState("map loaded",    false) };
+    GameState mapValidated { engine.createState("map validated", false) };
+    GameState playersAdded { engine.createState("players added", false) };
+    GameState win          { engine.createState("win",           false) };
+    engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
+
+
+    engine.addChildTransition(start,        "loadmap",     mapLoaded);
+    engine.addChildTransition(mapLoaded,    "loadmap",     mapLoaded);
+    engine.addChildTransition(mapLoaded,    "validatemap", mapValidated);
+    engine.addChildTransition(mapValidated, "addplayer",   playersAdded);
+    engine.addChildTransition(playersAdded, "addplayer",   playersAdded);
+    // FLAG: playersAdded --gamestart--> win
+    engine.addChildTransition(playersAdded, "gamestart",   win);
+
+
+    GameState quitFinal { engine.createState("quit", false) };
+    engine.addChildStates(end, { quitFinal });
+
+
+    engine.addChildTransition(win, "replay", startup->getInitialSubstatePtr()); // back to "start"
+    engine.addChildTransition(win, "quit",   quitFinal);
+
+
+    engine.setActiveParentState(startup);
+    engine.setActiveState(startup->getInitialSubstatePtr());
+
+    engine.startupPhase(std::cin, std::cout);
 }
