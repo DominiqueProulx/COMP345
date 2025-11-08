@@ -264,7 +264,11 @@ std::vector<Territory*>* Player::toDefend() {
 
 
         if (choice == 0) {
-            doneAdding = true;
+            if (territoriesToDefendThisturn->size() == 0) {
+                std::cout << "You have to add at least one territory for deployment!" << std::endl;
+                doneAdding = false;
+            }
+            else { doneAdding = true; } 
         }
         else if (choice < 1 || choice > numberOfTerritories) {
             std::cout << "Invalid choice. Please try again." << std::endl;

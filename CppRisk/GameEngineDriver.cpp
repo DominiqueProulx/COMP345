@@ -86,7 +86,7 @@ using GameState = GameEngine::GameState;
 void testStartupPhase(GameEngine& engine) {
 
 	std::cout << "========================================" << std::endl;
-	std::cout << "      TESTING startup Phase " << std::endl;
+	std::cout << "      TESTING Startup Phase " << std::endl;
 	std::cout << "========================================" << std::endl;
    
     engine.startupPhase(std::cin, std::cout);

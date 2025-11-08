@@ -752,6 +752,7 @@ bool GameEngine::reinforcementPhase() {
             }
             if (ownsAll) {
                 reinforcements += c->getBonus();
+				std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
             }
         }
         player->addToReinforcementPool(reinforcements);
