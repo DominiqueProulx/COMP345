@@ -71,9 +71,9 @@ private:
 
 	//main game loop phases & helpers
 	bool validatePlayerStays(Player* player);
-	void reinforcementPhase();
-	void issueOrdersPhase();
-	void executeOrdersPhase();
+	bool reinforcementPhase();
+	bool issueOrdersPhase();
+	bool executeOrdersPhase();
 
 public:
 	using GameState = State*; // exposed publically so states can be initialized but not used directly externally
@@ -97,6 +97,7 @@ public:
 	// accessors
 	State* getActiveStatePtr() const;
 	State* getActiveParentStatePtr() const;
+	Map* getMap() const { return map; }
 	void setActiveState(State* state);
 	void setActiveParentState(State* state);
 
@@ -116,6 +117,10 @@ public:
     const std::vector<Player*>* getPlayers() const { return players; }
 
     friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
+	// main Game Loop
+	void mainGameLoop();
+	void gameOver(std::istream& in, std::ostream& out);
+
 
 private:
         
@@ -129,8 +134,7 @@ private:
     void grant50Reinforcements(std::ostream& out);
     void initialCardDraws(std::ostream& out);
 
-	// main Game Loop
-	void mainGameLoop();
+	
 };
 
 #endif

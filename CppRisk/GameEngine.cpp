@@ -481,6 +481,13 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
             Command* c = cp.getCommand(*this);
             if (!c) { out << "No more commands.\n"; break; }
             processStartupCommand(c->getCommandString(), out);
+
+			//Exit Setup Phase if we reach play state
+            if (getActiveParentStatePtr() && getActiveParentStatePtr()->getName() == "play") {
+                out << "Game setup complete. Starting main game loop...\n";
+                break;
+            }
+
             if (getActiveStatePtr() && getActiveStatePtr()->getName() == "quit") break;
         }
         return;
@@ -500,6 +507,12 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
                 if (!raw) { out << "No more commands (input ended).\n"; break; }
                 processStartupCommand(raw->getCommandString(), out);
                 delete raw;
+
+                if (getActiveParentStatePtr() && getActiveParentStatePtr()->getName() == "play") {
+                    out << "Game setup complete. Starting main game loop...\n";
+                    break;
+                }
+
                 if (getActiveStatePtr() && getActiveStatePtr()->getName() == "quit") break;
             }
         }
@@ -566,12 +579,15 @@ void GameEngine::processStartupCommand(const std::string& full, std::ostream& ou
         }
         if (cmdGameStart(out)) {
             changeGameState("gamestart");
+
+			
         }
         return;
     }
 
     out << "Invalid command.\n";
 }
+
 
 bool GameEngine::cmdLoadMap(const std::string& filename, std::ostream& out)
 {
@@ -621,6 +637,9 @@ bool GameEngine::cmdGameStart(std::ostream& out)
     randomizePlayerOrder(out);
     grant50Reinforcements(out);
     initialCardDraws(out);
+
+  
+
 
     out << "GameStart complete.\n";
     return true;
@@ -714,7 +733,7 @@ bool GameEngine::validatePlayerStays(Player* player) {
 }
 
 // main game loop
-void GameEngine::reinforcementPhase() {
+bool GameEngine::reinforcementPhase() {
     std::cout << "Reinforcement Phase begins." << std::endl;
     for (Player* player : *players) {
         //calculate reinforcements based on territories owned
@@ -723,10 +742,10 @@ void GameEngine::reinforcementPhase() {
         std::cout << "Player " << player->getName() << " receives " << reinforcements << " reinforcements." << std::endl;
         player->addToReinforcementPool(reinforcements);
         // continent bonuses
-    /*	for (Continent* c : map->getContinents()) {   //TODO :FLAG: re-enable when map is integrated
+    	for (Continent* c : getMap()->getContinents()) {
             bool ownsAll = true;
             for (Territory* t : c->getTerritories()) {
-                if (t->getOwner() != p) {
+                if (t->getOwner() != player) {
                     ownsAll = false;
                     break;
                 }
@@ -734,14 +753,13 @@ void GameEngine::reinforcementPhase() {
             if (ownsAll) {
                 reinforcements += c->getBonus();
             }
-        }*/
+        }
         player->addToReinforcementPool(reinforcements);
-
-
-
+        return true;
     }
+    return false;
 }
-void GameEngine::issueOrdersPhase() {
+bool GameEngine::issueOrdersPhase() {
 
     std::cout << "Issuing Orders Phase begins." << std::endl;
     std::unordered_map<Player*, bool> playersDoneIssuing;
@@ -777,16 +795,19 @@ void GameEngine::issueOrdersPhase() {
         for (const auto& [player, done] : playersDoneIssuing) {
             if (!done) {
                 allPlayersDone = false; // found someone still issuing
+                return true;
                 break;
             }
         }
 
         if (allPlayersDone) {
             std::cout << "All players have finished issuing orders." << std::endl;
+          
         }
     }
+    return false;
 }
-void GameEngine::executeOrdersPhase() {
+bool GameEngine::executeOrdersPhase() {
     std::unordered_map<Player*, bool> playersDoneExecuting;
     for (Player* player : *players) {
         playersDoneExecuting[player] = false;
@@ -813,6 +834,7 @@ void GameEngine::executeOrdersPhase() {
         for (const auto& [player, done] : playersDoneExecuting) {
             if (!done) {
                 noMoreOrders = false;
+                return true;
                 break;
             }
         }
@@ -821,13 +843,26 @@ void GameEngine::executeOrdersPhase() {
             std::cout << "All players have finished executing orders." << std::endl;
         }
     }
+    return false;
 }
 void GameEngine::mainGameLoop() {
     bool gameContinues = true;
     while (gameContinues) {
-        reinforcementPhase();
-        issueOrdersPhase();
-        executeOrdersPhase();
+        if (reinforcementPhase()) {
+			changeGameState("issueorder");
+        }
+        if (issueOrdersPhase()) {
+            changeGameState("issueordersend");
+        }
+        else { changeGameState("issueorder"); }
+
+        if (executeOrdersPhase()) {
+            changeGameState("endexecorders");
+        }
+        else {
+			changeGameState("execorder");
+        }
+
         for (Player* player : *players) {
             validatePlayerStays(player);
         }
@@ -841,4 +876,19 @@ void GameEngine::mainGameLoop() {
 
     }
 }
+void GameEngine::gameOver(std::istream& in, std::ostream& out) {
+    CommandProcessor cp;
+    for (;;) {
+        Command* c = cp.getCommand(*this);
+        if (!c) break;
 
+        processStartupCommand(c->getCommandString(), out);
+
+        if (getActiveStatePtr()->getName() == "quit") break;
+        if (getActiveParentStatePtr()->getName() == "startup") {
+            out << "Restarting game...\n";
+            startupPhase(in, out);
+            mainGameLoop();
+        }
+    }
+}

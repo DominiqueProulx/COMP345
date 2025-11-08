@@ -9,7 +9,7 @@ using GameState = GameEngine::GameState;
 // Tests the GameEngine implementation by creating an FSM to replicate Risk and starting a loop to test state
 // transitions using user-inputted commands.
 // The State implementation is hidden under GameEngine and can only be created through engine.createState
-void testGameStates()
+/*void testGameStates()
 {
 	GameEngine engine;
 
@@ -81,97 +81,41 @@ void testGameStates()
 			shouldContinue = false;
 		}
 	}
-}
+}*/
 
-void testMainGameLoop() {
-std::cout << "========================================" << std::endl;
+void testStartupPhase(GameEngine& engine) {
+
+	std::cout << "========================================" << std::endl;
+	std::cout << "      TESTING startup Phase " << std::endl;
+	std::cout << "========================================" << std::endl;
+   
+    engine.startupPhase(std::cin, std::cout);
+}
+void testMainGameLoop(GameEngine& engine) {
+	std::cout << "========================================" << std::endl;
 	std::cout << "      TESTING Main Game Loop " << std::endl;
 	std::cout << "========================================" << std::endl;
-	GameEngine engine;
-
-	// adding states to recreate the state diagram
-	GameState startup{ engine.createState("startup", true) };
-	GameState play{ engine.createState("play", true) };
-	GameState end{ engine.createState("end", true) };
-	engine.addParentStates({ startup, play, end });
-
-	// STARTUP
-	GameState start{ engine.createState("start", false) };
-	GameState mapLoaded{ engine.createState("map loaded", false) };
-	GameState mapValidated{ engine.createState("map validated", false) };
-	GameState playersAdded{ engine.createState("players added", false) };
-
-	engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
-	engine.addChildTransition(start, "loadmap", mapLoaded);
-	engine.addChildTransition(mapLoaded, "loadmap", mapLoaded);
-	engine.addChildTransition(mapLoaded, "validatemap", mapValidated);
-	engine.addChildTransition(mapValidated, "addplayer", playersAdded);
-	engine.addChildTransition(playersAdded, "addplayer", playersAdded);
-	engine.addChildTransition(playersAdded, "assigncountries", play);
-	engine.setActiveState(startup->getInitialSubstatePtr());
-
-	// PLAY
-	GameState assignReinforcements{ engine.createState("assign reinforcements", false) };
-	GameState issueOrders{ engine.createState("issue orders", false) };
-	GameState executeOrders{ engine.createState("execute orders", false) };
-	GameState win{ engine.createState("win", false) };
-
-	engine.addChildStates(play, { assignReinforcements, issueOrders, executeOrders, win });
-	engine.addChildTransition(assignReinforcements, "issueorder", issueOrders);
-	engine.addChildTransition(issueOrders, "issueorder", issueOrders);
-	engine.addChildTransition(issueOrders, "endissueorders", executeOrders);
-	engine.addChildTransition(executeOrders, "execorder", executeOrders);
-	engine.addChildTransition(executeOrders, "endexecorders", assignReinforcements);
-	engine.addChildTransition(executeOrders, "win", win);
-	engine.addChildTransition(win, "play", startup);
-	engine.addChildTransition(win, "end", end);
-
-	// END
-	GameState final{ engine.createState("quit", false) };
-	engine.addChildStates(end, { final });
-	std::cout << "finished creating the engine" << std::endl;
+	
 
 	engine.mainGameLoop();
 
 }
 
-void testStartupPhase() {
-    GameEngine engine;
+void testGameEngine() {
+	GameEngine engine;
+	char buffer[256];
 
-    // Parents
-    GameState startup{ engine.createState("startup", true) };
-    GameState play   { engine.createState("play",    true) };
-    GameState end    { engine.createState("end",     true) };
-    engine.addParentStates({ startup, play, end });
+	engine.initializeRiskFSM(engine);
 
-    // STARTUP substates
-    GameState start        { engine.createState("start",         false) };
-    GameState mapLoaded    { engine.createState("map loaded",    false) };
-    GameState mapValidated { engine.createState("map validated", false) };
-    GameState playersAdded { engine.createState("players added", false) };
-    GameState win          { engine.createState("win",           false) };
-    engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
+	testStartupPhase(engine);
+	std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
+	testMainGameLoop(engine);
+	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
 
-    engine.addChildTransition(start,        "loadmap",     mapLoaded);
-    engine.addChildTransition(mapLoaded,    "loadmap",     mapLoaded);
-    engine.addChildTransition(mapLoaded,    "validatemap", mapValidated);
-    engine.addChildTransition(mapValidated, "addplayer",   playersAdded);
-    engine.addChildTransition(playersAdded, "addplayer",   playersAdded);
-    // FLAG: playersAdded --gamestart--> win
-    engine.addChildTransition(playersAdded, "gamestart",   win);
-
-
-    GameState quitFinal { engine.createState("quit", false) };
-    engine.addChildStates(end, { quitFinal });
-
-
-    engine.addChildTransition(win, "replay", startup->getInitialSubstatePtr()); // back to "start"
-    engine.addChildTransition(win, "quit",   quitFinal);
-
-
-    engine.setActiveParentState(startup);
-    engine.setActiveState(startup->getInitialSubstatePtr());
-
-    engine.startupPhase(std::cin, std::cout);
 }
