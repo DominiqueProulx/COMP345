@@ -27,6 +27,7 @@ Player::Player() {
     
     // Assignment 2 additions
     reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
     territoriesToDefend = nullptr;
@@ -49,6 +50,7 @@ Player::Player(const std::string& color, const std::vector<Territory*>& initialT
     
     // Assignment 2 additions
     reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
     territoriesToDefend = nullptr;
@@ -346,7 +348,8 @@ std::vector<Territory*>* Player::toAttack() {
     for (Territory* t : *territoriesOwned) {
         const std::vector<Territory*>& adjacentTerritories = t->getAdjacentTerritories();
         for (Territory* adjTerritory : adjacentTerritories) {
-            if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end()) {
+            if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end() && (adjTerritory->getOwner() != this)) {
+
                 possibleTerritories.push_back(adjTerritory); 
             }
         }
@@ -501,9 +504,9 @@ Order* Player::issueDeployOrder() {
     bool validInput = false;
     while (!validInput) {
         std::cout << "Enter number of armies to deploy to " << targetTerritory->getName()
-            << " (max " << *reinforcementPool << "): ";
+            << " (max " << (*reinforcementPool - *pendingDeployments) << "): ";
         std::cin >> armiesToDeploy;
-        if (armiesToDeploy < 1 || armiesToDeploy > *reinforcementPool) {
+        if (armiesToDeploy < 1 || armiesToDeploy > (*reinforcementPool - *pendingDeployments)) {
             std::cout << "Invalid number of armies. Please try again." << std::endl;
         }
         else {
@@ -514,9 +517,10 @@ Order* Player::issueDeployOrder() {
     // Create Deploy order
     Order* deployOrder = orderFactory(Player::OrderType::DEPLOY,nullptr, targetTerritory,nullptr, armiesToDeploy);
     
-    *reinforcementPool -= armiesToDeploy;
+  //  *reinforcementPool -= armiesToDeploy;
+	*pendingDeployments += armiesToDeploy;
     std::cout << armiesToDeploy << " armies deployed to " << targetTerritory->getName()
-        << ". Remaining reinforcement pool: " << *reinforcementPool << std::endl;
+        << ". Remaining reinforcement pool: " << (*reinforcementPool - *pendingDeployments) << std::endl;
 	return deployOrder;
 }
 Order* Player::issueBombOrder() {
@@ -609,9 +613,10 @@ Order* Player::orderFactory(Player::OrderType type,
 
     // issueOrder()
 void Player::issueOrder() {
+    
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase
     
-
+    *pendingDeployments = 0;
     if (territoriesToDefend == nullptr || territoriesToAttack == nullptr) {
         territoriesToDefend = new std::vector<Territory*>();
         territoriesToAttack = new std::vector<Territory*>();
@@ -625,9 +630,9 @@ void Player::issueOrder() {
     std::cout << "\nHere are the possible orders you can issue" << std::endl;
     // Only deploy order is available if the reinforcement pool is not empty
     
-    if (  *reinforcementPool != 0) {
+    if ( ( *reinforcementPool - *pendingDeployments) != 0) {
         std::cout << "\nYour reinforcement pool is not empty, please Deploy your armies first" << std::endl;
-        std::cout << (*reinforcementPool) << " armies need to be deployed." << std::endl;
+        std::cout << ( *reinforcementPool - *pendingDeployments) << " armies need to be deployed." << std::endl;
         // Deploy order to assign reinforcements to owned territories
         Order* deployOrder =  issueDeployOrder();
         if (deployOrder != nullptr) { (*orderslist).add(deployOrder); }
@@ -663,7 +668,7 @@ void Player::issueOrder() {
         else if (choice == 1) {
 			// Advance order (to defend or attack)
            Order* advanceOrder =  issueAdvanceOrder();
-           if (advanceOrder != nullptr) (*orderslist).add(advanceOrder);
+           if (advanceOrder != nullptr) (*orderslist).add(advanceOrder); 
 		}
 		else {
 			// Issue Order from hand

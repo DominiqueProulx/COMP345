@@ -756,9 +756,9 @@ bool GameEngine::reinforcementPhase() {
             }
         }
         player->addToReinforcementPool(reinforcements);
-        return true;
+       
     }
-    return false;
+    return true;
 }
 bool GameEngine::issueOrdersPhase() {
 

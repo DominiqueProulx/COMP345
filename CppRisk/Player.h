@@ -112,6 +112,7 @@ private:
     
     // Assignment 2 additions
     int* reinforcementPool;
+    int* pendingDeployments;
     bool* conqueredTerritoryThisTurn;
     std::set<Player*>* negotiatedPlayers;
     std::vector<Territory*>* territoriesToDefend;
