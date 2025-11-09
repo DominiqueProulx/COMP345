@@ -1,35 +1,53 @@
-#include "Map.h"
 #include <iostream>
-#include <vector>
 #include <string>
-using namespace std;
+#include <direct.h>
 
-void testLoadMaps() {
-	MapLoader loader;
-	vector<string> paths = {
-		"MAP.txt",
-		"MAP2.txt",
-		"test.txt"
-	};
+// Declare test functions
+void testCommandProcessor();
+//void testStartupPhase();
+//void testMainGameLoop();
+void testOrderExecution();
+void testLoggingObserver();
 
-	cout << "========================================" << endl;
-	cout << "      TESTING MAPS AND MAPLOADER" << endl;
-	cout << "========================================" << endl << endl;
+int main(void)
+{
+	char directory[FILENAME_MAX];
+	_getcwd(directory, FILENAME_MAX);
+	std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
+	std::cout << directory << std::endl;
+	std::cout << "--- Place MAP.txt in the folder above ---\n" << std::endl;
 
-	for (const auto& p : paths) {
-		string err;
-		Map* m = loader.load(p, &err);
-		if (m) {
-			cout << "[OK] Loaded: " << p << "\n";
-			cout << *m << "\n";
-			cout << "  -> validate(): " << (m->validate() ? "SUCCESS" : "FAILURE") << "\n";
-			delete m;
-		}
-		else {
-			cout << "[ERR] " << p << " => " << err << "\n";
-		}
-		cout << "------------------------------------------\n";
-	}
+	char buffer[256];
 
-	cout << endl;
+	// run all driver test functions
+	testCommandProcessor();
+	std::cout << "\n\nFinished testing COMMAND PROCESSOR. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	/*
+	testStartupPhase();
+	std::cout << "\n\nFinished testing STARTUP PHASE. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	*/
+
+	/*
+	testMainGameLoop();
+	std::cout << "\n\nFinished testing MAIN GAME LOOP. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	*/
+
+	testOrderExecution();
+	std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	testLoggingObserver();
+	std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	return 0;
 }

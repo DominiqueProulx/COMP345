@@ -1,43 +1,35 @@
+#include "Map.h"
 #include <iostream>
-#include <limits>
-#include "Orders.h"
-
+#include <vector>
+#include <string>
 using namespace std;
 
-// Declare only the test functions that exist
-void testOrdersLists();
-void testOrderExecution();
+void testLoadMaps() {
+	MapLoader loader;
+	vector<string> paths = {
+		"MAP.txt",
+		"MAP2.txt",
+		"test.txt"
+	};
 
-int main(void) {
-    cout << "\n========================================" << endl;
-    cout << "    COMP345 - TESTING ORDERS" << endl;
-    cout << "========================================\n" << endl;
+	cout << "========================================" << endl;
+	cout << "      TESTING MAPS AND MAPLOADER" << endl;
+	cout << "========================================" << endl << endl;
 
-    cout << "Select which test to run:" << endl;
-    cout << "1. Orders Lists (Assignment 1)" << endl;
-    cout << "2. Order Execution (Assignment 2)" << endl;
-    cout << "0. Exit" << endl;
+	for (const auto& p : paths) {
+		string err;
+		Map* m = loader.load(p, &err);
+		if (m) {
+			cout << "[OK] Loaded: " << p << "\n";
+			cout << *m << "\n";
+			cout << "  -> validate(): " << (m->validate() ? "SUCCESS" : "FAILURE") << "\n";
+			delete m;
+		}
+		else {
+			cout << "[ERR] " << p << " => " << err << "\n";
+		}
+		cout << "------------------------------------------\n";
+	}
 
-    int choice;
-    while (true) {
-        cout << "\nEnter your choice: ";
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        if (choice == 0) break;
-
-        switch (choice) {
-            case 1:
-                testOrdersLists();
-                break;
-            case 2:
-                testOrderExecution();
-                break;
-            default:
-                cout << "Invalid choice. Please try again." << endl;
-        }
-    }
-
-    cout << "\nExiting program..." << endl;
-    return 0;
+	cout << endl;
 }

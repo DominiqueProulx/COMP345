@@ -1,0 +1,13 @@
+loadmap
+loadmap MAP.txt
+validatemap
+addplayer June
+addplayer July
+badorder
+gamestart
+issueorder
+issueordersend
+badorder
+win
+replay
+quit

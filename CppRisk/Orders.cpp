@@ -5,11 +5,12 @@
 // File: Orders.cpp
 // -------------------------------
 
-#include "Orders.h"
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
+#include "Orders.h"
 
 // NOTE: Territory and Player implementations are now in Map.cpp and Player.cpp
 
@@ -18,54 +19,67 @@
 // ============================================================================
 
 Order::Order(const std::string& orderType) {
-    this->orderType = new std::string(orderType);
-    this->effect = nullptr;
-    this->executed = new bool(false);
+	this->orderType = new std::string(orderType);
+	this->effect = nullptr;
+	this->executed = new bool(false);
 }
 
-Order::Order(const Order& other) {
-    orderType = new std::string(*other.orderType);
-    effect = other.effect ? new std::string(*other.effect) : nullptr;
-    executed = new bool(*other.executed);
+// Copy constructor
+Order::Order(const Order& other) : Subject(other) {
+	orderType = new std::string(*other.orderType);
+	effect = other.effect ? new std::string(*other.effect) : nullptr;
+	executed = new bool(*other.executed);
 }
 
 Order::~Order() {
-    delete orderType;
-    delete effect;
-    delete executed;
+	delete orderType;
+	delete effect;
+	delete executed;
 }
 
 Order& Order::operator=(const Order& other) {
-    if (this != &other) {
-        delete orderType;
-        delete effect;
-        delete executed;
-        
-        orderType = new std::string(*other.orderType);
-        effect = other.effect ? new std::string(*other.effect) : nullptr;
-        executed = new bool(*other.executed);
-    }
-    return *this;
+	if (this != &other) {
+		Subject::operator=(other);
+
+		delete orderType;
+		delete effect;
+		delete executed;
+
+		orderType = new std::string(*other.orderType);
+		effect = other.effect ? new std::string(*other.effect) : nullptr;
+		executed = new bool(*other.executed);
+	}
+	return *this;
 }
 
+// Returns a log string describing an executed Order's effect.
+std::string Order::stringToLog() const
+{
+	if (executed)
+		return "[ORDER] Executed an order with the following effect: { " + *effect + " }.";
+	else
+		return "[ERR::ORDER] Attempted to log an unexecuted order...";
+}
+
+// Getters
 std::string Order::getType() const {
-    return *orderType;
+	return *orderType;
 }
 
 std::string Order::getEffect() const {
-    return effect ? *effect : "Not yet executed";
+	return effect ? *effect : "Not yet executed";
 }
 
 bool Order::isExecuted() const {
-    return *executed;
+	return *executed;
 }
 
 std::ostream& operator<<(std::ostream& os, const Order& order) {
-    os << "Order Type: " << *order.orderType;
-    if (*order.executed && order.effect) {
-        os << " | Effect: " << *order.effect;
-    }
-    return os;
+	os << "Order Type: " << *order.orderType;
+	if (*order.executed && order.effect) {
+		os << " | Effect: " << *order.effect;
+	}
+	return os;
 }
 
 // ============================================================================
@@ -74,37 +88,37 @@ std::ostream& operator<<(std::ostream& os, const Order& order) {
 
 // Default constructor for Assignment 1 compatibility
 Deploy::Deploy() : Order("Deploy") {
-    this->player = nullptr;
-    this->targetTerritory = nullptr;
-    this->armiesToDeploy = new int(0);
+	this->player = nullptr;
+	this->targetTerritory = nullptr;
+	this->armiesToDeploy = new int(0);
 }
 
-Deploy::Deploy(Player* player, Territory* target, int numArmies) 
-    : Order("Deploy") {
-    this->player = player;
-    this->targetTerritory = target;
-    this->armiesToDeploy = new int(numArmies);
+Deploy::Deploy(Player* player, Territory* target, int numArmies)
+	: Order("Deploy") {
+	this->player = player;
+	this->targetTerritory = target;
+	this->armiesToDeploy = new int(numArmies);
 }
 
 Deploy::Deploy(const Deploy& other) : Order(other) {
-    player = other.player;
-    targetTerritory = other.targetTerritory;
-    armiesToDeploy = new int(*other.armiesToDeploy);
+	player = other.player;
+	targetTerritory = other.targetTerritory;
+	armiesToDeploy = new int(*other.armiesToDeploy);
 }
 
 Deploy::~Deploy() {
-    delete armiesToDeploy;
+	delete armiesToDeploy;
 }
 
 Deploy& Deploy::operator=(const Deploy& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        targetTerritory = other.targetTerritory;
-        delete armiesToDeploy;
-        armiesToDeploy = new int(*other.armiesToDeploy);
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		targetTerritory = other.targetTerritory;
+		delete armiesToDeploy;
+		armiesToDeploy = new int(*other.armiesToDeploy);
+	}
+	return *this;
 }
 
 bool Deploy::validate() {
@@ -174,7 +188,7 @@ void Deploy::execute() {
 }
 
 Order* Deploy::clone() const {
-    return new Deploy(*this);
+	return new Deploy(*this);
 }
 
 // ============================================================================
@@ -183,41 +197,41 @@ Order* Deploy::clone() const {
 
 // Default constructor for Assignment 1 compatibility
 Advance::Advance() : Order("Advance") {
-    this->player = nullptr;
-    this->sourceTerritory = nullptr;
-    this->targetTerritory = nullptr;
-    this->armiesToMove = new int(0);
+	this->player = nullptr;
+	this->sourceTerritory = nullptr;
+	this->targetTerritory = nullptr;
+	this->armiesToMove = new int(0);
 }
 
 Advance::Advance(Player* player, Territory* source, Territory* target, int numArmies)
-    : Order("Advance") {
-    this->player = player;
-    this->sourceTerritory = source;
-    this->targetTerritory = target;
-    this->armiesToMove = new int(numArmies);
+	: Order("Advance") {
+	this->player = player;
+	this->sourceTerritory = source;
+	this->targetTerritory = target;
+	this->armiesToMove = new int(numArmies);
 }
 
 Advance::Advance(const Advance& other) : Order(other) {
-    player = other.player;
-    sourceTerritory = other.sourceTerritory;
-    targetTerritory = other.targetTerritory;
-    armiesToMove = new int(*other.armiesToMove);
+	player = other.player;
+	sourceTerritory = other.sourceTerritory;
+	targetTerritory = other.targetTerritory;
+	armiesToMove = new int(*other.armiesToMove);
 }
 
 Advance::~Advance() {
-    delete armiesToMove;
+	delete armiesToMove;
 }
 
 Advance& Advance::operator=(const Advance& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        sourceTerritory = other.sourceTerritory;
-        targetTerritory = other.targetTerritory;
-        delete armiesToMove;
-        armiesToMove = new int(*other.armiesToMove);
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		sourceTerritory = other.sourceTerritory;
+		targetTerritory = other.targetTerritory;
+		delete armiesToMove;
+		armiesToMove = new int(*other.armiesToMove);
+	}
+	return *this;
 }
 
 bool Advance::validate() {
@@ -378,7 +392,7 @@ void Advance::execute() {
 }
 
 Order* Advance::clone() const {
-    return new Advance(*this);
+	return new Advance(*this);
 }
 
 // ============================================================================
@@ -387,29 +401,29 @@ Order* Advance::clone() const {
 
 // Default constructor for Assignment 1 compatibility
 Bomb::Bomb() : Order("Bomb") {
-    this->player = nullptr;
-    this->targetTerritory = nullptr;
+	this->player = nullptr;
+	this->targetTerritory = nullptr;
 }
 
 Bomb::Bomb(Player* player, Territory* target) : Order("Bomb") {
-    this->player = player;
-    this->targetTerritory = target;
+	this->player = player;
+	this->targetTerritory = target;
 }
 
 Bomb::Bomb(const Bomb& other) : Order(other) {
-    player = other.player;
-    targetTerritory = other.targetTerritory;
+	player = other.player;
+	targetTerritory = other.targetTerritory;
 }
 
 Bomb::~Bomb() {}
 
 Bomb& Bomb::operator=(const Bomb& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        targetTerritory = other.targetTerritory;
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		targetTerritory = other.targetTerritory;
+	}
+	return *this;
 }
 
 bool Bomb::validate() {
@@ -446,38 +460,42 @@ bool Bomb::validate() {
 }
 
 void Bomb::execute() {
-    if (validate()) {
-        // Handle Assignment 1 mode
-        if (!player || !targetTerritory) {
-            std::cout << "Executing Bomb order (Assignment 1 mode)..." << std::endl;
-            delete effect;
-            effect = new std::string("Bomb order executed (placeholder)");
-            *executed = true;
-            return;
-        }
+	if (validate()) {
+		// Handle Assignment 1 mode
+		if (!player || !targetTerritory) {
+			std::cout << "Executing Bomb order (Assignment 1 mode)..." << std::endl;
+			delete effect;
+			effect = new std::string("Bomb order executed (placeholder)");
+			*executed = true;
+			return;
+		}
 
-        int currentArmies = targetTerritory->getNumberOfArmies();
-        int armiesDestroyed = currentArmies / 2;
-        int remainingArmies = currentArmies - armiesDestroyed;
-        
-        targetTerritory->setNumberOfArmies(remainingArmies);
-        
-        delete effect;
-        effect = new std::string("Bombed " + targetTerritory->getName() + 
-                                ": destroyed " + std::to_string(armiesDestroyed) + 
-                                " armies, " + std::to_string(remainingArmies) + " remain");
-        *executed = true;
-        
-        std::cout << "Bomb EXECUTED: " << *effect << std::endl;
-    } else {
-        delete effect;
-        effect = new std::string("Bomb order was invalid and not executed");
-        std::cout << "Bomb NOT EXECUTED" << std::endl;
-    }
+		int currentArmies = targetTerritory->getNumberOfArmies();
+		int armiesDestroyed = currentArmies / 2;
+		int remainingArmies = currentArmies - armiesDestroyed;
+
+		targetTerritory->setNumberOfArmies(remainingArmies);
+
+		delete effect;
+		effect = new std::string("Bombed " + targetTerritory->getName() +
+			": destroyed " + std::to_string(armiesDestroyed) +
+			" armies, " + std::to_string(remainingArmies) + " remain");
+		*executed = true;
+
+		std::cout << "Bomb EXECUTED: " << *effect << std::endl;
+
+		// log the order execution to gamelog.txt
+		notify(this);
+	}
+	else {
+		delete effect;
+		effect = new std::string("Bomb order was invalid and not executed");
+		std::cout << "Bomb NOT EXECUTED" << std::endl;
+	}
 }
 
 Order* Bomb::clone() const {
-    return new Bomb(*this);
+	return new Bomb(*this);
 }
 
 // ============================================================================
@@ -486,34 +504,34 @@ Order* Bomb::clone() const {
 
 // Default constructor for Assignment 1 compatibility
 Blockade::Blockade() : Order("Blockade") {
-    this->player = nullptr;
-    this->targetTerritory = nullptr;
-    this->neutralPlayer = nullptr;
+	this->player = nullptr;
+	this->targetTerritory = nullptr;
+	this->neutralPlayer = nullptr;
 }
 
-Blockade::Blockade(Player* player, Territory* target, Player* neutral) 
-    : Order("Blockade") {
-    this->player = player;
-    this->targetTerritory = target;
-    this->neutralPlayer = neutral;
+Blockade::Blockade(Player* player, Territory* target, Player* neutral)
+	: Order("Blockade") {
+	this->player = player;
+	this->targetTerritory = target;
+	this->neutralPlayer = neutral;
 }
 
 Blockade::Blockade(const Blockade& other) : Order(other) {
-    player = other.player;
-    targetTerritory = other.targetTerritory;
-    neutralPlayer = other.neutralPlayer;
+	player = other.player;
+	targetTerritory = other.targetTerritory;
+	neutralPlayer = other.neutralPlayer;
 }
 
 Blockade::~Blockade() {}
 
 Blockade& Blockade::operator=(const Blockade& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        targetTerritory = other.targetTerritory;
-        neutralPlayer = other.neutralPlayer;
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		targetTerritory = other.targetTerritory;
+		neutralPlayer = other.neutralPlayer;
+	}
+	return *this;
 }
 
 bool Blockade::validate() {
@@ -574,7 +592,7 @@ void Blockade::execute() {
 }
 
 Order* Blockade::clone() const {
-    return new Blockade(*this);
+	return new Blockade(*this);
 }
 
 // ============================================================================
@@ -583,41 +601,41 @@ Order* Blockade::clone() const {
 
 // Default constructor for Assignment 1 compatibility
 Airlift::Airlift() : Order("Airlift") {
-    this->player = nullptr;
-    this->sourceTerritory = nullptr;
-    this->targetTerritory = nullptr;
-    this->armiesToMove = new int(0);
+	this->player = nullptr;
+	this->sourceTerritory = nullptr;
+	this->targetTerritory = nullptr;
+	this->armiesToMove = new int(0);
 }
 
 Airlift::Airlift(Player* player, Territory* source, Territory* target, int numArmies)
-    : Order("Airlift") {
-    this->player = player;
-    this->sourceTerritory = source;
-    this->targetTerritory = target;
-    this->armiesToMove = new int(numArmies);
+	: Order("Airlift") {
+	this->player = player;
+	this->sourceTerritory = source;
+	this->targetTerritory = target;
+	this->armiesToMove = new int(numArmies);
 }
 
 Airlift::Airlift(const Airlift& other) : Order(other) {
-    player = other.player;
-    sourceTerritory = other.sourceTerritory;
-    targetTerritory = other.targetTerritory;
-    armiesToMove = new int(*other.armiesToMove);
+	player = other.player;
+	sourceTerritory = other.sourceTerritory;
+	targetTerritory = other.targetTerritory;
+	armiesToMove = new int(*other.armiesToMove);
 }
 
 Airlift::~Airlift() {
-    delete armiesToMove;
+	delete armiesToMove;
 }
 
 Airlift& Airlift::operator=(const Airlift& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        sourceTerritory = other.sourceTerritory;
-        targetTerritory = other.targetTerritory;
-        delete armiesToMove;
-        armiesToMove = new int(*other.armiesToMove);
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		sourceTerritory = other.sourceTerritory;
+		targetTerritory = other.targetTerritory;
+		delete armiesToMove;
+		armiesToMove = new int(*other.armiesToMove);
+	}
+	return *this;
 }
 
 bool Airlift::validate() {
@@ -686,7 +704,7 @@ void Airlift::execute() {
 }
 
 Order* Airlift::clone() const {
-    return new Airlift(*this);
+	return new Airlift(*this);
 }
 
 // ============================================================================
@@ -695,37 +713,37 @@ Order* Airlift::clone() const {
 
 // Default constructor for Assignment 1 compatibility
 Negotiate::Negotiate() : Order("Negotiate") {
-    this->player = nullptr;
-    this->targetPlayer = nullptr;
+	this->player = nullptr;
+	this->targetPlayer = nullptr;
 }
 
 Negotiate::Negotiate(Player* player, Player* targetPlayer) : Order("Negotiate") {
-    this->player = player;
-    this->targetPlayer = targetPlayer;
+	this->player = player;
+	this->targetPlayer = targetPlayer;
 }
 
 Negotiate::Negotiate(const Negotiate& other) : Order(other) {
-    player = other.player;
-    targetPlayer = other.targetPlayer;
+	player = other.player;
+	targetPlayer = other.targetPlayer;
 }
 
 Negotiate::~Negotiate() {}
 
 Negotiate& Negotiate::operator=(const Negotiate& other) {
-    if (this != &other) {
-        Order::operator=(other);
-        player = other.player;
-        targetPlayer = other.targetPlayer;
-    }
-    return *this;
+	if (this != &other) {
+		Order::operator=(other);
+		player = other.player;
+		targetPlayer = other.targetPlayer;
+	}
+	return *this;
 }
 
 bool Negotiate::validate() {
-    // Handle default constructor case
-    if (!player || !targetPlayer) {
-        std::cout << "Validating Negotiate order (Assignment 1 mode)..." << std::endl;
-        return true;
-    }
+	// Handle default constructor case
+	if (!player || !targetPlayer) {
+		std::cout << "Validating Negotiate order (Assignment 1 mode)..." << std::endl;
+		return true;
+	}
 
     // Assignment 2 validation
     if (player == targetPlayer) {
@@ -767,7 +785,7 @@ void Negotiate::execute() {
 }
 
 Order* Negotiate::clone() const {
-    return new Negotiate(*this);
+	return new Negotiate(*this);
 }
 
 // ============================================================================
@@ -775,74 +793,97 @@ Order* Negotiate::clone() const {
 // ============================================================================
 
 OrdersList::OrdersList() {
-    orders = new std::vector<Order*>();
+	orders = new std::vector<Order*>();
 }
 
-OrdersList::OrdersList(const OrdersList& other) {
-    orders = new std::vector<Order*>();
-    for (Order* order : *other.orders) {
-        orders->push_back(order->clone());
-    }
+// Copy constructor - performs deep copy
+OrdersList::OrdersList(const OrdersList& other) : Subject(other) {
+	orders = new std::vector<Order*>();
+	for (Order* order : *other.orders) {
+		orders->push_back(order->clone());  // Deep copy using clone method
+	}
 }
 
 OrdersList::~OrdersList() {
-    for (Order* order : *orders) {
-        delete order;
-    }
-    delete orders;
+	for (Order* order : *orders) {
+		delete order;
+	}
+	delete orders;
 }
 
 OrdersList& OrdersList::operator=(const OrdersList& other) {
-    if (this != &other) {
-        for (Order* order : *orders) {
-            delete order;
-        }
-        orders->clear();
-        
-        for (Order* order : *other.orders) {
-            orders->push_back(order->clone());
-        }
-    }
-    return *this;
+	if (this != &other) {
+		Subject::operator=(other);
+
+		// Delete existing orders
+		for (Order* order : *orders) {
+			delete order;
+		}
+		orders->clear();
+
+		// Deep copy from other
+		for (Order* order : *other.orders) {
+			orders->push_back(order->clone());
+		}
+	}
+	return *this;
 }
 
 void OrdersList::add(Order* order) {
-    if (order != nullptr) {
-        orders->push_back(order);
-    }
+	if (order != nullptr) {
+		orders->push_back(order);
+		std::cout << "Order added to list: " << order->getType() << std::endl;
+
+		// log the added order to gamelog.txt
+		notify(this);
+	}
 }
 
 void OrdersList::remove(int index) {
-    if (index >= 0 && index < orders->size()) {
-        delete (*orders)[index];
-        orders->erase(orders->begin() + index);
-    }
+	if (index >= 0 && index < orders->size()) {
+		delete (*orders)[index];
+		orders->erase(orders->begin() + index);
+	}
 }
 
 void OrdersList::move(int fromIndex, int toIndex) {
-    if (fromIndex >= 0 && fromIndex < orders->size() && 
-        toIndex >= 0 && toIndex < orders->size()) {
-        Order* orderToMove = (*orders)[fromIndex];
-        orders->erase(orders->begin() + fromIndex);
-        orders->insert(orders->begin() + toIndex, orderToMove);
-    }
+	if (fromIndex >= 0 && fromIndex < orders->size() &&
+		toIndex >= 0 && toIndex < orders->size()) {
+		Order* orderToMove = (*orders)[fromIndex];
+		orders->erase(orders->begin() + fromIndex);
+		orders->insert(orders->begin() + toIndex, orderToMove);
+	}
 }
 
+// Returns a log string describing an added order to the OrderList.
+std::string OrdersList::stringToLog() const
+{
+	if (orders->empty())
+		return "[ERR::ORDERLIST] Attempted to log an empty order list...";
+	else
+	{
+		std::ostringstream orderAsStream{};
+		orderAsStream << *orders->back();
+		return "[ORDERLIST] Added a new order to a list: { " + orderAsStream.str() + " }.";
+	}
+}
+
+// Get size of orders list
 int OrdersList::size() const {
-    return orders->size();
+	return static_cast<int>(orders->size());
 }
 
 Order* OrdersList::getOrder(int index) const {
-    if (index >= 0 && index < orders->size()) {
-        return (*orders)[index];
-    }
-    return nullptr;
+	if (index >= 0 && index < orders->size()) {
+		return (*orders)[index];
+	}
+	return nullptr;
 }
 
 std::ostream& operator<<(std::ostream& os, const OrdersList& list) {
-    os << "OrdersList (" << list.orders->size() << " orders):" << std::endl;
-    for (size_t i = 0; i < list.orders->size(); ++i) {
-        os << "  [" << i << "] " << *((*list.orders)[i]) << std::endl;
-    }
-    return os;
+	os << "OrdersList (" << list.orders->size() << " orders):" << std::endl;
+	for (size_t i = 0; i < list.orders->size(); ++i) {
+		os << "  [" << i << "] " << *((*list.orders)[i]) << std::endl;
+	}
+	return os;
 }

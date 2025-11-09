@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include "LoggingObserver.h"
 
 // Include actual implementations from teammates
 #include "Map.h"
@@ -15,31 +16,34 @@
 
 // -------- ORDER BASE CLASS --------
 // Abstract base class for all order types
-class Order {
+class Order : public Subject, public ILoggable {
 public:
-    // Constructors and destructor
-    Order(const std::string& orderType);
-    Order(const Order& other);
-    virtual ~Order();
-    
-    // Assignment operator
-    Order& operator=(const Order& other);
-    
-    // Pure virtual methods - must be implemented by subclasses
-    virtual bool validate() = 0;
-    virtual void execute() = 0;
-    
-    // Virtual clone method for deep copying in OrdersList
-    virtual Order* clone() const = 0;
-    
-    // Getters
-    std::string getType() const;
-    std::string getEffect() const;
-    bool isExecuted() const;
-    
-    // Stream insertion operator
-    friend std::ostream& operator<<(std::ostream& os, const Order& order);
-    
+	// Constructors and destructor
+	Order(const std::string& orderType);
+	Order(const Order& other);
+	virtual ~Order();
+
+	// Assignment operator
+	Order& operator=(const Order& other);
+
+	// Pure virtual methods - must be implemented by subclasses
+	virtual bool validate() = 0;
+	virtual void execute() = 0;
+
+	// Virtual clone method for deep copying in OrdersList
+	virtual Order* clone() const = 0;
+
+	// logging function
+	std::string stringToLog() const override;
+
+	// Getters
+	std::string getType() const;
+	std::string getEffect() const;
+	bool isExecuted() const;
+
+	// Stream insertion operator
+	friend std::ostream& operator<<(std::ostream& os, const Order& order);
+
 protected:
     std::string* orderType;
     std::string* effect;
@@ -166,23 +170,31 @@ private:
 
 // -------- ORDERSLIST CLASS --------
 // Manages a collection of orders with operations to manipulate the list
-class OrdersList {
+class OrdersList : public Subject, public ILoggable {
 public:
-    OrdersList();
-    OrdersList(const OrdersList& other);
-    ~OrdersList();
-    
-    OrdersList& operator=(const OrdersList& other);
-    
-    void add(Order* order);
-    void remove(int index);
-    void move(int fromIndex, int toIndex);
-    
-    int size() const;
-    Order* getOrder(int index) const;
-    
-    friend std::ostream& operator<<(std::ostream& os, const OrdersList& list);
-    
+	// Constructors and destructor
+	OrdersList();
+	OrdersList(const OrdersList& other);
+	~OrdersList();
+
+	// Assignment operator
+	OrdersList& operator=(const OrdersList& other);
+
+	// Methods
+	void add(Order* order);                    // Add order to end of list
+	void remove(int index);                     // Remove order at index
+	void move(int fromIndex, int toIndex);      // Move order from one position to another
+
+	// logging function
+	std::string stringToLog() const override;
+
+	// Getters
+	int size() const;
+	Order* getOrder(int index) const;
+
+	// Stream insertion operator
+	friend std::ostream& operator<<(std::ostream& os, const OrdersList& list);
+
 private:
     std::vector<Order*>* orders;
 };
