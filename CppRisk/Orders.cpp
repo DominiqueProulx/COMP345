@@ -122,64 +122,69 @@ Deploy& Deploy::operator=(const Deploy& other) {
 }
 
 bool Deploy::validate() {
-	// Handle default constructor case (Assignment 1 mode)
-	if (!player || !targetTerritory) {
-		std::cout << "Validating Deploy order (Assignment 1 mode)..." << std::endl;
-		return true;
-	}
-
-	// Assignment 2 validation
-	if (!player->ownsTerritory(targetTerritory)) {
-		std::cout << "Deploy INVALID: " << player->getName()
-			<< " does not own " << targetTerritory->getName() << std::endl;
-		return false;
-	}
-
-	if (player->getReinforcementPool() < *armiesToDeploy) {
-		std::cout << "Deploy INVALID: Not enough reinforcements (have "
-			<< player->getReinforcementPool() << ", need "
-			<< *armiesToDeploy << ")" << std::endl;
-		return false;
-	}
-
-	std::cout << "Deploy VALID: Deploying " << *armiesToDeploy
-		<< " armies to " << targetTerritory->getName() << std::endl;
-	return true;
+    // Handle default constructor case (Assignment 1 mode)
+    if (!player || !targetTerritory) {
+        std::cout << "Validating Deploy order (Assignment 1 mode)..." << std::endl;
+        return true;
+    }
+    
+    // Assignment 2 validation
+    if (!player->ownsTerritory(targetTerritory)) {
+        std::cout << "Deploy INVALID: " << player->getName() 
+                  << " does not own " << targetTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    // Calculate available armies = pool - already committed armies
+    // Note: Game engine is responsible for tracking pending deployments
+    // during the issuing phase. We only read the value here for validation.
+    int availableArmies = player->getReinforcementPool() - player->getPendingDeployments();
+    
+    if (availableArmies < *armiesToDeploy) {
+        std::cout << "Deploy INVALID: Not enough reinforcements (have " 
+                  << availableArmies << " available, need " 
+                  << *armiesToDeploy << ")" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Deploy VALID: Deploying " << *armiesToDeploy 
+              << " armies to " << targetTerritory->getName() 
+              << " (available: " << availableArmies << ")" << std::endl;
+    return true;
 }
 
 void Deploy::execute() {
-	if (validate()) {
-		// Handle Assignment 1 mode
-		if (!player || !targetTerritory) {
-			std::cout << "Executing Deploy order (Assignment 1 mode)..." << std::endl;
-			delete effect;
-			effect = new std::string("Deploy order executed (placeholder)");
-			*executed = true;
-			std::cout << "Deploy order executed successfully." << std::endl;
-			return;
-		}
-
-		// Assignment 2 execution
-		player->setReinforcementPool(player->getReinforcementPool() - *armiesToDeploy);
-		targetTerritory->setNumberOfArmies(
-			targetTerritory->getNumberOfArmies() + *armiesToDeploy
-		);
-
-		delete effect;
-		effect = new std::string("Deployed " + std::to_string(*armiesToDeploy) +
-			" armies to " + targetTerritory->getName());
-		*executed = true;
-
-		std::cout << "Deploy EXECUTED: " << *effect << std::endl;
-
-		// log the order execution to gamelog.txt
-		notify(this);
-	}
-	else {
-		delete effect;
-		effect = new std::string("Deploy order was invalid and not executed");
-		std::cout << "Deploy NOT EXECUTED" << std::endl;
-	}
+    if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !targetTerritory) {
+            std::cout << "Executing Deploy order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Deploy order executed (placeholder)");
+            *executed = true;
+            std::cout << "Deploy order executed successfully." << std::endl;
+            return;
+        }
+        
+        // Assignment 2 execution
+        // Deduct from reinforcement pool
+        player->setReinforcementPool(player->getReinforcementPool() - *armiesToDeploy);
+        
+        // Add armies to territory
+        targetTerritory->setNumberOfArmies(
+            targetTerritory->getNumberOfArmies() + *armiesToDeploy
+        );
+        
+        delete effect;
+        effect = new std::string("Deployed " + std::to_string(*armiesToDeploy) + 
+                                " armies to " + targetTerritory->getName());
+        *executed = true;
+        
+        std::cout << "Deploy EXECUTED: " << *effect << std::endl;
+    } else {
+        delete effect;
+        effect = new std::string("Deploy order was invalid and not executed");
+        std::cout << "Deploy NOT EXECUTED" << std::endl;
+    }
 }
 
 Order* Deploy::clone() const {
@@ -230,158 +235,160 @@ Advance& Advance::operator=(const Advance& other) {
 }
 
 bool Advance::validate() {
-	// Handle default constructor case (Assignment 1 mode)
-	if (!player || !sourceTerritory || !targetTerritory) {
-		std::cout << "Validating Advance order (Assignment 1 mode)..." << std::endl;
-		return true;
-	}
-
-	// Assignment 2 validation
-	if (!player->ownsTerritory(sourceTerritory)) {
-		std::cout << "Advance INVALID: " << player->getName()
-			<< " does not own source " << sourceTerritory->getName() << std::endl;
-		return false;
-	}
-	// If target belongs to player, this is a move (not attack), still need to validate
-	// If target belongs to someone else or is neutral, this is an attack
-	if (targetTerritory->getOwner() &&
-		!player->ownsTerritory(targetTerritory) &&
-		targetTerritory->getOwner() != player) {
-		// This is an attack - additional validation needed
-	}
-
-	if (!sourceTerritory->isAdjacentTo(targetTerritory)) {
-		std::cout << "Advance INVALID: " << sourceTerritory->getName()
-			<< " is not adjacent to " << targetTerritory->getName() << std::endl;
-		return false;
-	}
-
-	if (sourceTerritory->getNumberOfArmies() < *armiesToMove) {
-		std::cout << "Advance INVALID: Not enough armies on "
-			<< sourceTerritory->getName() << std::endl;
-		return false;
-	}
-
-	// Check negotiate
-	if (targetTerritory->getOwner() != player &&
-		targetTerritory->getOwner() != nullptr &&
-		player->hasNegotiationWith(targetTerritory->getOwner())) {
-		std::cout << "Advance INVALID: Cannot attack "
-			<< targetTerritory->getOwner()->getName()
-			<< " due to negotiate order" << std::endl;
-		return false;
-	}
-
-	std::cout << "Advance VALID: Moving " << *armiesToMove
-		<< " armies from " << sourceTerritory->getName()
-		<< " to " << targetTerritory->getName() << std::endl;
-	return true;
+    // Handle default constructor case (Assignment 1 mode)
+    if (!player || !sourceTerritory || !targetTerritory) {
+        std::cout << "Validating Advance order (Assignment 1 mode)..." << std::endl;
+        return true;
+    }
+    
+    // Assignment 2 validation
+    if (!player->ownsTerritory(sourceTerritory)) {
+        std::cout << "Advance INVALID: " << player->getName() 
+                  << " does not own source " << sourceTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    // Check if target territory has an owner and validate accordingly
+    if (targetTerritory->getOwner() && 
+        !player->ownsTerritory(targetTerritory) && 
+        targetTerritory->getOwner() != player) {
+        // This is an attack - target is owned by another player
+        // Additional validation is handled below (adjacency, negotiate)
+    }
+    
+    if (!sourceTerritory->isAdjacentTo(targetTerritory)) {
+        std::cout << "Advance INVALID: " << sourceTerritory->getName() 
+                  << " is not adjacent to " << targetTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    if (sourceTerritory->getNumberOfArmies() < *armiesToMove) {
+        std::cout << "Advance INVALID: Not enough armies on " 
+                  << sourceTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    // Check negotiate - cannot attack if negotiated
+    if (targetTerritory->getOwner() != player && 
+        targetTerritory->getOwner() != nullptr &&
+        player->hasNegotiationWith(targetTerritory->getOwner())) {
+        std::cout << "Advance INVALID: Cannot attack " 
+                  << targetTerritory->getOwner()->getName() 
+                  << " due to negotiate order" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Advance VALID: Moving " << *armiesToMove 
+              << " armies from " << sourceTerritory->getName() 
+              << " to " << targetTerritory->getName() << std::endl;
+    return true;
 }
 
 void Advance::simulateBattle(int attackers, int defenders) {
-	std::cout << "\n=== BATTLE SIMULATION ===" << std::endl;
-	std::cout << "Attackers: " << attackers << " | Defenders: " << defenders << std::endl;
-
-	int attackersRemaining = attackers;
-	int defendersRemaining = defenders;
-
-	static bool seeded = false;
-	if (!seeded) {
-		std::srand(std::time(nullptr));
-		seeded = true;
-	}
-
-	for (int i = 0; i < attackers && defendersRemaining > 0; i++) {
-		if (std::rand() % 100 < 60) {
-			defendersRemaining--;
-		}
-	}
-
-	for (int i = 0; i < defenders && attackersRemaining > 0; i++) {
-		if (std::rand() % 100 < 70) {
-			attackersRemaining--;
-		}
-	}
-
-	std::cout << "Battle Result - Attackers: " << attackersRemaining
-		<< " | Defenders: " << defendersRemaining << std::endl;
-
-	sourceTerritory->setNumberOfArmies(
-		sourceTerritory->getNumberOfArmies() - attackers
-	);
-
-	if (defendersRemaining == 0) {
-		std::cout << "Territory conquered by " << player->getName() << "!" << std::endl;
-
-		Player* previousOwner = targetTerritory->getOwner();
-		if (previousOwner) {
-			previousOwner->removeTerritory(targetTerritory);
-		}
-
-		player->addTerritory(targetTerritory);
-		targetTerritory->setNumberOfArmies(attackersRemaining);
-		player->setConqueredThisTurn(true);
-
-		delete effect;
-		effect = new std::string("Conquered " + targetTerritory->getName() +
-			" with " + std::to_string(attackersRemaining) +
-			" armies surviving");
-	}
-	else {
-		targetTerritory->setNumberOfArmies(defendersRemaining);
-
-		delete effect;
-		effect = new std::string("Attack on " + targetTerritory->getName() +
-			" failed. " + std::to_string(defendersRemaining) +
-			" defenders remain");
-	}
-
-	std::cout << "=== BATTLE END ===" << std::endl << std::endl;
+    std::cout << "\n=== BATTLE SIMULATION ===" << std::endl;
+    std::cout << "Attackers: " << attackers << " | Defenders: " << defenders << std::endl;
+    
+    int attackersRemaining = attackers;
+    int defendersRemaining = defenders;
+    
+    static bool seeded = false;
+    if (!seeded) {
+        std::srand(std::time(nullptr));
+        seeded = true;
+    }
+    
+    // Attackers kill defenders (60% chance per attacker)
+    for (int i = 0; i < attackers && defendersRemaining > 0; i++) {
+        if (std::rand() % 100 < 60) {
+            defendersRemaining--;
+        }
+    }
+    
+    // Defenders kill attackers (70% chance per defender)
+    for (int i = 0; i < defenders && attackersRemaining > 0; i++) {
+        if (std::rand() % 100 < 70) {
+            attackersRemaining--;
+        }
+    }
+    
+    std::cout << "Battle Result - Attackers: " << attackersRemaining 
+              << " | Defenders: " << defendersRemaining << std::endl;
+    
+    // Remove attacking armies from source
+    sourceTerritory->setNumberOfArmies(
+        sourceTerritory->getNumberOfArmies() - attackers
+    );
+    
+    if (defendersRemaining == 0) {
+        // Conquest successful
+        std::cout << "Territory conquered by " << player->getName() << "!" << std::endl;
+        
+        Player* previousOwner = targetTerritory->getOwner();
+        if (previousOwner) {
+            previousOwner->removeTerritory(targetTerritory);
+        }
+        
+        player->addTerritory(targetTerritory);
+        targetTerritory->setNumberOfArmies(attackersRemaining);
+        player->setConqueredThisTurn(true);
+        
+        delete effect;
+        effect = new std::string("Conquered " + targetTerritory->getName() + 
+                                " with " + std::to_string(attackersRemaining) + 
+                                " armies surviving");
+    } else {
+        // Attack failed
+        targetTerritory->setNumberOfArmies(defendersRemaining);
+        
+        delete effect;
+        effect = new std::string("Attack on " + targetTerritory->getName() + 
+                                " failed. " + std::to_string(defendersRemaining) + 
+                                " defenders remain");
+    }
+    
+    std::cout << "=== BATTLE END ===" << std::endl << std::endl;
 }
 
 void Advance::execute() {
-	if (validate()) {
-		// Handle Assignment 1 mode
-		if (!player || !sourceTerritory || !targetTerritory) {
-			std::cout << "Executing Advance order (Assignment 1 mode)..." << std::endl;
-			delete effect;
-			effect = new std::string("Advance order executed (placeholder)");
-			*executed = true;
-			std::cout << "Advance order executed successfully." << std::endl;
-			return;
-		}
-
-		// Assignment 2 execution
-		if (player->ownsTerritory(targetTerritory)) {
-			sourceTerritory->setNumberOfArmies(
-				sourceTerritory->getNumberOfArmies() - *armiesToMove
-			);
-			targetTerritory->setNumberOfArmies(
-				targetTerritory->getNumberOfArmies() + *armiesToMove
-			);
-
-			delete effect;
-			effect = new std::string("Moved " + std::to_string(*armiesToMove) +
-				" armies from " + sourceTerritory->getName() +
-				" to " + targetTerritory->getName());
-			*executed = true;
-
-			std::cout << "Advance EXECUTED: " << *effect << std::endl;
-
-			// log the order execution to gamelog.txt
-			notify(this);
-		}
-		else {
-			simulateBattle(*armiesToMove, targetTerritory->getNumberOfArmies());
-			*executed = true;
-			std::cout << "Advance EXECUTED: " << *effect << std::endl;
-		}
-	}
-	else {
-		delete effect;
-		effect = new std::string("Advance order was invalid and not executed");
-		std::cout << "Advance NOT EXECUTED" << std::endl;
-	}
+    if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !sourceTerritory || !targetTerritory) {
+            std::cout << "Executing Advance order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Advance order executed (placeholder)");
+            *executed = true;
+            std::cout << "Advance order executed successfully." << std::endl;
+            return;
+        }
+        
+        // Assignment 2 execution
+        if (player->ownsTerritory(targetTerritory)) {
+            // Simple move between owned territories
+            sourceTerritory->setNumberOfArmies(
+                sourceTerritory->getNumberOfArmies() - *armiesToMove
+            );
+            targetTerritory->setNumberOfArmies(
+                targetTerritory->getNumberOfArmies() + *armiesToMove
+            );
+            
+            delete effect;
+            effect = new std::string("Moved " + std::to_string(*armiesToMove) + 
+                                    " armies from " + sourceTerritory->getName() + 
+                                    " to " + targetTerritory->getName());
+            *executed = true;
+            
+            std::cout << "Advance EXECUTED: " << *effect << std::endl;
+        } else {
+            // Attack enemy territory
+            simulateBattle(*armiesToMove, targetTerritory->getNumberOfArmies());
+            *executed = true;
+            std::cout << "Advance EXECUTED: " << *effect << std::endl;
+        }
+    } else {
+        delete effect;
+        effect = new std::string("Advance order was invalid and not executed");
+        std::cout << "Advance NOT EXECUTED" << std::endl;
+    }
 }
 
 Order* Advance::clone() const {
@@ -420,34 +427,36 @@ Bomb& Bomb::operator=(const Bomb& other) {
 }
 
 bool Bomb::validate() {
-	// Handle default constructor case
-	if (!player || !targetTerritory) {
-		std::cout << "Validating Bomb order (Assignment 1 mode)..." << std::endl;
-		return true;
-	}
-	// Assignment 2 validation
-	if (player->ownsTerritory(targetTerritory)) {
-		std::cout << "Bomb INVALID: Cannot bomb own territory" << std::endl;
-		return false;
-	}
-
-	bool isAdjacent = false;
-	const std::vector<Territory*>* territories = player->getTerritories();
-	for (Territory* t : *territories) {
-		if (t->isAdjacentTo(targetTerritory)) {
-			isAdjacent = true;
-			break;
-		}
-	}
-
-	if (!isAdjacent) {
-		std::cout << "Bomb INVALID: " << targetTerritory->getName()
-			<< " is not adjacent to any owned territory" << std::endl;
-		return false;
-	}
-
-	std::cout << "Bomb VALID: Bombing " << targetTerritory->getName() << std::endl;
-	return true;
+    // Handle default constructor case
+    if (!player || !targetTerritory) {
+        std::cout << "Validating Bomb order (Assignment 1 mode)..." << std::endl;
+        return true;
+    }
+    
+    // Assignment 2 validation
+    if (player->ownsTerritory(targetTerritory)) {
+        std::cout << "Bomb INVALID: Cannot bomb own territory" << std::endl;
+        return false;
+    }
+    
+    // Check if target is adjacent to any owned territory
+    bool isAdjacent = false;
+    const std::vector<Territory*>* territories = player->getTerritories();
+    for (Territory* t : *territories) {
+        if (t->isAdjacentTo(targetTerritory)) {
+            isAdjacent = true;
+            break;
+        }
+    }
+    
+    if (!isAdjacent) {
+        std::cout << "Bomb INVALID: " << targetTerritory->getName() 
+                  << " is not adjacent to any owned territory" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Bomb VALID: Bombing " << targetTerritory->getName() << std::endl;
+    return true;
 }
 
 void Bomb::execute() {
@@ -526,49 +535,60 @@ Blockade& Blockade::operator=(const Blockade& other) {
 }
 
 bool Blockade::validate() {
+    // Handle default constructor case
+    if (!player || !targetTerritory || !neutralPlayer) {
+        std::cout << "Validating Blockade order (Assignment 1 mode)..." << std::endl;
+        return true;
+    }
 
-	// Handle default constructor case
-	if (!player || !targetTerritory || !neutralPlayer) {
-		std::cout << "Validating Blockade order (Assignment 1 mode)..." << std::endl;
-		return true;
-	}
-
-	// Assignment 2 validation
-	if (!player->ownsTerritory(targetTerritory)) {
-		std::cout << "Blockade INVALID: " << player->getName()
-			<< " does not own " << targetTerritory->getName() << std::endl;
-		return false;
-	}
-
-	std::cout << "Blockade VALID: Blockading " << targetTerritory->getName() << std::endl;
-	return true;
+    // Assignment 2 validation
+    if (!player->ownsTerritory(targetTerritory)) {
+        std::cout << "Blockade INVALID: " << player->getName() 
+                  << " does not own " << targetTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    // Check if neutral player exists
+    if (!neutralPlayer) {
+        std::cout << "Blockade INVALID: Neutral player does not exist" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Blockade VALID: Blockading " << targetTerritory->getName() << std::endl;
+    return true;
 }
 
 void Blockade::execute() {
-	if (validate()) {
-		int currentArmies = targetTerritory->getNumberOfArmies();
-		targetTerritory->setNumberOfArmies(currentArmies * 2);
-
-		player->removeTerritory(targetTerritory);
-		neutralPlayer->addTerritory(targetTerritory);
-
-		delete effect;
-		effect = new std::string("Blockaded " + targetTerritory->getName() +
-			": doubled armies to " +
-			std::to_string(currentArmies * 2) +
-			" and transferred to Neutral player");
-		*executed = true;
-
-		std::cout << "Blockade EXECUTED: " << *effect << std::endl;
-
-		// log the order execution to gamelog.txt
-		notify(this);
-	}
-	else {
-		delete effect;
-		effect = new std::string("Blockade order was invalid and not executed");
-		std::cout << "Blockade NOT EXECUTED" << std::endl;
-	}
+    if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !targetTerritory || !neutralPlayer) {
+            std::cout << "Executing Blockade order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Blockade order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
+        int currentArmies = targetTerritory->getNumberOfArmies();
+        targetTerritory->setNumberOfArmies(currentArmies * 2);
+        
+        player->removeTerritory(targetTerritory);
+        neutralPlayer->addTerritory(targetTerritory);
+        
+        delete effect;
+        effect = new std::string("Blockaded " + targetTerritory->getName() + 
+                                ": doubled armies to " + 
+                                std::to_string(currentArmies * 2) + 
+                                " and transferred to Neutral player");
+        *executed = true;
+        
+        std::cout << "Blockade EXECUTED: " << *effect << std::endl;
+    } else {
+        delete effect;
+        effect = new std::string("Blockade order was invalid and not executed");
+        std::cout << "Blockade NOT EXECUTED" << std::endl;
+    }
 }
 
 Order* Blockade::clone() const {
@@ -619,56 +639,68 @@ Airlift& Airlift::operator=(const Airlift& other) {
 }
 
 bool Airlift::validate() {
-
-	// Handle default constructor case
-	if (!player || !sourceTerritory || !targetTerritory) {
-		std::cout << "Validating Airlift order (Assignment 1 mode)..." << std::endl;
-		return true;
-	}
-	// Assignment 2 validation
-	if (!player->ownsTerritory(sourceTerritory)) {
-		std::cout << "Airlift INVALID: " << player->getName()
-			<< " does not own source " << sourceTerritory->getName() << std::endl;
-		return false;
-	}
-
-	if (sourceTerritory->getNumberOfArmies() < *armiesToMove) {
-		std::cout << "Airlift INVALID: Not enough armies on "
-			<< sourceTerritory->getName() << std::endl;
-		return false;
-	}
-
-	std::cout << "Airlift VALID: Airlifting " << *armiesToMove
-		<< " armies from " << sourceTerritory->getName()
-		<< " to " << targetTerritory->getName() << std::endl;
-	return true;
+    // Handle default constructor case
+    if (!player || !sourceTerritory || !targetTerritory) {
+        std::cout << "Validating Airlift order (Assignment 1 mode)..." << std::endl;
+        return true;
+    }
+    
+    // Assignment 2 validation
+    if (!player->ownsTerritory(sourceTerritory)) {
+        std::cout << "Airlift INVALID: " << player->getName() 
+                  << " does not own source " << sourceTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    if (!player->ownsTerritory(targetTerritory)) {
+        std::cout << "Airlift INVALID: " << player->getName() 
+                  << " does not own target " << targetTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    if (sourceTerritory->getNumberOfArmies() < *armiesToMove) {
+        std::cout << "Airlift INVALID: Not enough armies on " 
+                  << sourceTerritory->getName() << std::endl;
+        return false;
+    }
+    
+    std::cout << "Airlift VALID: Airlifting " << *armiesToMove 
+              << " armies from " << sourceTerritory->getName() 
+              << " to " << targetTerritory->getName() << std::endl;
+    return true;
 }
 
 void Airlift::execute() {
-	if (validate()) {
-		sourceTerritory->setNumberOfArmies(
-			sourceTerritory->getNumberOfArmies() - *armiesToMove
-		);
-		targetTerritory->setNumberOfArmies(
-			targetTerritory->getNumberOfArmies() + *armiesToMove
-		);
-
-		delete effect;
-		effect = new std::string("Airlifted " + std::to_string(*armiesToMove) +
-			" armies from " + sourceTerritory->getName() +
-			" to " + targetTerritory->getName());
-		*executed = true;
-
-		std::cout << "Airlift EXECUTED: " << *effect << std::endl;
-
-		// log the order execution to gamelog.txt
-		notify(this);
-	}
-	else {
-		delete effect;
-		effect = new std::string("Airlift order was invalid and not executed");
-		std::cout << "Airlift NOT EXECUTED" << std::endl;
-	}
+    if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !sourceTerritory || !targetTerritory) {
+            std::cout << "Executing Airlift order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Airlift order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
+        sourceTerritory->setNumberOfArmies(
+            sourceTerritory->getNumberOfArmies() - *armiesToMove
+        );
+        targetTerritory->setNumberOfArmies(
+            targetTerritory->getNumberOfArmies() + *armiesToMove
+        );
+        
+        delete effect;
+        effect = new std::string("Airlifted " + std::to_string(*armiesToMove) + 
+                                " armies from " + sourceTerritory->getName() + 
+                                " to " + targetTerritory->getName());
+        *executed = true;
+        
+        std::cout << "Airlift EXECUTED: " << *effect << std::endl;
+    } else {
+        delete effect;
+        effect = new std::string("Airlift order was invalid and not executed");
+        std::cout << "Airlift NOT EXECUTED" << std::endl;
+    }
 }
 
 Order* Airlift::clone() const {
@@ -713,36 +745,43 @@ bool Negotiate::validate() {
 		return true;
 	}
 
-	if (player == targetPlayer) {
-		std::cout << "Negotiate INVALID: Cannot negotiate with self" << std::endl;
-		return false;
-	}
-
-	std::cout << "Negotiate VALID: " << player->getName()
-		<< " negotiating with " << targetPlayer->getName() << std::endl;
-	return true;
+    // Assignment 2 validation
+    if (player == targetPlayer) {
+        std::cout << "Negotiate INVALID: Cannot negotiate with self" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Negotiate VALID: " << player->getName() 
+              << " negotiating with " << targetPlayer->getName() << std::endl;
+    return true;
 }
 
 void Negotiate::execute() {
-	if (validate()) {
-		player->addNegotiatedPlayer(targetPlayer);
-		targetPlayer->addNegotiatedPlayer(player);
-
-		delete effect;
-		effect = new std::string("Negotiated with " + targetPlayer->getName() +
-			": no attacks possible this turn");
-		*executed = true;
-
-		std::cout << "Negotiate EXECUTED: " << *effect << std::endl;
-
-		// log the order execution to gamelog.txt
-		notify(this);
-	}
-	else {
-		delete effect;
-		effect = new std::string("Negotiate order was invalid and not executed");
-		std::cout << "Negotiate NOT EXECUTED" << std::endl;
-	}
+    if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !targetPlayer) {
+            std::cout << "Executing Negotiate order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Negotiate order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
+        player->addNegotiatedPlayer(targetPlayer);
+        targetPlayer->addNegotiatedPlayer(player);
+        
+        delete effect;
+        effect = new std::string("Negotiated with " + targetPlayer->getName() + 
+                                ": no attacks possible this turn");
+        *executed = true;
+        
+        std::cout << "Negotiate EXECUTED: " << *effect << std::endl;
+    } else {
+        delete effect;
+        effect = new std::string("Negotiate order was invalid and not executed");
+        std::cout << "Negotiate NOT EXECUTED" << std::endl;
+    }
 }
 
 Order* Negotiate::clone() const {

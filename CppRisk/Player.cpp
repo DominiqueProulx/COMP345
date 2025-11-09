@@ -26,6 +26,7 @@ Player::Player() {
     
     // Assignment 2 additions
     reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
 }
@@ -46,6 +47,7 @@ Player::Player(const std::string& color, const std::vector<Territory*>& initialT
     
     // Assignment 2 additions
     reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
 }
@@ -65,6 +67,7 @@ Player::Player(const Player& other) {
     
     // Assignment 2 additions
     this->reinforcementPool = new int(*other.reinforcementPool);
+    this->pendingDeployments = new int(*other.pendingDeployments); 
     this->conqueredTerritoryThisTurn = new bool(*other.conqueredTerritoryThisTurn);
     this->negotiatedPlayers = new std::set<Player*>(*other.negotiatedPlayers);
 }
@@ -84,6 +87,7 @@ Player::~Player() {
     
     // Assignment 2 additions
     delete reinforcementPool;
+    delete pendingDeployments;
     delete conqueredTerritoryThisTurn;
     delete negotiatedPlayers;
 }
@@ -200,6 +204,7 @@ Player& Player::operator=(const Player& otherPlayer) {
     delete orderslist; 
     delete territoriesOwned;
     delete reinforcementPool;
+    delete pendingDeployments;
     delete conqueredTerritoryThisTurn;
     delete negotiatedPlayers;
 
@@ -217,6 +222,7 @@ Player& Player::operator=(const Player& otherPlayer) {
     
     // Assignment 2 additions
     this->reinforcementPool = new int(*otherPlayer.reinforcementPool);
+    this->pendingDeployments = new int(*otherPlayer.pendingDeployments);
     this->conqueredTerritoryThisTurn = new bool(*otherPlayer.conqueredTerritoryThisTurn);
     this->negotiatedPlayers = new std::set<Player*>(*otherPlayer.negotiatedPlayers);
     
@@ -276,6 +282,18 @@ std::vector<Territory*> Player::toAttack() {
         }
     }
     return territoriesToAttack;
+}
+
+int Player::getPendingDeployments() const {
+    return *pendingDeployments;
+}
+
+void Player::addPendingDeployment(int armies) {
+    *pendingDeployments += armies;
+}
+
+void Player::clearPendingDeployments() {
+    *pendingDeployments = 0;
 }
 
 // issueOrder()
