@@ -165,6 +165,7 @@ Command* CommandProcessor::getCommand(GameEngine& engine) {
 	return commands->back().get();
 }
 
+
 // Returns a log string stating the name of the new saved Command.
 std::string CommandProcessor::stringToLog() const
 {
@@ -177,6 +178,11 @@ std::string CommandProcessor::stringToLog() const
 		return "[CMDPROCESSOR] Added a new command to a list: { " + cmdAsStream.str() + " }.";
 	}
 }
+
+
+//FILE COMMAND PROCESSOR ADAPTER
+
+//constructor, copy constructor, assignment operator, destructor
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const string& filename)
 	: CommandProcessor(), file(make_unique<ifstream>(filename)) {
@@ -212,9 +218,9 @@ Command* FileCommandProcessorAdapter::readCommand(GameEngine& engine) {
 			continue; // skip empty lines
 		}
 
-		Command* newCommand = new Command(line);
+		Command* newCommand = new Command(line); 
 		validate(*newCommand, engine);
-		saveCommand(*newCommand);
+		saveCommand(*newCommand); 
 
 		return newCommand;
 
