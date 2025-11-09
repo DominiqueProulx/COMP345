@@ -119,6 +119,16 @@ Hand* Player::getHand() const {
 OrdersList* Player::getOrdersList() const {
     return orderslist;
 }
+int Player::getPendingDeployments() const {
+    return *pendingDeployments;
+}
+
+
+int Player::getReinforcementPool() const {
+    return *reinforcementPool;
+}
+
+
 
 // Setters
 void Player::setColor(const std::string& color) {
@@ -133,6 +143,20 @@ void Player::setHand(Hand& hand) {
 
 void Player::setPendingDeployments(int armies) {
     *pendingDeployments = armies;
+}
+
+void Player::addPendingDeployment(int armies) {
+    *pendingDeployments += armies;
+}
+
+void Player::clearPendingDeployments() {
+    *pendingDeployments = 0;
+}
+void Player::setReinforcementPool(int armies) {
+    *reinforcementPool = armies;
+}
+void Player::setConqueredThisTurn(bool conquered) {
+    *conqueredTerritoryThisTurn = conquered;
 }
 
 // Assignment 2 methods
@@ -163,20 +187,14 @@ void Player::removeTerritory(Territory* territory) {
     }
 }
 
-int Player::getReinforcementPool() const {
-    return *reinforcementPool;
-}
-
-void Player::setReinforcementPool(int armies) {
-    *reinforcementPool = armies;
-}
-
 bool Player::hasConqueredThisTurn() const {
     return *conqueredTerritoryThisTurn;
 }
 
-void Player::setConqueredThisTurn(bool conquered) {
-    *conqueredTerritoryThisTurn = conquered;
+
+void Player::removeExecutedOrder() {
+    orderslist->remove(0);
+
 }
 
 void Player::addNegotiatedPlayer(Player* player) {
@@ -254,6 +272,8 @@ Player& Player::operator=(const Player& otherPlayer) {
 
 
 // toDefend()
+// Player selects the territories they wish to defend this turn, in priority order.
+// Returns a vector of Territory pointers representing the defend list.
 std::vector<Territory*>* Player::toDefend() {
     int numberOfTerritories = (*territoriesOwned).size();
 
@@ -263,7 +283,7 @@ std::vector<Territory*>* Player::toDefend() {
         return nullptr; 
     }
 
-    std::vector<Territory*>* territoriesToDefendThisturn = new std::vector<Territory*>();
+	std::vector<Territory*>* territoriesToDefendThisturn = new std::vector<Territory*>();// Create a new vector to hold territories to defend
     bool doneAdding = false;
 
     std::cout << "\nPlease add territories to defend in priority order." << std::endl;
@@ -280,19 +300,20 @@ std::vector<Territory*>* Player::toDefend() {
         int choice;
         std::cin >> choice;
 
+		// Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
             std::cin.clear(); 
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter a number." << std::endl;
             continue;
         }
-
+		//returns the empty list if user cancels, allows a way out if there are no territories to defend. 
         if (choice == -1) {
             std::cout << "You cancelled territory selection. Returning..." << std::endl;
             return territoriesToDefendThisturn;
            
         }
-
+        //marks the end of the selection
         if (choice == 0) {
             if (territoriesToDefendThisturn->empty()) {
                 std::cout << "You must add at least one territory before finishing, or type -1 to cancel." << std::endl;
@@ -305,6 +326,7 @@ std::vector<Territory*>* Player::toDefend() {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
         else {
+			//add the chosen territory to the defend list if not already added
             Territory* territoryToAdd = (*territoriesOwned)[choice - 1];
             if (std::find(territoriesToDefendThisturn->begin(), territoriesToDefendThisturn->end(), territoryToAdd)
                 == territoriesToDefendThisturn->end()) {
@@ -319,6 +341,9 @@ std::vector<Territory*>* Player::toDefend() {
 
     return territoriesToDefendThisturn;
 }
+
+//choose from territories to defend
+// Handles user selection from the defend list
 Territory* Player::choseFromToDefend() {
 
     // Check if the defend list is empty or null
@@ -327,6 +352,7 @@ Territory* Player::choseFromToDefend() {
         return nullptr;
     }
 
+	//list all territories to defend
     std::cout << "\n----- Territories to Defend -----" << std::endl;
     int i = 1;
     for (Territory* t : *territoriesToDefend) {
@@ -335,7 +361,7 @@ Territory* Player::choseFromToDefend() {
     }
 
     std::cout << "\nEnter the number of the territory from your defend list."
-        << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
+        << "\n(Enter 0 to cancel)\n" << std::endl;
 
     int choice;
     bool validInput = false;
@@ -350,8 +376,8 @@ Territory* Player::choseFromToDefend() {
             continue;
         }
 
-        // Allow user to go back or cancel
-        if (choice == 0 || choice == -1) {
+		// Allow user to cancel selection , this way they are not stuck if the list is empty.
+        if (choice == 0 ) {
             std::cout << "Selection cancelled. Returning..." << std::endl;
             return nullptr;
         }
@@ -364,11 +390,13 @@ Territory* Player::choseFromToDefend() {
             validInput = true;
         }
     }
-
+	//Return the selected territory
     Territory* targetTerritory = (*territoriesToDefend)[choice - 1];
     return targetTerritory;
 }
 
+//choose from territories to attack
+// Handles user selection from the attack list
 Territory* Player::choseFromToAttack() {
 
     // Check if the attack list is empty or null
@@ -385,7 +413,7 @@ Territory* Player::choseFromToAttack() {
     }
 
     std::cout << "\nEnter the number of the territory you want from your to attack list."
-        << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
+        << "\n(Enter 0 to cancel)\n" << std::endl;
 
     int choice;
     bool validInput = false;
@@ -400,8 +428,8 @@ Territory* Player::choseFromToAttack() {
             continue;
         }
 
-        // Allow user to go back or cancel
-        if (choice == 0 || choice == -1) {
+        // Allow user to cancel selection , this way they are not stuck if the list is empty.
+        if (choice == 0 ) {
             std::cout << "Selection cancelled. Returning..." << std::endl;
             return nullptr;
         }
@@ -415,15 +443,19 @@ Territory* Player::choseFromToAttack() {
         }
     }
 
-    Territory* targetTerritory = (*territoriesToAttack)[choice - 1];
+	Territory* targetTerritory = (*territoriesToAttack)[choice - 1]; // Return the selected territory
     return targetTerritory;
 }
 
+//choose from adjacent territories
+// Allows the player to choose a territory adjacent to a given territory for attack or defense
 Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string& option) {
     std::vector<Territory*> adjTerritories;
     int index = 1;
     std::cout << "Choose a territory: " << std::endl;
 
+	// List adjacent territories based on the option (attack or defend)
+	// For attack, list adjacent territories from the attack list
     if (option == "attack") {
         for (Territory* t : *territoriesToAttack) {
             if (t->isAdjacentTo(ownTerritory)) {
@@ -434,6 +466,7 @@ Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string&
             }
         }
     }
+	// For defend, list adjacent territories owned by the player
     else if (option == "defend") {
         for (Territory* t : *territoriesOwned) {
             if (t->isAdjacentTo(ownTerritory)) {
@@ -450,13 +483,14 @@ Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string&
         return nullptr;
     }
 
-    std::cout << "\nEnter the number of the territory (0 or -1 to cancel): ";
+    std::cout << "\nEnter the number of the territory (0 cancel): ";
 
     int choice;
     bool validInput = false;
     while (!validInput) {
         std::cin >> choice;
 
+		// Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -464,11 +498,12 @@ Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string&
             continue;
         }
 
-        if (choice == 0 || choice == -1) {
+		// Allow user to cancel selection
+        if (choice == 0 ) {
             std::cout << "Selection cancelled. Returning..." << std::endl;
             return nullptr;
         }
-
+		// Validate choice range
         if (choice < 1 || choice >(int)adjTerritories.size()) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
@@ -477,11 +512,13 @@ Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string&
         }
     }
 
-    return adjTerritories[choice - 1];
+	return adjTerritories[choice - 1]; // Return the selected adjacent territory
 }
 
 
 // toAttack()
+// Player selects the territories they wish to attack this turn, in priority order.
+// Returns a vector of Territory pointers representing the attack list.
 std::vector<Territory*>* Player::toAttack() {
     std::vector<Territory*> possibleTerritories;
 
@@ -503,8 +540,9 @@ std::vector<Territory*>* Player::toAttack() {
         std::cout << "Player has no territories to attack." << std::endl;
         return territoriesToAttackThisturn;
     }
-
     std::cout << "Please add territories to attack in priority (enter 0 to finish or cancel):" << std::endl;
+
+	// Display possible territories to attack with the number of armies present on it
     for (int i = 0; i < numberOfPossibleTerritories; i++) {
         std::cout << i + 1 << ". " << possibleTerritories[i]->getName()
             << " - " << possibleTerritories[i]->getNumberOfArmies() << " armies." << std::endl;
@@ -516,6 +554,7 @@ std::vector<Territory*>* Player::toAttack() {
         int choice;
         std::cin >> choice;
 
+		// Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -523,16 +562,19 @@ std::vector<Territory*>* Player::toAttack() {
             continue;
         }
 
+		// Handle finish/cancel input
         if (choice == 0) {
             if (territoriesToAttackThisturn->empty()) {
                 std::cout << "No territories selected for attack. Returning empty list." << std::endl;
             }
             doneAdding = true;
         }
+		// Validate choice range
         else if (choice < 1 || choice > numberOfPossibleTerritories) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
         else {
+			// Add the chosen territory to the attack list if not already added
             Territory* territoryToAdd = possibleTerritories[choice - 1];
             if (std::find(territoriesToAttackThisturn->begin(), territoriesToAttackThisturn->end(), territoryToAdd) == territoriesToAttackThisturn->end()) {
                 territoriesToAttackThisturn->push_back(territoryToAdd);
@@ -544,9 +586,10 @@ std::vector<Territory*>* Player::toAttack() {
         }
     }
 
-    return territoriesToAttackThisturn;
+	return territoriesToAttackThisturn;// Return the attack list
 }
 
+// Draw backup cards to ensure the player has at least 2 cards in hand at the beginning of the turn
 void Player::drawBackUpCards() {
     Hand* playersHand = getHand();
 	int cardcount = playersHand->getSize();
@@ -563,6 +606,7 @@ void Player::drawBackUpCards() {
 
 }
 
+// Reset defend and attack lists at the beginnign of the turn 
 void Player::resetDefendAndAttack() {
     if (territoriesToDefend) {
         delete territoriesToDefend;
@@ -573,15 +617,23 @@ void Player::resetDefendAndAttack() {
         territoriesToAttack = nullptr;
     }
 }
+
+// issueAdvanceOrder()
+// Handles the issuance of an Advance order by the player.
+// Returns a pointer to the created Advance order
 Order* Player::issueAdvanceOrder() {
 	std::cout << "You want to advance armies to defend your own territories or to attack a neighboring territory,\n press\"d\"for defend and \"a\" for attack. press 0 to cancel." << std::endl;
 	bool validInput = false;
 	char choice;
 	while (!validInput) {
 		std::cin >> choice;
+
+		//Handles defend choice
 		if (choice == 'd' || choice == 'D') {
             Territory* fromTerritory = nullptr;
             Territory* toTerritory = nullptr;
+
+			// Loop until a valid territory with armies is chosen to move armies from
 			while (fromTerritory == nullptr || fromTerritory->getNumberOfArmies() < 1) {
 				// chose the territory to move armies from
 				std::cout << "chose the territory you want to move armies from: " << std::endl;
@@ -590,24 +642,34 @@ Order* Player::issueAdvanceOrder() {
                     std::cout << "Advance order cancelled." << std::endl;
                     return nullptr;
 				}
+				// Check if there are armies available to move
 				if (fromTerritory->getNumberOfArmies() < 1) {
 					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please chose another Territory or press 0 to skip your turn \n" << std::endl;
-                    char choice;
+                    int choice;
                     std::cin >> choice;
+
+                    if (std::cin.fail()) {
+                        std::cin.clear();
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        std::cout << "Invalid input. Please enter a number." << std::endl;
+                        continue;
+                    }
                     if(choice == '0') {
                         std::cout << "Advance order cancelled." << std::endl;
-                        return nullptr;
+						return nullptr; // Exit if user chooses to cancel
 					}
 
 				}
 			}
-
+            
+			//Chose the territory to move armies to
 			std::cout << "chose the territory you want to move armies to: " << std::endl;
 			toTerritory = choseFromAdjacent(fromTerritory,"defend");
 
 
 			int armiestoMove;
 			bool validArmiesInput = false;
+			// Loop until a valid number of armies is entered
 			while (!validArmiesInput) {
 				int maxnumber = fromTerritory->getNumberOfArmies();
 				std::cout << "How many armies do you wish to move? max: " << maxnumber << std::endl;
@@ -618,15 +680,15 @@ Order* Player::issueAdvanceOrder() {
 				else {
 					validArmiesInput = true;
 				}
-
+				// Create the Advance order using the order factory
 				std::cout << "Creating an Advance order from " << fromTerritory->getName() << " to " << toTerritory->getName() << " and adding it to the orders list" << std::endl;
 				Order* advanceOrder = orderFactory(Player::OrderType::DEPLOY, fromTerritory, toTerritory, nullptr, armiestoMove);
 				
-
 				validInput = true;
                 return advanceOrder;
 			}
 		}
+		//Handles attack choice
 		else if (choice == 'a' || choice == 'A') {
 			// chose the territory to move armies from
             Territory* fromTerritory = nullptr;
@@ -635,19 +697,19 @@ Order* Player::issueAdvanceOrder() {
 
 				std::cout << "Choose the territory you want to move armies from: " << std::endl;
 				fromTerritory = choseFromToDefend();
-                if (fromTerritory == nullptr) { return nullptr; }
+				if (fromTerritory == nullptr) { return nullptr; } // Exit if user chooses to cancel
 				if (fromTerritory->getNumberOfArmies() < 1) {
 					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please choose another Territory " << std::endl;
-                    char choice;
+                    int choice;
                     std::cin >> choice;
-                    
+					// Handle invalid input types (non-numeric)
                     if (std::cin.fail()) {
                         std::cin.clear();
                         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cout << "Invalid input. Please enter a number." << std::endl;
                         continue;
                     }
-
+					// Exit if user chooses to cancel
                     if (choice == '0') {
                         std::cout << "Advance order cancelled." << std::endl;
                         return nullptr;
@@ -663,7 +725,8 @@ Order* Player::issueAdvanceOrder() {
 			while (!validArmiesInput) {
 				std::cout << "How many armies do you wish to move? " << std::endl;
 				std::cin >> armiestoMove;
-            
+
+				// Handle invalid input types (non-numeric)
                 if (std::cin.fail()) {
                     // Input was not an integer
                     std::cin.clear(); 
@@ -671,14 +734,14 @@ Order* Player::issueAdvanceOrder() {
                     std::cout << "Invalid input. Please enter a number." << std::endl;
                     continue;
                 }
-
+				// Validate number of armies to move
 				if (armiestoMove < 1 || armiestoMove > fromTerritory->getNumberOfArmies()) {
 					std::cout << "Invalid number of armies. Please try again." << std::endl;
 				}
 				else {
 					validArmiesInput = true;
 				}
-
+				// Create the Advance order using the order factory
 				std::cout << "Creating an Advance order from " << fromTerritory->getName() << " to " << toTerritory->getName() << " and adding it to the orders list" << std::endl;
 				Order* advanceOrder = orderFactory(Player::OrderType::ADVANCE, fromTerritory, toTerritory, nullptr, armiestoMove);
 				
@@ -687,15 +750,19 @@ Order* Player::issueAdvanceOrder() {
 			}
 		}
         else if (choice == '0') {
-            std::cout << "Advance order cancelled." << std::endl;
+			std::cout << "Advance order cancelled." << std::endl; // Exit if user chooses to cancel
             validInput = true;
 		}
 		else {
-			std::cout << "Invalid choice. Please try again." << std::endl;
+			std::cout << "Invalid choice. Please try again." << std::endl; 
 		}
 	}
     return nullptr;
 }
+
+// issueDeployOrder()
+// Handles the issuance of a Deploy order by the player.
+// Returns a pointer to the created Deploy order
 Order* Player::issueDeployOrder() {
 
     std::cout << "\nWhich territories would you like to deploy armies to? " << std::endl;
@@ -713,6 +780,7 @@ Order* Player::issueDeployOrder() {
             << " (max " << (*reinforcementPool - *pendingDeployments) << "): ";
         std::cin >> armiesToDeploy;
 
+		// Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
             // Input was not an integer
             std::cin.clear(); // clear the failbit
@@ -721,7 +789,7 @@ Order* Player::issueDeployOrder() {
             continue;
         }
 
-
+		// Validate number of armies to deploy to the chosen territory
         if (armiesToDeploy < 1 || armiesToDeploy > (*reinforcementPool - *pendingDeployments)) {
             std::cout << "Invalid number of armies. Please try again." << std::endl;
         }
@@ -730,15 +798,18 @@ Order* Player::issueDeployOrder() {
         }
     }
 
-    // Create Deploy order
+    // Create Deploy order using the order factory
     Order* deployOrder = orderFactory(Player::OrderType::DEPLOY,nullptr, targetTerritory,nullptr, armiesToDeploy);
     
-  //  *reinforcementPool -= armiesToDeploy;
+	// Update pending deployments to match the commited armies
 	*pendingDeployments += armiesToDeploy;
     std::cout << armiesToDeploy << " armies deployed to " << targetTerritory->getName()
         << ". Remaining reinforcement pool: " << (*reinforcementPool - *pendingDeployments) << std::endl;
 	return deployOrder;
 }
+// issueBombOrder()
+// Handles the issuance of a Bomb order by the player.
+// Returns a pointer to the created Bomb order
 Order* Player::issueBombOrder() {
     // choose target territory
 	std::cout << "choose the territory you want to bomb: " << std::endl;
@@ -747,11 +818,15 @@ Order* Player::issueBombOrder() {
         std::cout << "Bomb order cancelled." << std::endl;
         return nullptr;
     }
+	// Create Bomb order using the order factory
     std::cout << "Creating a Bomb order targeting " << targetTerritory->getName() << " and adding it to the orders list" << std::endl;
     Order* bombOrder = orderFactory(Player::OrderType::BOMB, nullptr, targetTerritory, nullptr, 0);
     return bombOrder;
 }
 
+// issueBlockadeOrder()
+// Handles the issuance of a Blockade order by the player.
+//// Returns a pointer to the created Blockade order
 Order* Player::issueBlockadeOrder() {
     // choose target territory
     std::cout << "choose the territory you want to blockade: " << std::endl;
@@ -760,10 +835,15 @@ Order* Player::issueBlockadeOrder() {
         std::cout << "Blockade order cancelled." << std::endl;
         return nullptr;
     }
+	// Create Blockade order using the order factory
 	std::cout << "Creating a Blockade order targeting " << targetTerritory->getName() << " and adding it to the orders list" << std::endl;
 	Order* blockadeOrder = orderFactory(Player::OrderType::BLOCKADE, nullptr, targetTerritory, new Player(), 0); //FLAG : need to specify neutral player after integration
 	return blockadeOrder;
 }
+
+// issueAirliftOrder()
+// Handles the issuance of an Airlift order by the player.
+// Returns a pointer to the created Airlift order
 Order* Player::issueAirliftOrder() {
     Territory* fromTerritory;
     Territory* toTerritory;
@@ -797,14 +877,13 @@ Order* Player::issueAirliftOrder() {
             << " to " << toTerritory->getName() << " (max " << fromTerritory->getNumberOfArmies() << "): ";
         std::cin >> armiesToAirlift;
 
+		// Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter a number." << std::endl;
             continue;
         }
-
-
         if (armiesToAirlift < 1 || armiesToAirlift > fromTerritory->getNumberOfArmies()) {
             std::cout << "Invalid number of armies. Please try again." << std::endl;
         }
@@ -812,11 +891,17 @@ Order* Player::issueAirliftOrder() {
             validInput = true;
         }
     }
+
+	// Create Airlift order using the order factory
     std::cout << "Creating an Airlift order from " << fromTerritory->getName() << " to " << toTerritory->getName() << " and adding it to the orders list" << std::endl;
     Order* airliftOrder = orderFactory(Player::OrderType::AIRLIFT, fromTerritory, toTerritory, nullptr, armiesToAirlift);
 	return airliftOrder;
 
 }
+
+// issueNegotiateOrder()
+// Handles the issuance of a Negotiate order by the player.
+// Returns a pointer to the created Negotiate order
 Order* Player::issueNegotiateOrder() {
 	//choose the player to negotiate with
     std::cout << "Choose the territory of the player you want to negotiate with: " << std::endl;
@@ -826,11 +911,16 @@ Order* Player::issueNegotiateOrder() {
         std::cout << "Negociate order cancelled." << std::endl;
         return nullptr;
     }
+	// Get the owner of the chosen territory - Negocation is between players not territories
 	Player* owner = targetTerritory->getOwner();
 	std::cout << "Creating a Negotiate order with player owning " << targetTerritory->getName() << " and adding it to the orders list" << std::endl;
+	// Create Negotiate order using the order factory
 	Order* negotiateOrder = orderFactory(Player::OrderType::NEGOTIATE, nullptr, nullptr, owner, 0);
 	return negotiateOrder;
 }
+// orderFactory()
+// Factory method to create different types of orders based on the specified type
+// Returns a pointer to the created Order
 Order* Player::orderFactory(Player::OrderType type,
     Territory* sourceTerritory,
     Territory* targetTerritory ,
@@ -861,24 +951,18 @@ Order* Player::orderFactory(Player::OrderType type,
     }
 }
 
-int Player::getPendingDeployments() const {
-    return *pendingDeployments;
-}
 
-void Player::addPendingDeployment(int armies) {
-    *pendingDeployments += armies;
-}
-
-void Player::clearPendingDeployments() {
-    *pendingDeployments = 0;
-}
 
 // issueOrder()
+// Main method for issuing orders during the player's turn
+// First, toDefend and ToAttack lists are set if not already done for the turn
+// Calls the appropriate order issuance methods based on player input
+// Only deploy orders casn be called until the reinforcement pool is all pendingDeployment 
+// All orders are created using the order factory
+// Adds the created orders to the player's order list
 void Player::issueOrder() {
     
-    // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase
-    
-   
+    // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase turn
     if (territoriesToDefend == nullptr || territoriesToAttack == nullptr) {
         territoriesToDefend = new std::vector<Territory*>();
         territoriesToAttack = new std::vector<Territory*>();
@@ -891,7 +975,6 @@ void Player::issueOrder() {
 
     std::cout << "\nHere are the possible orders you can issue" << std::endl;
     // Only deploy order is available if the reinforcement pool is not empty
-    
     if ( ( *reinforcementPool - *pendingDeployments) != 0) {
         std::cout << "\nYour reinforcement pool is not empty, please Deploy your armies first" << std::endl;
         std::cout << ( *reinforcementPool - *pendingDeployments) << " armies need to be deployed." << std::endl;
@@ -901,7 +984,7 @@ void Player::issueOrder() {
       
     } else {
        
-        
+		// Other orders are available once the reinforcement pool is empty
         std::cout << "\nHere are the possible orders" << std::endl;
         std::cout << "0. end turn" << std::endl; 
         std::cout << "1. Advance" << std::endl;
@@ -916,7 +999,7 @@ void Player::issueOrder() {
         while (!validInput) {
             std::cout << "Please choose an order number" << std::endl;
             std::cin >> choice;
-            
+			// Handle invalid input types (non-numeric)
             if (std::cin.fail()) {
                 std::cin.clear();
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -951,7 +1034,9 @@ void Player::issueOrder() {
 	}
 }
 
-
+// getNextOrderToExecute()
+// Retrieves the next order to be executed from the player's order list
+// Returns a pointer to the next Order, or nullptr if no orders are available
 Order* Player::getNextOrderToExecute(){
     if (orderslist->size() == 0) {
         std::cout << "No orders to execute." << std::endl;
@@ -964,7 +1049,4 @@ Order* Player::getNextOrderToExecute(){
 	}
 	
 }
-void Player::removeExecutedOrder() {
-    orderslist->remove(0);
 
-}

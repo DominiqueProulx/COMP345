@@ -732,8 +732,10 @@ void GameEngine::initialCardDraws(std::ostream& out)
     out << "Each player drew 2 cards.\n";
 }
 
+//Checks if player still has territories, if the player is removed from the game
 bool GameEngine::validatePlayerStays(Player* player) {
     if (player->getTerritories()->size() == 0) {
+
         std::cout << "Player " << player->getName() << " has no territories left and is eliminated from the game." << std::endl;
         auto playerIndex = std::find(players->begin(), players->end(), player);
         if (playerIndex != players->end()) {
@@ -751,25 +753,34 @@ bool GameEngine::validatePlayerStays(Player* player) {
     }
 }
 
-// main game loop
+// Main game loop
+
+/*Reinforcement phase :
+    - Allocates the number of armies to players based on territories and continue bonus
+    - Resets the turn variables( negotionations, conquered this turn, pendingdeployment)
+    - Draws card back up to 2
+*/
 bool GameEngine::reinforcementPhase() {
     std::cout << "---------------------------" << std::endl;
     std::cout << "Reinforcement Phase" << std::endl;
     std::cout << "---------------------------" << std::endl;
     for (Player* player : *players) {
+
+        //Draw Cards back up
 		std::cout << "drawing cards back up " << std::endl;
         player->drawBackUpCards();
 
-        //clear Order effects from last turn 
+        //Clear Order effects from last turn 
         player->clearNegotiations();
         player->setConqueredThisTurn(false);
-      //  player->clearPendingDeployments();
+        player->clearPendingDeployments();
 
-        //calculate reinforcements based on territories owned
+        //Calculate reinforcements based on territories owned
         int numTerritories = player->getTerritories()->size();
         int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
         std::cout << "Player " << player->getName() << " receives " << reinforcements << " base reinforcements." << std::endl;
-        // continent bonuses
+
+        //Calculate Continent bonuses
     	for (Continent* c : getMap()->getContinents()) {
             bool ownsAll = true;
             for (Territory* t : c->getTerritories()) {
@@ -783,12 +794,18 @@ bool GameEngine::reinforcementPhase() {
 				std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
             }
         }
+		//Add reinforcements to player's pool
         player->addToReinforcementPool(reinforcements);
        
     }
-    
     return true;
 }
+
+/*Issue Order phase :
+    - player has to build the toDefend and toAttack list first
+    - player has to deploy all reinforcement armies first   
+    - player can then issue advance or card orders.
+ */
 bool GameEngine::issueOrdersPhase() {
     std::cout << "---------------------------" << std::endl;
     std::cout << "Issue Orders  Phase" << std::endl;
@@ -804,15 +821,18 @@ bool GameEngine::issueOrdersPhase() {
     }
 
     bool allPlayersDone = false;
-    while (!allPlayersDone) {  //TODO : simplify this if you have time
+    while (!allPlayersDone) {  
+        //Player issue orders in round robin fashion
         for (Player* player : *players) {
             if (!playersDoneIssuing[player]) {
                 std::cout << "---------------------------------------------------------" << std::endl;
                 std::cout << "---------- Player " << player->getName() << " turn ------" << std::endl;
                 std::cout << "---------------------------------------------------------" << std::endl;
                 std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
+               
                 player->issueOrder();
-                //check if player is done with his orders in this phase
+
+                //verifies if player is done with his orders in this phase
                 std::cout << "Does Player " << player->getName() << " want to issue another order? (y/n)" << std::endl;
                 char answer;
                 std::cin >> answer;
@@ -820,27 +840,32 @@ bool GameEngine::issueOrdersPhase() {
                     playersDoneIssuing[player] = true;
                 }
                 else {
-                    playersDoneIssuing[player] = false; //redundant but explicit
+					playersDoneIssuing[player] = false; //redundant but explicit, player is not done yet
                 }
             }
         }
         allPlayersDone = true;
-        //check if all players are done issuing orders
+        //Check if all players are done issuing orders
         for (const auto& [player, done] : playersDoneIssuing) {
             if (!done) {
-                allPlayersDone = false; // found someone still issuing
+                allPlayersDone = false; // found someone still issuing, the issue order phase will continue
                 break;
             }
         }
 
         if (allPlayersDone) {
-            std::cout << "All players have finished issuing orders." << std::endl;
+            std::cout << "All players have finished issuing orders." << std::endl; //the issue order phase will end for this turn.
             return true;
           
         }
     }
     return false;
 }
+
+/*Executes Orders
+    - Executes orders in Orderlist.
+	- executes one order per player in round robin fashion until all orders are executed.
+*/
 bool GameEngine::executeOrdersPhase() {
     std::unordered_map<Player*, bool> playersDoneExecuting;
     for (Player* player : *players) {
@@ -861,7 +886,7 @@ bool GameEngine::executeOrdersPhase() {
             if (nextOrder != nullptr) {
                 std::cout << "Player " << player->getName() << " is executing order" << std::endl;
                 nextOrder->execute();
-                player->removeExecutedOrder();
+				player->removeExecutedOrder(); //Remove order from Orderlist after execution
             }
             else {
                 playersDoneExecuting[player] = true;
@@ -872,18 +897,27 @@ bool GameEngine::executeOrdersPhase() {
         noMoreOrders = true;
         for (const auto& [player, done] : playersDoneExecuting) {
             if (!done) {
-                noMoreOrders = false;
+				noMoreOrders = false; // found someone still has orders to execute, execute orders phase continues
                 break;
             }
         }
 
         if (noMoreOrders) {
-            std::cout << "All players have finished executing orders." << std::endl;
+			std::cout << "All players have finished executing orders." << std::endl; //ExecuteOrders phase ends for this turn
             return true;
         }
     }
     return false;
 }
+
+/*Main Game Loop
+Until game ends:
+    -Reinforcement Phase
+    -Issue Orders Phase
+    -Execute Orders Phase
+	    checks if a player is eliminated
+        checks if a player has won , if so, moves to the win state
+*/
 void GameEngine::mainGameLoop() {
     bool gameContinues = true;
     while (gameContinues) {
@@ -905,9 +939,9 @@ void GameEngine::mainGameLoop() {
                 std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
                 std::cout << "*****---------------------------------------------------*****" << std::endl;
                 gameContinues = false;
-                changeGameState("win");
+                changeGameState("win");//Game state transition to win , the game has ended
             }
-            else { changeGameState("endexecorders"); }
+            else { changeGameState("endexecorders"); } //Go back to reinformcement phase for another turn.
         }
         else {
 			changeGameState("execorder");
@@ -917,6 +951,8 @@ void GameEngine::mainGameLoop() {
 }
 #include <sstream>
 
+
+// Handles the end of a game once on "win" state., allowing the user to input command to replay or quit.
 void GameEngine::gameOver(std::istream& in, std::ostream& out) {
     out << "\n=== GAME OVER ===\n";
     out << "Commands:\n"
