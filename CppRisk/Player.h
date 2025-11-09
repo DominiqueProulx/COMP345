@@ -90,6 +90,10 @@ public:
 		int armies = 0
     );
 
+    // Pending deployments tracking (for issuing phase)
+    int getPendingDeployments() const;
+    void addPendingDeployment(int armies);
+    void clearPendingDeployments();
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);

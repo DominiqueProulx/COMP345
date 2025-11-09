@@ -10,11 +10,11 @@ void testStartupPhase();
 void testOrderExecution();
 void testMainGameLoop();
 void testGameEngine();
-//void testLoggingObserver();
+void testLoggingObserver();
 
 int main(void)
 {
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  //  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     char directory[FILENAME_MAX];
     _getcwd(directory, FILENAME_MAX);
     std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
@@ -41,17 +41,15 @@ int main(void)
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         */
 
-        /*testOrderExecution();
-        std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
-        std::cin >> buffer;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        */
-        /*
-        testLoggingObserver();
-        std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
-        std::cin >> buffer;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        */
+	testOrderExecution();
+	std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	testLoggingObserver();
+	std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         /*testMainGameLoop();
         std::cout << "\n\nFinished testing MAIN GAME LOOP. Enter any character to proceed to the next test. ";

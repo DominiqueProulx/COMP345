@@ -72,6 +72,7 @@ Player::Player(const Player& other) {
     
     // Assignment 2 additions
     this->reinforcementPool = new int(*other.reinforcementPool);
+    this->pendingDeployments = new int(*other.pendingDeployments); 
     this->conqueredTerritoryThisTurn = new bool(*other.conqueredTerritoryThisTurn);
     this->negotiatedPlayers = new std::set<Player*>(*other.negotiatedPlayers);
 }
@@ -91,6 +92,7 @@ Player::~Player() {
     
     // Assignment 2 additions
     delete reinforcementPool;
+    delete pendingDeployments;
     delete conqueredTerritoryThisTurn;
     delete negotiatedPlayers;
     delete territoriesToDefend;
@@ -225,6 +227,7 @@ Player& Player::operator=(const Player& otherPlayer) {
     delete orderslist; 
     delete territoriesOwned;
     delete reinforcementPool;
+    delete pendingDeployments;
     delete conqueredTerritoryThisTurn;
     delete negotiatedPlayers;
 
@@ -242,6 +245,7 @@ Player& Player::operator=(const Player& otherPlayer) {
     
     // Assignment 2 additions
     this->reinforcementPool = new int(*otherPlayer.reinforcementPool);
+    this->pendingDeployments = new int(*otherPlayer.pendingDeployments);
     this->conqueredTerritoryThisTurn = new bool(*otherPlayer.conqueredTerritoryThisTurn);
     this->negotiatedPlayers = new std::set<Player*>(*otherPlayer.negotiatedPlayers);
     
@@ -857,7 +861,19 @@ Order* Player::orderFactory(Player::OrderType type,
     }
 }
 
-    // issueOrder()
+int Player::getPendingDeployments() const {
+    return *pendingDeployments;
+}
+
+void Player::addPendingDeployment(int armies) {
+    *pendingDeployments += armies;
+}
+
+void Player::clearPendingDeployments() {
+    *pendingDeployments = 0;
+}
+
+// issueOrder()
 void Player::issueOrder() {
     
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase

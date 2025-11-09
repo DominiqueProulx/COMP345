@@ -153,6 +153,8 @@
     <ClCompile Include="CommandProcessingDriver.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GameEngineDriver.cpp" />
+    <ClCompile Include="LoggingObserver.cpp" />
+    <ClCompile Include="LoggingObserverDriver.cpp" />
     <ClCompile Include="MainDriver.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapDriver.cpp" />
@@ -164,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="CommandProcessing.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="LoggingObserver.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Orders.h" />
     <ClInclude Include="Player.h" />

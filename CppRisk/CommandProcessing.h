@@ -4,9 +4,11 @@
 #include <iostream>
 #include <memory>
 #include "GameEngine.h"
+#include "LoggingObserver.h"
+
 using namespace std;
 
-class Command {
+class Command : public Subject, public ILoggable {
 protected:
 	unique_ptr<string> command;
 	unique_ptr<string> effect;
@@ -24,12 +26,15 @@ public:
 
 	void saveEffect(const string& effect);
 
+	// logging function
+	std::string stringToLog() const override;
+
 	bool isValid() const;
 	void setValid(bool v);
 
 };
 
-class CommandProcessor {
+class CommandProcessor : public Subject, public ILoggable {
 public:
 	CommandProcessor();
 	CommandProcessor(const CommandProcessor& other);
@@ -41,6 +46,9 @@ public:
 	bool validate(Command& command, GameEngine& engine);
 
 	void runFromFile(const string& filename, GameEngine& engine);
+
+	// logging function
+	std::string stringToLog() const override;
 
 protected:
 	Command readCommand(GameEngine& engine);
@@ -59,5 +67,5 @@ public:
 	FileCommandProcessorAdapter& operator=(const FileCommandProcessorAdapter& other);
 	~FileCommandProcessorAdapter();
 	Command* readCommand(GameEngine& engine);
-	
+
 };

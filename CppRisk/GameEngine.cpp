@@ -186,7 +186,7 @@ GameEngine::GameEngine()
 }
 
 // Duplicates an existing GameEngine into a new distinct object.
-GameEngine::GameEngine(const GameEngine& other)
+GameEngine::GameEngine(const GameEngine& other) : Subject(other)
 {
     activeParentState = other.activeParentState;
     activeState = other.activeState;
@@ -382,6 +382,13 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
     engine.addChildStates(end, { final });
 }
 
+// Returns a log string describing the GameEngine's current state.
+std::string GameEngine::stringToLog() const
+{
+	return "[ENGINE] Transitioned to new state: { "
+		+ activeParentState->getName() + "/" + activeState->getName() + " }.";
+}
+
 // Returns this GameEngine's active substate.
 GameEngine::State* GameEngine::getActiveStatePtr() const
 {
@@ -431,10 +438,13 @@ void GameEngine::changeGameState(const std::string& cmd)
         else
             activeState = newState;
 
-        std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
-    }
-    else
-        std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";
+		std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
+
+		// log the state transition to gamelog.txt
+		notify(this);
+	}
+	else
+		std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";
 }
 
 // Returns true if the active state is considered a final state (defined by no outgoing transitions).
@@ -585,7 +595,7 @@ void GameEngine::processStartupCommand(const std::string& full, std::ostream& ou
     if (verb == "gamestart") {
         if (!isCommandValid("gamestart")) { out << "State invalid.\n"; return; }
         if (!players || players->size() < 2 || players->size() > 6) {
-            out << "Need 2–6 players before 'gamestart'.\n"; return;
+            out << "Need 2�6 players before 'gamestart'.\n"; return;
         }
         if (cmdGameStart(out)) {
             changeGameState("gamestart");

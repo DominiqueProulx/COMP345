@@ -71,10 +71,11 @@ void testCommandLineProcessor() {
 		// Trim leading whitespace from the argument
 		argument = ltrim(argument);
 
-		// Handle 'quit'
+		// Handle 'quit' at any time
 		if (baseCommand == "quit") {
 			if (fullCommandStr == "quit") {
 				std::cout << "Exiting program." << std::endl;
+
 				break;
 			}
 		}
@@ -182,8 +183,6 @@ void testCommandLineProcessor() {
 			}
 		}
 
-		delete newCommand;
-		newCommand = nullptr;
 	}
 
 	// CLEANUP

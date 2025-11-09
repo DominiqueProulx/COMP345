@@ -5,9 +5,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "orders.h"  // contaisn player and map includes
-std::vector<Player*>* createFakePlayers(); //FLAG:remove this line when integrating Jackson's code.
-
+#include "LoggingObserver.h"
+#include "orders.h"  // contains player,cards and map includes
 class Player;
 class Deck;
 class Territory;
@@ -15,7 +14,7 @@ class Map;
 class MapLoader;
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
-class GameEngine
+class GameEngine : public Subject, public ILoggable
 {
 private:
 	/* -- STATE OBJECT DEFINITION (GAME ENGINE COMPONENT) -- */
@@ -93,6 +92,9 @@ public:
 	void addChildStates(State* parent, const std::initializer_list<State*>& states);
 	void addChildTransition(State* from, const std::string& cmd, State* to);
 	static void initializeRiskFSM(GameEngine& engine);
+
+	// logging function
+	std::string stringToLog() const override;
 
 	// accessors
 	State* getActiveStatePtr() const;

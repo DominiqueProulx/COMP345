@@ -14,7 +14,8 @@ Command::Command(const string& command)
 };
 //copy constructor
 Command::Command(const Command& other)
-	: command(make_unique<string>(*other.command)),
+	: Subject(other),
+	command(make_unique<string>(*other.command)),
 	effect(make_unique<string>(*other.effect)),
 	valid(make_unique<bool>(*other.valid))
 {
@@ -22,6 +23,8 @@ Command::Command(const Command& other)
 //assignment operator
 Command& Command::operator=(const Command& other) {
 	if (this != &other) {
+		Subject::operator=(other);
+
 		*command = *other.command;
 		*effect = *other.effect;
 		*valid = *other.valid;
@@ -37,6 +40,9 @@ ostream& operator<<(ostream& os, const Command& cmd) {
 
 void Command::saveEffect(const string& newEffect) {
 	*this->effect = newEffect;
+
+	// log the effect change to gamelog.txt
+	notify(this);
 }
 
 string Command::getEffect() const {
@@ -45,6 +51,15 @@ string Command::getEffect() const {
 
 string Command::getCommandString() const {
 	return *command;
+}
+
+// Returns a log string describing the Command's new saved effect.
+std::string Command::stringToLog() const
+{
+	if (effect)
+		return "[CMD] Saved a new command effect: { " + *effect + " }.";
+	else
+		return "[ERR::CMD] Attempted to log a command with no effect...";
 }
 
 bool Command::isValid() const {
@@ -60,7 +75,8 @@ void Command::setValid(bool v) {
 //constructor
 CommandProcessor::CommandProcessor() : commands(make_unique<vector<unique_ptr<Command>>>()) {}
 //copy constructor
-CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(make_unique<vector<unique_ptr<Command>>>()) {
+CommandProcessor::CommandProcessor(const CommandProcessor& other)
+	: Subject(other), commands(make_unique<vector<unique_ptr<Command>>>()) {
 	for (const auto& cmd : *other.commands) {
 		commands->push_back(make_unique<Command>(*cmd));
 	}
@@ -68,6 +84,8 @@ CommandProcessor::CommandProcessor(const CommandProcessor& other) : commands(mak
 //assignment operator
 CommandProcessor& CommandProcessor::operator=(const CommandProcessor& other) {
 	if (this != &other) {
+		Subject::operator=(other);
+
 		commands->clear();
 		for (const auto& cmd : *other.commands) {
 			commands->push_back(make_unique<Command>(*cmd));
@@ -98,6 +116,9 @@ Command CommandProcessor::readCommand(GameEngine& engine) {
 //adds command to end of commands vector
 void CommandProcessor::saveCommand(const Command& command) {
 	commands->push_back(make_unique<Command>(command));
+
+	// log the saved command to gamelog.txt
+	notify(this);
 }
 
 //validates command based on current game state
@@ -144,6 +165,25 @@ Command* CommandProcessor::getCommand(GameEngine& engine) {
 	return commands->back().get();
 }
 
+
+// Returns a log string stating the name of the new saved Command.
+std::string CommandProcessor::stringToLog() const
+{
+	if (commands->empty())
+		return "[ERR::CMDPROCESSOR] Attempted to log an empty command list...";
+	else
+	{
+		std::ostringstream cmdAsStream{};
+		cmdAsStream << *commands->back();
+		return "[CMDPROCESSOR] Added a new command to a list: { " + cmdAsStream.str() + " }.";
+	}
+}
+
+
+//FILE COMMAND PROCESSOR ADAPTER
+
+//constructor, copy constructor, assignment operator, destructor
+
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const string& filename)
 	: CommandProcessor(), file(make_unique<ifstream>(filename)) {
 	if (!file->is_open()) {
@@ -178,9 +218,9 @@ Command* FileCommandProcessorAdapter::readCommand(GameEngine& engine) {
 			continue; // skip empty lines
 		}
 
-		Command* newCommand = new Command(line);
+		Command* newCommand = new Command(line); 
 		validate(*newCommand, engine);
-		saveCommand(*newCommand);
+		saveCommand(*newCommand); 
 
 		return newCommand;
 
