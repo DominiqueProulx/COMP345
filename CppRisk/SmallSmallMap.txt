@@ -1,0 +1,16 @@
+[Map]
+author=Lazarus
+image=alabama_small.bmp
+wrap=no
+scroll=none
+warn=yes
+
+[Continents]
+A Troop=3
+B Troop=4
+
+[Territories]
+Territory1,100,100,A Troop,Territory2,Territory3
+Territory2,200,100,A Troop,Territory1,Territory4
+Territory3,100,200,B Troop,Territory1,Territory4
+Territory4,200,200,B Troop,Territory2,Territory3

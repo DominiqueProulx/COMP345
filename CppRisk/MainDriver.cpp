@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <direct.h>
+#include <crtdbg.h>
 
 // Declare test functions
 void testCommandProcessor();
@@ -13,6 +14,7 @@ void testGameEngine();
 
 int main(void)
 {
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     char directory[FILENAME_MAX];
     _getcwd(directory, FILENAME_MAX);
     std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;

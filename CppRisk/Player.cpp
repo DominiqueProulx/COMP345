@@ -129,6 +129,10 @@ void Player::setHand(Hand& hand) {
     this->playerHand = &hand;
 }
 
+void Player::setPendingDeployments(int armies) {
+    *pendingDeployments = armies;
+}
+
 // Assignment 2 methods
 
 void Player::addToReinforcementPool(int armies) {
@@ -190,6 +194,14 @@ bool Player::hasNegotiationWith(Player* player) const {
 std::string Player::getName() const {
     return *playerColor;  // Using color as name for now
 }
+// equals overloading
+bool Player::operator==(const Player& other) const {
+    return playerID == other.playerID;
+}
+bool Player::operator!=(const Player& other) const {
+    return !(*this == other);
+}
+
 
 // Stream insertion operator
 std::ostream& operator<<(std::ostream& os, const Player& player) {
@@ -237,47 +249,61 @@ Player& Player::operator=(const Player& otherPlayer) {
 }
 
 // toDefend()
+// toDefend()
 std::vector<Territory*>* Player::toDefend() {
     int numberOfTerritories = (*territoriesOwned).size();
-	std::vector<Territory*>* territoriesToDefendThisturn = new std::vector<Territory*>();
 
+    // If player has no territories, allow to exit
     if (numberOfTerritories == 0) {
-        std::cout << "Player has no territories to defend." << std::endl;
-        return territoriesToDefendThisturn;
+        std::cout << "You currently have no territories to defend. Returning to main menu..." << std::endl;
+        return nullptr; 
     }
-        bool doneAdding = false;
-		
-    std::cout << "Please add territories to defend in priority" << std::endl;
+
+    std::vector<Territory*>* territoriesToDefendThisturn = new std::vector<Territory*>();
+    bool doneAdding = false;
+
+    std::cout << "\nPlease add territories to defend in priority order." << std::endl;
+    std::cout << "(Enter 0 to finish or -1 to cancel)\n" << std::endl;
+
+    // Display owned territories
     for (int i = 0; i < numberOfTerritories; i++) {
         std::cout << i + 1 << ". " << (*territoriesOwned)[i]->getName() << std::endl;
     }
+
+    //Capture user input
     while (!doneAdding) {
-        std::cout << "Enter the number of the territory to add to defend list (0 to finish): ";
+        std::cout << "\nEnter the number of the territory to add to the defend list: ";
         int choice;
         std::cin >> choice;
 
         if (std::cin.fail()) {
-            std::cin.clear(); // clear the error flag
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cin.clear(); 
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter a number." << std::endl;
-            continue; // go back to start of loop
+            continue;
         }
 
-
+        if (choice == -1) {
+            std::cout << "You cancelled territory selection. Returning..." << std::endl;
+            delete territoriesToDefendThisturn;
+            return nullptr; // User explicitly canceled
+        }
 
         if (choice == 0) {
-            if (territoriesToDefendThisturn->size() == 0) {
-                std::cout << "You have to add at least one territory for deployment!" << std::endl;
-                doneAdding = false;
+            if (territoriesToDefendThisturn->empty()) {
+                std::cout << "You must add at least one territory before finishing, or type -1 to cancel." << std::endl;
             }
-            else { doneAdding = true; } 
+            else {
+                doneAdding = true;
+            }
         }
         else if (choice < 1 || choice > numberOfTerritories) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
         else {
             Territory* territoryToAdd = (*territoriesOwned)[choice - 1];
-            if (std::find(territoriesToDefendThisturn->begin(), territoriesToDefendThisturn->end(), territoryToAdd) == territoriesToDefendThisturn->end()) {
+            if (std::find(territoriesToDefendThisturn->begin(), territoriesToDefendThisturn->end(), territoryToAdd)
+                == territoriesToDefendThisturn->end()) {
                 territoriesToDefendThisturn->push_back(territoryToAdd);
                 std::cout << territoryToAdd->getName() << " added to defend list." << std::endl;
             }
@@ -286,20 +312,48 @@ std::vector<Territory*>* Player::toDefend() {
             }
         }
     }
+
     return territoriesToDefendThisturn;
 }
 Territory* Player::choseFromToDefend() {
+
+    // Check if the defend list is empty or null
+    if (!territoriesToDefend || territoriesToDefend->empty()) {
+        std::cout << "You have no territories to defend. Returning..." << std::endl;
+        return nullptr;
+    }
+
+    std::cout << "\n----- Territories to Defend -----" << std::endl;
     int i = 1;
     for (Territory* t : *territoriesToDefend) {
-        std::cout << i << ". " << t->getName() << ":" << t->getNumberOfArmies() << std::endl;
+        std::cout << i << ". " << t->getName() << ": " << t->getNumberOfArmies() << " armies." << std::endl;
         i++;
     }
+
+    std::cout << "\nEnter the number of the territory you want to select."
+        << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
 
     int choice;
     bool validInput = false;
     while (!validInput) {
         std::cin >> choice;
-        if (choice < 1 || choice > territoriesToDefend->size()) {
+
+        // Handle invalid input types (non-numeric)
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number." << std::endl;
+            continue;
+        }
+
+        // Allow user to go back or cancel
+        if (choice == 0 || choice == -1) {
+            std::cout << "Selection cancelled. Returning..." << std::endl;
+            return nullptr;
+        }
+
+        // Validate choice range
+        if (choice < 1 || choice >(int)territoriesToDefend->size()) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
         else {
@@ -308,91 +362,187 @@ Territory* Player::choseFromToDefend() {
     }
 
     Territory* targetTerritory = (*territoriesToDefend)[choice - 1];
-	return targetTerritory;
+    return targetTerritory;
 }
+
 Territory* Player::choseFromToAttack() {
+
+    // Check if the attack list is empty or null
+    if (!territoriesToAttack || territoriesToAttack->empty()) {
+        std::cout << "You have no territories to attack. Returning..." << std::endl;
+        return nullptr;
+    }
+
+    std::cout << "\n----- Territories to Attack -----" << std::endl;
     int index = 1;
-    std::cout << "chose the territory you want to move armies to: " << std::endl;
     for (Territory* t : *territoriesToAttack) {
-        std::cout << index << "." << t->getName() << " : " << t->getNumberOfArmies() << " armies." << std::endl;
+        std::cout << index << ". " << t->getName() << " : " << t->getNumberOfArmies() << " armies." << std::endl;
         index++;
     }
+
+    std::cout << "\nEnter the number of the territory you want to attack."
+        << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
+
     int choice;
-
-
-
-    bool validInputto = false;
-    while (!validInputto) {
+    bool validInput = false;
+    while (!validInput) {
         std::cin >> choice;
+
+        // Handle invalid input types (non-numeric)
         if (std::cin.fail()) {
-            std::cin.clear(); // clear the error flag
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid input. Please enter a number." << std::endl;
-            continue; // go back to start of loop
+            continue;
         }
-        if (choice < 1 || choice > territoriesToAttack->size()) {
+
+        // Allow user to go back or cancel
+        if (choice == 0 || choice == -1) {
+            std::cout << "Selection cancelled. Returning..." << std::endl;
+            return nullptr;
+        }
+
+        // Validate choice range
+        if (choice < 1 || choice >(int)territoriesToAttack->size()) {
             std::cout << "Invalid choice. Please try again." << std::endl;
         }
         else {
-            validInputto = true;
+            validInput = true;
         }
     }
-    return (*territoriesToAttack)[choice - 1];
+
+    Territory* targetTerritory = (*territoriesToAttack)[choice - 1];
+    return targetTerritory;
 }
+
+Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string& option) {
+    std::vector<Territory*> adjTerritories;
+    int index = 1;
+    std::cout << "Choose a territory: " << std::endl;
+
+    if (option == "attack") {
+        for (Territory* t : *territoriesToAttack) {
+            if (t->isAdjacentTo(ownTerritory)) {
+                adjTerritories.push_back(t);
+                std::cout << index << ". " << t->getName()
+                    << " : " << t->getNumberOfArmies() << " armies." << std::endl;
+                index++;
+            }
+        }
+    }
+    else if (option == "defend") {
+        for (Territory* t : *territoriesOwned) {
+            if (t->isAdjacentTo(ownTerritory)) {
+                adjTerritories.push_back(t);
+                std::cout << index << ". " << t->getName()
+                    << " : " << t->getNumberOfArmies() << " armies." << std::endl;
+                index++;
+            }
+        }
+    }
+
+    if (adjTerritories.empty()) {
+        std::cout << "No adjacent territories available to " << option << ". Returning..." << std::endl;
+        return nullptr;
+    }
+
+    std::cout << "\nEnter the number of the territory (0 or -1 to cancel): ";
+
+    int choice;
+    bool validInput = false;
+    while (!validInput) {
+        std::cin >> choice;
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number." << std::endl;
+            continue;
+        }
+
+        if (choice == 0 || choice == -1) {
+            std::cout << "Selection cancelled. Returning..." << std::endl;
+            return nullptr;
+        }
+
+        if (choice < 1 || choice >(int)adjTerritories.size()) {
+            std::cout << "Invalid choice. Please try again." << std::endl;
+        }
+        else {
+            validInput = true;
+        }
+    }
+
+    return adjTerritories[choice - 1];
+}
+
 
 // toAttack()
 std::vector<Territory*>* Player::toAttack() {
     std::vector<Territory*> possibleTerritories;
 
-    //add all adjacent territories 
+    // Add all adjacent territories that are not owned by the player
     for (Territory* t : *territoriesOwned) {
         const std::vector<Territory*>& adjacentTerritories = t->getAdjacentTerritories();
         for (Territory* adjTerritory : adjacentTerritories) {
-            if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end() && (adjTerritory->getOwner() != this)) {
-
-                possibleTerritories.push_back(adjTerritory); 
+            if (std::find(possibleTerritories.begin(), possibleTerritories.end(), adjTerritory) == possibleTerritories.end()
+                && (*(adjTerritory->getOwner()) != *this)) {
+                possibleTerritories.push_back(adjTerritory);
             }
         }
     }
-  
+
     int numberOfPossibleTerritories = possibleTerritories.size();
-	std::vector<Territory*>* territoriesToAttackThisturn = new std::vector<Territory*>();
+    std::vector<Territory*>* territoriesToAttackThisturn = new std::vector<Territory*>();
 
     if (numberOfPossibleTerritories == 0) {
         std::cout << "Player has no territories to attack." << std::endl;
         return territoriesToAttackThisturn;
     }
 
-	bool doneAdding = false;
-   
-        std::cout << "Please add territories to attack in priority" << std::endl;
-        for (int i = 0; i < numberOfPossibleTerritories; i++) {
-            std::cout << i + 1 << ". " << possibleTerritories[i]->getName() << std::endl;
-		}
-        while (!doneAdding) {
-            std::cout << "Enter the number of the territory to add to attack list (0 to finish): ";
-            int choice;
-            std::cin >> choice;
-            if (choice == 0) {
-                doneAdding = true;
+    std::cout << "Please add territories to attack in priority (enter 0 to finish or cancel):" << std::endl;
+    for (int i = 0; i < numberOfPossibleTerritories; i++) {
+        std::cout << i + 1 << ". " << possibleTerritories[i]->getName()
+            << " - " << possibleTerritories[i]->getNumberOfArmies() << " armies." << std::endl;
+    }
+
+    bool doneAdding = false;
+    while (!doneAdding) {
+        std::cout << "Enter the number of the territory to add to attack list (0 to finish/cancel): ";
+        int choice;
+        std::cin >> choice;
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number." << std::endl;
+            continue;
+        }
+
+        if (choice == 0) {
+            if (territoriesToAttackThisturn->empty()) {
+                std::cout << "No territories selected for attack. Returning empty list." << std::endl;
             }
-            else if (choice < 1 || choice > numberOfPossibleTerritories) {
-                std::cout << "Invalid choice. Please try again." << std::endl;
+            doneAdding = true;
+        }
+        else if (choice < 1 || choice > numberOfPossibleTerritories) {
+            std::cout << "Invalid choice. Please try again." << std::endl;
+        }
+        else {
+            Territory* territoryToAdd = possibleTerritories[choice - 1];
+            if (std::find(territoriesToAttackThisturn->begin(), territoriesToAttackThisturn->end(), territoryToAdd) == territoriesToAttackThisturn->end()) {
+                territoriesToAttackThisturn->push_back(territoryToAdd);
+                std::cout << territoryToAdd->getName() << " added to attack list." << std::endl;
             }
             else {
-                Territory* territoryToAdd = possibleTerritories[choice - 1];
-                if (std::find(territoriesToAttackThisturn->begin(), territoriesToAttackThisturn->end(), territoryToAdd) == territoriesToAttackThisturn->end()) {
-                    territoriesToAttackThisturn->push_back(territoryToAdd);
-                    std::cout << territoryToAdd->getName() << " added to attack list." << std::endl;
-                }
-                else {
-                    std::cout << "Territory already in attack list. Please choose another." << std::endl;
-                }
-			}
+                std::cout << "Territory already in attack list. Please choose another." << std::endl;
+            }
+        }
     }
 
     return territoriesToAttackThisturn;
 }
+
 
 void Player::resetDefendAndAttack() {
     if (territoriesToDefend) {
@@ -418,12 +568,19 @@ Order* Player::issueAdvanceOrder() {
 				std::cout << "chose the territory you want to move armies from: " << std::endl;
 				fromTerritory = choseFromToDefend();
 				if (fromTerritory->getNumberOfArmies() < 1) {
-					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please chose another Territory " << std::endl;
+					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please chose another Territory or press 0 to skip your turn \n" << std::endl;
+                    char choice;
+                    std::cin >> choice;
+                    if(choice == '0') {
+                        std::cout << "Advance order cancelled." << std::endl;
+                        return nullptr;
+					}
+
 				}
 			}
 
 			std::cout << "chose the territory you want to move armies to: " << std::endl;
-			toTerritory = choseFromToDefend();
+			toTerritory = choseFromAdjacent(fromTerritory,"defend");
 
 
 			int armiestoMove;
@@ -457,12 +614,18 @@ Order* Player::issueAdvanceOrder() {
 				fromTerritory = choseFromToDefend();
 				if (fromTerritory->getNumberOfArmies() < 1) {
 					std::cout << "No armies available to move from " << fromTerritory->getName() << " Please choose another Territory " << std::endl;
+                    char choice;
+                    std::cin >> choice;
+                    if (choice == '0') {
+                        std::cout << "Advance order cancelled." << std::endl;
+                        return nullptr;
+                    }
 				}
 			}
 
 			//list territories to attack          
 			std::cout << "chose the territory you want to move armies to: " << std::endl;
-			 toTerritory = choseFromToAttack();
+			 toTerritory = choseFromAdjacent(fromTerritory, "attack");
 			int armiestoMove;
 			bool validArmiesInput = false;
 			while (!validArmiesInput) {
@@ -595,16 +758,22 @@ Order* Player::orderFactory(Player::OrderType type,
 
     switch (type) {
     case OrderType::ADVANCE:
+        std::cout << "Creating Advance Order via Factory Method" << std::endl;
         return new Advance(this, sourceTerritory, targetTerritory, armies);
     case OrderType::DEPLOY:
+		std::cout << "Creating Deploy Order via Factory Method" << std::endl;
         return new Deploy(this, targetTerritory, armies);
     case OrderType::BLOCKADE:
+		std::cout << "Creating Blockade Order via Factory Method" << std::endl;
         return new Blockade(this, targetTerritory, targetOrNeutral);
     case OrderType::AIRLIFT:
+		std::cout << "Creating Airlift Order via Factory Method" << std::endl;
         return new Airlift(this, sourceTerritory, targetTerritory, armies);
     case OrderType::BOMB:
+		std::cout << "Creating Bomb Order via Factory Method" << std::endl;
         return new Bomb(this, targetTerritory);
     case OrderType::NEGOTIATE:
+		std::cout << "Creating Negotiate Order via Factory Method" << std::endl;
         return new Negotiate(this,  targetOrNeutral );
     default:
         return nullptr;
@@ -616,7 +785,7 @@ void Player::issueOrder() {
     
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase
     
-    *pendingDeployments = 0;
+   
     if (territoriesToDefend == nullptr || territoriesToAttack == nullptr) {
         territoriesToDefend = new std::vector<Territory*>();
         territoriesToAttack = new std::vector<Territory*>();
@@ -641,7 +810,7 @@ void Player::issueOrder() {
        
         
         std::cout << "\nHere are the possible orders" << std::endl;
-        std::cout << " 0. end turn" << std::endl; 
+        std::cout << "0. end turn" << std::endl; 
         std::cout << "1. Advance" << std::endl;
         std::cout << "From the cards available in your hand : \n" << std::endl;
 
@@ -668,7 +837,8 @@ void Player::issueOrder() {
         else if (choice == 1) {
 			// Advance order (to defend or attack)
            Order* advanceOrder =  issueAdvanceOrder();
-           if (advanceOrder != nullptr) (*orderslist).add(advanceOrder); 
+           if (advanceOrder != nullptr) { (*orderslist).add(advanceOrder); }
+           else { std::cout << "There was a problem with the advance order, it was not added to the orderList" << std::endl; };
 		}
 		else {
 			// Issue Order from hand
@@ -676,6 +846,7 @@ void Player::issueOrder() {
 			std::cout << "Playing the card" << cardName << ", it will create the order and add it to the orders list" << std::endl;
 			Order* cardOrder = playerHand->getCard(choice - 2)->play(*playerHand, *deck, this);
 			if (cardOrder != nullptr) { (*orderslist).add(cardOrder); }
+            else { std::cout << "There was a problem with the card order, it was not added to the orderList" << std::endl; };
 		}
 	}
 }

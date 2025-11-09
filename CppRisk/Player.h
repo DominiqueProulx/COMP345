@@ -25,7 +25,7 @@ class Player {
 public:
     static int playerCount;
 
-    //I wanted to add this to order but it gave me issues with circular dependency
+    
     enum class OrderType {
         ADVANCE,
         DEPLOY,
@@ -50,6 +50,7 @@ public:
     const std::vector<Territory*>* getTerritories() const;
     Hand* getHand() const;
     OrdersList* getOrdersList() const;
+    void setPendingDeployments(int armies);
 
     void setColor(const std::string& color);
     void setHand(Hand& hand);
@@ -73,6 +74,7 @@ public:
     void resetDefendAndAttack();
     Territory* choseFromToDefend();
     Territory* choseFromToAttack();
+    Territory* choseFromAdjacent(Territory* ownTerritory , const std::string& option);
     Order* issueAdvanceOrder();
     Order* issueDeployOrder();
     Order* issueBombOrder();
@@ -91,6 +93,9 @@ public:
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
+	// Equals operator
+    bool operator==(const Player& other) const;
+    bool operator!=(const Player& other) const;
     // Assignment Operator
     Player& operator= (const Player& otherplayer);
 

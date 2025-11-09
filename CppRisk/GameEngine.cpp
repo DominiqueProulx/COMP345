@@ -666,6 +666,7 @@ void GameEngine::fairDistributeTerritories(std::ostream& out)
     std::size_t i = 0;
     for (auto* t : ts) {
         Player* owner = (*players)[i % players->size()];
+        t->setOwner(owner);
         auto* owned = const_cast<std::vector<Territory*>*>(owner->getTerritories());
         if (owned) owned->push_back(t);
         ++i;
@@ -768,6 +769,7 @@ bool GameEngine::issueOrdersPhase() {
         std::cout << "reset toDefend and ToAttack lists for the new issue Order Phase" << std::endl;
         playersDoneIssuing[player] = false; //initialize all players as not done issuing orders
         player->resetDefendAndAttack();   // reset the toDefend and toAttack lists for the new turn
+        player->setPendingDeployments(0); //reset the pending deployment for the phase
     }
 
     bool allPlayersDone = false;
@@ -796,13 +798,13 @@ bool GameEngine::issueOrdersPhase() {
         for (const auto& [player, done] : playersDoneIssuing) {
             if (!done) {
                 allPlayersDone = false; // found someone still issuing
-                return true;
                 break;
             }
         }
 
         if (allPlayersDone) {
             std::cout << "All players have finished issuing orders." << std::endl;
+            return true;
           
         }
     }
@@ -835,13 +837,13 @@ bool GameEngine::executeOrdersPhase() {
         for (const auto& [player, done] : playersDoneExecuting) {
             if (!done) {
                 noMoreOrders = false;
-                return true;
                 break;
             }
         }
 
         if (noMoreOrders) {
             std::cout << "All players have finished executing orders." << std::endl;
+            return true;
         }
     }
     return false;
