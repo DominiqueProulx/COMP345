@@ -122,6 +122,8 @@ bool Deploy::validate() {
     }
     
     // Calculate available armies = pool - already committed armies
+    // Note: Game engine is responsible for tracking pending deployments
+    // during the issuing phase. We only read the value here for validation.
     int availableArmies = player->getReinforcementPool() - player->getPendingDeployments();
     
     if (availableArmies < *armiesToDeploy) {
@@ -150,10 +152,7 @@ void Deploy::execute() {
         }
         
         // Assignment 2 execution
-        // Track this deployment as committed
-        player->addPendingDeployment(*armiesToDeploy);
-
-        
+        // Deduct from reinforcement pool
         player->setReinforcementPool(player->getReinforcementPool() - *armiesToDeploy);
         
         // Add armies to territory
@@ -234,14 +233,14 @@ bool Advance::validate() {
                   << " does not own source " << sourceTerritory->getName() << std::endl;
         return false;
     }
-            // If target belongs to player, this is a move (not attack), still need to validate
-            // If target belongs to someone else or is neutral, this is an attack
-        if (targetTerritory->getOwner() && 
+    
+    // Check if target territory has an owner and validate accordingly
+    if (targetTerritory->getOwner() && 
         !player->ownsTerritory(targetTerritory) && 
         targetTerritory->getOwner() != player) {
-        // This is an attack - additional validation needed
+        // This is an attack - target is owned by another player
+        // Additional validation is handled below (adjacency, negotiate)
     }
-    
     
     if (!sourceTerritory->isAdjacentTo(targetTerritory)) {
         std::cout << "Advance INVALID: " << sourceTerritory->getName() 
@@ -255,7 +254,7 @@ bool Advance::validate() {
         return false;
     }
     
-    // Check negotiate
+    // Check negotiate - cannot attack if negotiated
     if (targetTerritory->getOwner() != player && 
         targetTerritory->getOwner() != nullptr &&
         player->hasNegotiationWith(targetTerritory->getOwner())) {
@@ -284,12 +283,14 @@ void Advance::simulateBattle(int attackers, int defenders) {
         seeded = true;
     }
     
+    // Attackers kill defenders (60% chance per attacker)
     for (int i = 0; i < attackers && defendersRemaining > 0; i++) {
         if (std::rand() % 100 < 60) {
             defendersRemaining--;
         }
     }
     
+    // Defenders kill attackers (70% chance per defender)
     for (int i = 0; i < defenders && attackersRemaining > 0; i++) {
         if (std::rand() % 100 < 70) {
             attackersRemaining--;
@@ -299,11 +300,13 @@ void Advance::simulateBattle(int attackers, int defenders) {
     std::cout << "Battle Result - Attackers: " << attackersRemaining 
               << " | Defenders: " << defendersRemaining << std::endl;
     
+    // Remove attacking armies from source
     sourceTerritory->setNumberOfArmies(
         sourceTerritory->getNumberOfArmies() - attackers
     );
     
     if (defendersRemaining == 0) {
+        // Conquest successful
         std::cout << "Territory conquered by " << player->getName() << "!" << std::endl;
         
         Player* previousOwner = targetTerritory->getOwner();
@@ -320,6 +323,7 @@ void Advance::simulateBattle(int attackers, int defenders) {
                                 " with " + std::to_string(attackersRemaining) + 
                                 " armies surviving");
     } else {
+        // Attack failed
         targetTerritory->setNumberOfArmies(defendersRemaining);
         
         delete effect;
@@ -345,6 +349,7 @@ void Advance::execute() {
         
         // Assignment 2 execution
         if (player->ownsTerritory(targetTerritory)) {
+            // Simple move between owned territories
             sourceTerritory->setNumberOfArmies(
                 sourceTerritory->getNumberOfArmies() - *armiesToMove
             );
@@ -360,6 +365,7 @@ void Advance::execute() {
             
             std::cout << "Advance EXECUTED: " << *effect << std::endl;
         } else {
+            // Attack enemy territory
             simulateBattle(*armiesToMove, targetTerritory->getNumberOfArmies());
             *executed = true;
             std::cout << "Advance EXECUTED: " << *effect << std::endl;
@@ -412,13 +418,14 @@ bool Bomb::validate() {
         std::cout << "Validating Bomb order (Assignment 1 mode)..." << std::endl;
         return true;
     }
-        // Assignment 2 validation
+    
+    // Assignment 2 validation
     if (player->ownsTerritory(targetTerritory)) {
         std::cout << "Bomb INVALID: Cannot bomb own territory" << std::endl;
         return false;
     }
-
     
+    // Check if target is adjacent to any owned territory
     bool isAdjacent = false;
     const std::vector<Territory*>* territories = player->getTerritories();
     for (Territory* t : *territories) {
@@ -510,8 +517,7 @@ Blockade& Blockade::operator=(const Blockade& other) {
 }
 
 bool Blockade::validate() {
-
-     // Handle default constructor case
+    // Handle default constructor case
     if (!player || !targetTerritory || !neutralPlayer) {
         std::cout << "Validating Blockade order (Assignment 1 mode)..." << std::endl;
         return true;
@@ -524,12 +530,28 @@ bool Blockade::validate() {
         return false;
     }
     
+    // Check if neutral player exists
+    if (!neutralPlayer) {
+        std::cout << "Blockade INVALID: Neutral player does not exist" << std::endl;
+        return false;
+    }
+    
     std::cout << "Blockade VALID: Blockading " << targetTerritory->getName() << std::endl;
     return true;
 }
 
 void Blockade::execute() {
     if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !targetTerritory || !neutralPlayer) {
+            std::cout << "Executing Blockade order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Blockade order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
         int currentArmies = targetTerritory->getNumberOfArmies();
         targetTerritory->setNumberOfArmies(currentArmies * 2);
         
@@ -599,12 +621,12 @@ Airlift& Airlift::operator=(const Airlift& other) {
 }
 
 bool Airlift::validate() {
-
     // Handle default constructor case
     if (!player || !sourceTerritory || !targetTerritory) {
         std::cout << "Validating Airlift order (Assignment 1 mode)..." << std::endl;
         return true;
     }
+    
     // Assignment 2 validation
     if (!player->ownsTerritory(sourceTerritory)) {
         std::cout << "Airlift INVALID: " << player->getName() 
@@ -612,6 +634,11 @@ bool Airlift::validate() {
         return false;
     }
     
+    if (!player->ownsTerritory(targetTerritory)) {
+        std::cout << "Airlift INVALID: " << player->getName() 
+                  << " does not own target " << targetTerritory->getName() << std::endl;
+        return false;
+    }
     
     if (sourceTerritory->getNumberOfArmies() < *armiesToMove) {
         std::cout << "Airlift INVALID: Not enough armies on " 
@@ -627,6 +654,16 @@ bool Airlift::validate() {
 
 void Airlift::execute() {
     if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !sourceTerritory || !targetTerritory) {
+            std::cout << "Executing Airlift order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Airlift order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
         sourceTerritory->setNumberOfArmies(
             sourceTerritory->getNumberOfArmies() - *armiesToMove
         );
@@ -690,6 +727,7 @@ bool Negotiate::validate() {
         return true;
     }
 
+    // Assignment 2 validation
     if (player == targetPlayer) {
         std::cout << "Negotiate INVALID: Cannot negotiate with self" << std::endl;
         return false;
@@ -702,6 +740,16 @@ bool Negotiate::validate() {
 
 void Negotiate::execute() {
     if (validate()) {
+        // Handle Assignment 1 mode
+        if (!player || !targetPlayer) {
+            std::cout << "Executing Negotiate order (Assignment 1 mode)..." << std::endl;
+            delete effect;
+            effect = new std::string("Negotiate order executed (placeholder)");
+            *executed = true;
+            return;
+        }
+        
+        // Assignment 2 execution
         player->addNegotiatedPlayer(targetPlayer);
         targetPlayer->addNegotiatedPlayer(player);
         
