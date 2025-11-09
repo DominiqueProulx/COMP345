@@ -167,7 +167,7 @@ GameEngine::GameEngine()
 }
 
 // Duplicates an existing GameEngine into a new distinct object.
-GameEngine::GameEngine(const GameEngine& other)
+GameEngine::GameEngine(const GameEngine& other) : Subject(other)
 {
 	activeParentState = other.activeParentState;
 	activeState = other.activeState;
@@ -193,6 +193,8 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
 	// short-circuit self-assignment
 	if (this == &other)
 		return *this;
+
+	Subject::operator=(other);
 
 	// deep copy other's fields and clear old memory
 	activeParentState = other.activeParentState;
@@ -316,6 +318,13 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
 	engine.addChildStates(end, { final });
 }
 
+// Returns a log string describing the GameEngine's current state.
+std::string GameEngine::stringToLog() const
+{
+	return "[ENGINE] Transitioned to new state: { "
+		+ activeParentState->getName() + "/" + activeState->getName() + " }.";
+}
+
 // Returns this GameEngine's active substate.
 GameEngine::State* GameEngine::getActiveStatePtr() const
 {
@@ -366,6 +375,9 @@ void GameEngine::changeGameState(const std::string& cmd)
 			activeState = newState;
 
 		std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
+
+		// log the state transition to gamelog.txt
+		notify(this);
 	}
 	else
 		std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";

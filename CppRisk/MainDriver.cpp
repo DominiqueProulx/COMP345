@@ -7,7 +7,7 @@ void testCommandProcessor();
 //void testStartupPhase();
 //void testMainGameLoop();
 void testOrderExecution();
-//void testLoggingObserver();
+void testLoggingObserver();
 
 int main(void)
 {
@@ -44,12 +44,10 @@ int main(void)
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	/*
 	testLoggingObserver();
 	std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	*/
 
 	return 0;
 }
