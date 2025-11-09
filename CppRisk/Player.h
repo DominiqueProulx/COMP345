@@ -68,6 +68,7 @@ public:
     void clearNegotiations();
     bool hasNegotiationWith(Player* player) const;
     std::string getName() const;
+	void drawBackUpCards();
 
     Order* getNextOrderToExecute();
     void removeExecutedOrder();

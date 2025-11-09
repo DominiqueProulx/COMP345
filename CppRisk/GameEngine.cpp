@@ -735,12 +735,17 @@ bool GameEngine::validatePlayerStays(Player* player) {
 
 // main game loop
 bool GameEngine::reinforcementPhase() {
-    std::cout << "Reinforcement Phase begins." << std::endl;
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Reinforcement Phase" << std::endl;
+    std::cout << "---------------------------" << std::endl;
     for (Player* player : *players) {
+		std::cout << "drawing cards back up " << std::endl;
+        player->drawBackUpCards();
+
         //calculate reinforcements based on territories owned
         int numTerritories = player->getTerritories()->size();
         int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
-        std::cout << "Player " << player->getName() << " receives " << reinforcements << " reinforcements." << std::endl;
+        std::cout << "Player " << player->getName() << " receives " << reinforcements << "base reinforcements." << std::endl;
         player->addToReinforcementPool(reinforcements);
         // continent bonuses
     	for (Continent* c : getMap()->getContinents()) {
@@ -759,9 +764,13 @@ bool GameEngine::reinforcementPhase() {
         player->addToReinforcementPool(reinforcements);
        
     }
+    
     return true;
 }
 bool GameEngine::issueOrdersPhase() {
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Issue Orders  Phase" << std::endl;
+    std::cout << "---------------------------" << std::endl;
 
     std::cout << "Issuing Orders Phase begins." << std::endl;
     std::unordered_map<Player*, bool> playersDoneIssuing;
@@ -815,6 +824,11 @@ bool GameEngine::executeOrdersPhase() {
     for (Player* player : *players) {
         playersDoneExecuting[player] = false;
     }
+
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Execute Orders Phase" << std::endl;
+    std::cout << "---------------------------" << std::endl;
+
     std::cout << "Executing Orders Phase begins." << std::endl;
     bool noMoreOrders = false;
     while (!noMoreOrders) {
