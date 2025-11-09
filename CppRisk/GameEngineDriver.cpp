@@ -117,5 +117,6 @@ void testGameEngine() {
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	
+	engine.gameOver(std::cin, std::cout);
 
 }

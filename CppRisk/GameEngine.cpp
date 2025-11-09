@@ -205,22 +205,32 @@ GameEngine::GameEngine(const GameEngine& other)
 GameEngine::~GameEngine()
 {
     delete parentStates;
+    parentStates = nullptr;
 
     // delete all State objects
-    for (const auto& s : *states)
+    for (const auto& s : *states){
         delete s;
-
-    delete states;
+    }
+    if (states) {
+        delete states;
+        states = nullptr;
+    }
+    
 
     //A2_P2
     if (deck) delete deck;
+    deck = nullptr;
     if (map) delete map;
+    map = nullptr;
     if (mapLoader) delete mapLoader;
-    if (deck) delete deck;
+    mapLoader = nullptr;
+   
 
     if (players) {
         for (auto* p : *players) delete p;
         delete players;
+        players = nullptr;
+
     }
 }
 
@@ -638,9 +648,6 @@ bool GameEngine::cmdGameStart(std::ostream& out)
     grant50Reinforcements(out);
     initialCardDraws(out);
 
-  
-
-
     out << "GameStart complete.\n";
     return true;
 }
@@ -720,7 +727,8 @@ bool GameEngine::validatePlayerStays(Player* player) {
         std::cout << "Player " << player->getName() << " has no territories left and is eliminated from the game." << std::endl;
         auto playerIndex = std::find(players->begin(), players->end(), player);
         if (playerIndex != players->end()) {
-            players->erase(playerIndex);
+            delete *playerIndex; //delete the player
+            players->erase(playerIndex); // remove the pointer from the vector
         }
         else {
             std::cerr << "ERROR: Player " << player->getName() << " not found in active players list." << std::endl;
@@ -742,11 +750,15 @@ bool GameEngine::reinforcementPhase() {
 		std::cout << "drawing cards back up " << std::endl;
         player->drawBackUpCards();
 
+        //clear Order effects from last turn 
+        player->clearNegotiations();
+        player->setConqueredThisTurn(false);
+      //  player->clearPendingDeployments();
+
         //calculate reinforcements based on territories owned
         int numTerritories = player->getTerritories()->size();
         int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
-        std::cout << "Player " << player->getName() << " receives " << reinforcements << "base reinforcements." << std::endl;
-        player->addToReinforcementPool(reinforcements);
+        std::cout << "Player " << player->getName() << " receives " << reinforcements << " base reinforcements." << std::endl;
         // continent bonuses
     	for (Continent* c : getMap()->getContinents()) {
             bool ownsAll = true;
@@ -874,38 +886,80 @@ void GameEngine::mainGameLoop() {
         else { changeGameState("issueorder"); }
 
         if (executeOrdersPhase()) {
+            for (Player* player : *players) {
+                validatePlayerStays(player);
+            }
+            //check if a player has won 
+            if (players->size() == 1) {
+                std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
+                gameContinues = false;
+                changeGameState("win");
+            }
             changeGameState("endexecorders");
         }
         else {
 			changeGameState("execorder");
         }
 
-        for (Player* player : *players) {
-            validatePlayerStays(player);
-        }
-        //check if a player has won 
-        if (players->size() == 1) {
-            std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
-            gameContinues = false;
-            changeGameState("win");
-        }
-
-
     }
 }
+#include <sstream>
+
 void GameEngine::gameOver(std::istream& in, std::ostream& out) {
-    CommandProcessor cp;
+    out << "\n=== GAME OVER ===\n";
+    out << "Options:\n"
+        << "  replay   → restart game setup\n"
+        << "  quit     → exit program\n";
+
     for (;;) {
-        Command* c = cp.getCommand(*this);
-        if (!c) break;
+        std::cout << "> ";
+        std::string userInput;
+        std::getline(std::cin, userInput);
 
-        processStartupCommand(c->getCommandString(), out);
+        // Parse and clean command
+        std::istringstream inputStream(userInput);
+        std::string command, argument;
+        inputStream >> command;
+        std::getline(inputStream, argument);
 
-        if (getActiveStatePtr()->getName() == "quit") break;
-        if (getActiveParentStatePtr()->getName() == "startup") {
-            out << "Restarting game...\n";
-            startupPhase(in, out);
-            mainGameLoop();
+        if (!argument.empty() && argument.front() == ' ')
+            argument.erase(0, 1);
+
+        if (command.empty()) {
+            out << "Invalid command.\n";
+            continue;
+        }
+
+        if (command == "replay") {
+            if (!isCommandValid("replay")) {
+                out << "Replay not allowed from this state.\n";
+                continue;
+            }
+            out << "Restarting the game...\n";
+            changeGameState("replay");
+
+            // Clean up for a fresh start
+            for (auto* player : *players) delete player;
+            players->clear();
+            delete map;
+            map = nullptr;
+
+            startupPhase(std::cin, out);
+            return;
+        }
+        else if (command == "quit") {
+            if (!isCommandValid("end") && !isCommandValid("quit")) {
+                out << "Quit not allowed from this state.\n";
+                continue;
+            }
+            out << "Exiting game. Goodbye!\n";
+            changeGameState("end");
+            return;
+        }
+        else {
+            out << "Invalid command. Type 'replay' or 'quit'.\n";
         }
     }
 }
+
+

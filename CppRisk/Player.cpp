@@ -549,7 +549,6 @@ void Player::drawBackUpCards() {
     for (int i = cardcount; i < 2; i++) {
         Card* drawnCard = deck->draw(playersHand);
         if (drawnCard) {
-            playerHand->addCard(drawnCard);
             std::cout << "Player " << getName() << " drew a card." << std::endl;
         }
         else {
