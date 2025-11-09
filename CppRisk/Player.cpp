@@ -330,7 +330,7 @@ Territory* Player::choseFromToDefend() {
         i++;
     }
 
-    std::cout << "\nEnter the number of the territory you want to select."
+    std::cout << "\nEnter the number of the territory from your defend list."
         << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
 
     int choice;
@@ -380,7 +380,7 @@ Territory* Player::choseFromToAttack() {
         index++;
     }
 
-    std::cout << "\nEnter the number of the territory you want to attack."
+    std::cout << "\nEnter the number of the territory you want from your to attack list."
         << "\n(Enter 0 to go back or -1 to cancel)\n" << std::endl;
 
     int choice;
@@ -694,8 +694,7 @@ Order* Player::issueAdvanceOrder() {
 }
 Order* Player::issueDeployOrder() {
 
-    std::cout << "Which territories would you like to deploy armies to? " << std::endl;
-    std::cout << "----- Territories to Defend ----- " << std::endl;
+    std::cout << "\nWhich territories would you like to deploy armies to? " << std::endl;
     int i = 1;
     
 	Territory* targetTerritory = choseFromToDefend();

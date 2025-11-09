@@ -891,11 +891,13 @@ void GameEngine::mainGameLoop() {
             }
             //check if a player has won 
             if (players->size() == 1) {
+                std::cout << "*****---------------------------------------------------*****"<< std::endl;
                 std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
+                std::cout << "*****---------------------------------------------------*****" << std::endl;
                 gameContinues = false;
                 changeGameState("win");
             }
-            changeGameState("endexecorders");
+            else { changeGameState("endexecorders"); }
         }
         else {
 			changeGameState("execorder");
@@ -907,9 +909,9 @@ void GameEngine::mainGameLoop() {
 
 void GameEngine::gameOver(std::istream& in, std::ostream& out) {
     out << "\n=== GAME OVER ===\n";
-    out << "Options:\n"
-        << "  replay   → restart game setup\n"
-        << "  quit     → exit program\n";
+    out << "Commands:\n"
+        << "  replay \n"
+        << "  quit  \n";
 
     for (;;) {
         std::cout << "> ";
