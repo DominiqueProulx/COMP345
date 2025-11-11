@@ -2,9 +2,8 @@
 #include "map.h"
 #include "Player.h"
 #include "Cards.h"
-#include "map.h"
-#include <iostream>
 #include <sstream>
+#include <iostream>
 #include <algorithm>
 #include <random>
 #include "CommandProcessing.h"
@@ -948,8 +947,9 @@ void GameEngine::mainGameLoop() {
         }
 
     }
+    gameOver(std::cin, std::cout);
 }
-#include <sstream>
+
 
 
 // Handles the end of a game once on "win" state., allowing the user to input command to replay or quit.
