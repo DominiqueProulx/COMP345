@@ -152,12 +152,6 @@ void Player::addPendingDeployment(int armies) {
 void Player::clearPendingDeployments() {
     *pendingDeployments = 0;
 }
-void Player::setReinforcementPool(int armies) {
-    *reinforcementPool = armies;
-}
-void Player::setConqueredThisTurn(bool conquered) {
-    *conqueredTerritoryThisTurn = conquered;
-}
 
 // Assignment 2 methods
 
