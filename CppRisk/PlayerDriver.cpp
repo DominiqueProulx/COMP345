@@ -87,46 +87,46 @@ void testPlayers() {
 	std::srand(std::time(0));
 
 	//Testing toDefend() method
-	//std::cout << "\nTesting toDefend() method for Player 1" << std::endl;
-	//std::vector<Territory*> territoriesToDefend1 = player1.toDefend();
-	//std::cout << "Player 1 has chosen to defend " << territoriesToDefend1.size() << " territories." << std::endl;
-	//std::cout << "The territories to defend are: " << std::endl;
-	//int vectorsize3 = territoriesToDefend1.size();
-	//for (int i = 0; i < vectorsize3; i++) {
-	//	std::cout << (territoriesToDefend1[i]->getName()) << std::endl;
-	//}
+	std::cout << "\nTesting toDefend() method for Player 1" << std::endl;
+	std::vector<Territory*>* territoriesToDefend1 = player1.toDefend();
+	std::cout << "Player 1 has chosen to defend " << territoriesToDefend1->size() << " territories." << std::endl;
+	std::cout << "The territories to defend are: " << std::endl;
+	int vectorsize3 = territoriesToDefend1->size();
+	for (int i = 0; i < vectorsize3; i++) {
+		std::cout << ((*territoriesToDefend1)[i]->getName()) << std::endl;
+	}
 
-	//std::cout << "\nTesting toDefend() method for Player 2" << std::endl;
-	//std::vector<Territory*> territoriesToDefend2 = player2.toDefend();
-	//std::cout << "Player 2 has chosen to defend " << territoriesToDefend2.size() << " territories." << std::endl;
-	//std::cout << "The territories to defend are: " << std::endl;
-	//int vectorsize4 = territoriesToDefend2.size();
-	//for (int i = 0; i < vectorsize4; i++) {
-	//	std::cout << (territoriesToDefend2[i]->getName()) << std::endl;
-	//}
+	std::cout << "\nTesting toDefend() method for Player 2" << std::endl;
+	std::vector<Territory*>* territoriesToDefend2 = player2.toDefend();
+	std::cout << "Player 2 has chosen to defend " << territoriesToDefend2->size() << " territories." << std::endl;
+	std::cout << "The territories to defend are: " << std::endl;
+	int vectorsize4 = territoriesToDefend2->size();
+	for (int i = 0; i < vectorsize4; i++) {
+		std::cout << ((*territoriesToDefend2)[i]->getName()) << std::endl;
+	}
 
 	////Testing toAttack() method
-	//std::cout << "\nTesting toAttack() method for Player 1" << std::endl;
-	//std::vector<Territory*> territoriesToAttack1 = player1.toAttack();
-	//std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1.size() << " territories." << std::endl;
-	//std::cout << "The territories to Attack are: " << std::endl;
-	//int vectorsize5 = territoriesToAttack1.size();
-	//for (int i = 0; i < vectorsize5; i++) {
-	//	std::cout << (territoriesToAttack1[i]->getName()) << std::endl;
-	//}
+	std::cout << "\nTesting toAttack() method for Player 1" << std::endl;
+	std::vector<Territory*>* territoriesToAttack1 = player1.toAttack();
+	std::cout << "Player 1 has chosen to Attack " << territoriesToAttack1->size() << " territories." << std::endl;
+	std::cout << "The territories to Attack are: " << std::endl;
+	int vectorsize5 = territoriesToAttack1->size();
+	for (int i = 0; i < vectorsize5; i++) {
+		std::cout << ((*territoriesToAttack1)[i]->getName()) << std::endl;
+	}
 
 	//Testing toAttack() method
-	/*std::cout << "\nTesting toAttack() method for Player 2" << std::endl;
-	std::vector<Territory*> territoriesToAttack2 = player2.toAttack();
-	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2.size() << " territories." << std::endl;
+	std::cout << "\nTesting toAttack() method for Player 2" << std::endl;
+	std::vector<Territory*>* territoriesToAttack2 = player2.toAttack();
+	std::cout << "Player 2 has chosen to Attack " << territoriesToAttack2->size() << " territories." << std::endl;
 	std::cout << "The territories to Attack are: " << std::endl;
-	int vectorsize6 = territoriesToAttack2.size();
+	int vectorsize6 = territoriesToAttack2->size();
 	for (int i = 0; i < vectorsize6; i++) {
-		std::cout << (territoriesToAttack2[i]->getName()) << std::endl;
-	}*/
+		std::cout << ((*territoriesToAttack2)[i]->getName()) << std::endl;
+	}
 
 	//Testing issueOrder() method
-	/*std::cout << "\nCreating cards and adding them to the hand of the player to test orders" << std::endl;
+	std::cout << "\nCreating cards and adding them to the hand of the player to test orders" << std::endl;
 
 	std::cout << "\nTesting issueOrder() method for Player 1" << std::endl;
 	bool endOrder = false;
@@ -138,7 +138,7 @@ void testPlayers() {
 		if (answer == 'n' || answer == 'N') {
 			endOrder = true;
 		}
-	}*/
+	}
 
 	std::cout << "\nHere is the list of all the orders that are part of the player's order list: " << std::endl;
 	std::cout << player1.getOrdersList() << std::endl;
@@ -149,52 +149,4 @@ void testPlayers() {
 
 }
 
-std::vector<Player*>* createFakePlayers() {
-	MapLoader loader;
-	std::string error;
-	Map* map = loader.load("MAP.txt", &error);
 
-	if (!map) {
-		std::cerr << "Failed to load map: " << error << std::endl;
-		return nullptr;
-	}
-
-	Deck* deck = new Deck();
-	deck->initializeDeck();
-
-	std::cout << "allocating territories " << std::endl;
-	std::vector<Territory*> territoryPlayer1;
-	std::vector<Territory*> territoryPlayer2;
-	int count = 0;
-
-	for (Territory* t : map->getTerritories()) {
-		std::cout << " Territory : " << t->getName() << std::endl;
-		if (count % 2 == 0) territoryPlayer1.push_back(t);
-		else territoryPlayer2.push_back(t);
-		count++;
-	}
-	std::cout << "Create the players" << std::endl;
-	std::cout << "Create the players" << std::endl;
-	std::string color1("blue"), color2("red");
-
-	std::cout << "Create the players" << std::endl;
-	Player* player1 = new Player(color1, territoryPlayer1, deck);
-	Player* player2 = new Player(color2, territoryPlayer2, deck);
-	std::cout << "Create the players hands" << std::endl;
-	Hand* hand1 = new Hand();
-	Hand* hand2 = new Hand();
-	for (int i = 0; i < 5; ++i) {
-		deck->draw(hand1);
-		deck->draw(hand2);
-	}
-
-	player1->setHand(*hand1);
-	player2->setHand(*hand2);
-
-	auto* players = new std::vector<Player*>();
-	players->push_back(player1);
-	players->push_back(player2);
-
-	return players;
-}
-//FLAG :: remove this function when integrating Jackson's code.

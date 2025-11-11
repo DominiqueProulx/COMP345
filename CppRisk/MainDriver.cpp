@@ -16,7 +16,7 @@ void testLoggingObserver();
 
 int main(void)
 {
-  //  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     char directory[FILENAME_MAX];
     _getcwd(directory, FILENAME_MAX);
     std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
