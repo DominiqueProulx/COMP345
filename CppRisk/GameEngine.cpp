@@ -714,8 +714,9 @@ void GameEngine::grant50Reinforcements(std::ostream& out)
 
     for (auto* p : *players) {
         p->setReinforcementPool(50);
+        out << "Granted " << p->getName() <<" 50 reinforcement armies.\n";
     }
-    out << "Granted each player 50 reinforcement armies.\n";
+    
 }
 
 void GameEngine::initialCardDraws(std::ostream& out)
@@ -727,8 +728,9 @@ void GameEngine::initialCardDraws(std::ostream& out)
         p->getHand();
         deck->draw(p->getHand());
         deck->draw(p->getHand());
+        out <<  p->getName()  <<" drew 2 cards.\n";
     }
-    out << "Each player drew 2 cards.\n";
+    
 }
 
 //Checks if player still has territories, if the player is removed from the game
