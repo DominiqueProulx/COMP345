@@ -1,5 +1,5 @@
 [CMD] Saved a new command effect: { Test action completed successfully }.
-[CMDPROCESSOR] Added a new command to a list: { Command: 4 | Effect: Invalid command: '4' is not recognized in state 'start'. }.
+[CMDPROCESSOR] Added a new command to a list: { Command: loadmap MAP.txt | Effect: Command 'loadmap' is valid in state 'start'. }.
 [CMDPROCESSOR] Added a new command to a list: { Command: loadmap | Effect: Command 'loadmap' is valid in state 'start'. }.
 [ORDERLIST] Added a new order to a list: { Order Type: Deploy }.
 [ENGINE] Transitioned to new state: { startup/map loaded }.

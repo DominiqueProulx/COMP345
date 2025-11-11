@@ -9,7 +9,7 @@ using GameState = GameEngine::GameState;
 // Tests the GameEngine implementation by creating an FSM to replicate Risk and starting a loop to test state
 // transitions using user-inputted commands.
 // The State implementation is hidden under GameEngine and can only be created through engine.createState
-/*void testGameStates()
+void testGameStates()
 {
 	GameEngine engine;
 
@@ -81,7 +81,7 @@ using GameState = GameEngine::GameState;
 			shouldContinue = false;
 		}
 	}
-}*/
+}
 
 void testStartupPhase(GameEngine& engine) {
 

@@ -244,11 +244,6 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
     activeParentState = other.activeParentState;
     activeState = other.activeState;
 
-    delete parentStates;
-    parentStates = new std::vector<State*>(*other.parentStates);
-
-    delete states;
-    states = new std::vector<State*>(*other.states);
 
     if (deck) delete deck;
     deck = other.deck ? new Deck(*other.deck) : nullptr;
@@ -491,9 +486,7 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
             << "  loadmap <filename>\n"
             << "  validatemap\n"
             << "  addplayer <playername>\n"
-            << "  gamestart\n"
-            << "  replay \n"
-            << "  quit   \n";
+            << "  gamestart\n";
 
         CommandProcessor cp;
         for (;;) {
@@ -886,6 +879,7 @@ bool GameEngine::executeOrdersPhase() {
                 std::cout << "Player " << player->getName() << " is executing order" << std::endl;
                 nextOrder->execute();
 				player->removeExecutedOrder(); //Remove order from Orderlist after execution
+                
             }
             else {
                 playersDoneExecuting[player] = true;

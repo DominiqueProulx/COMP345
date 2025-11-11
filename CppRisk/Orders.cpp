@@ -138,7 +138,7 @@ bool Deploy::validate() {
     // Calculate available armies = pool - already committed armies
     // Note: Game engine is responsible for tracking pending deployments
     // during the issuing phase. We only read the value here for validation.
-    int availableArmies = player->getReinforcementPool() - player->getPendingDeployments();
+    int availableArmies = player->getReinforcementPool();
     
     if (availableArmies < *armiesToDeploy) {
         std::cout << "Deploy INVALID: Not enough reinforcements (have " 

@@ -147,6 +147,18 @@ void testPlayers() {
 
 	std::cout << "\nEnd of Tests for Player Class " << std::endl;
 
+	// Delete all dynamically allocated memory
+	delete player1Hand;
+	delete player2Hand;
+
+	delete territoriesToDefend1;
+	delete territoriesToDefend2;
+
+	delete territoriesToAttack1;
+	delete territoriesToAttack2;
+
+	delete map; // all territories will also be deleted
+	
 }
 
 

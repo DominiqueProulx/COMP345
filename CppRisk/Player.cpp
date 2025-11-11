@@ -152,6 +152,12 @@ void Player::addPendingDeployment(int armies) {
 void Player::clearPendingDeployments() {
     *pendingDeployments = 0;
 }
+void Player::setReinforcementPool(int armies) {
+    *reinforcementPool = armies;
+}
+void Player::setConqueredThisTurn(bool conquered) {
+    *conqueredTerritoryThisTurn = conquered;
+}
 
 // Assignment 2 methods
 
@@ -190,6 +196,8 @@ void Player::removeExecutedOrder() {
     orderslist->remove(0);
 
 }
+
+
 
 void Player::addNegotiatedPlayer(Player* player) {
     if (player && player != this) {
@@ -797,8 +805,7 @@ Order* Player::issueDeployOrder() {
     
 	// Update pending deployments to match the commited armies
 	*pendingDeployments += armiesToDeploy;
-    std::cout << armiesToDeploy << " armies deployed to " << targetTerritory->getName()
-        << ". Remaining reinforcement pool: " << (*reinforcementPool - *pendingDeployments) << std::endl;
+    std::cout << armiesToDeploy << " armies deployed to " << targetTerritory->getName() << ". Remaining reinforcement pool: " << (*reinforcementPool - *pendingDeployments) << std::endl;
 	return deployOrder;
 }
 // issueBombOrder()
@@ -962,7 +969,14 @@ void Player::issueOrder() {
         territoriesToAttack = new std::vector<Territory*>();
 
         std::cout << "\nPlease specify which of your territories to defend : " << std::endl;
+        if (territoriesToDefend != nullptr) {
+            delete territoriesToDefend;
+        }
         territoriesToDefend = toDefend();
+       
+        if (territoriesToAttack != nullptr) {
+            delete territoriesToAttack;
+        }
         std::cout << "\nPlease specify which territories you want to attack : " << std::endl;
         territoriesToAttack = toAttack();
     }
@@ -980,7 +994,7 @@ void Player::issueOrder() {
        
 		// Other orders are available once the reinforcement pool is empty
         std::cout << "\nHere are the possible orders" << std::endl;
-        std::cout << "0. end turn" << std::endl; 
+        std::cout << "0. End turn" << std::endl; 
         std::cout << "1. Advance" << std::endl;
         std::cout << "From the cards available in your hand : \n" << std::endl;
 
