@@ -1,0 +1,23 @@
+[Map]
+author=Dominique
+image=middleearth.bmp
+wrap=no
+scroll=none
+warn=yes
+
+[Continents]
+The North=4
+The South=5
+
+[Territories]
+Shire,100,100,The North,Bree,Weathertop
+Bree,200,120,The North,Shire,Weathertop,Fornost
+Weathertop,150,200,The North,Shire,Bree,Rivendell
+Fornost,250,100,The North,Bree,Rivendell,Rohan
+Rivendell,220,200,The North,Weathertop,Fornost,Rohan,Lorien
+
+Rohan,300,250,The South,Fornost,Rivendell,Lorien,Gondor
+Lorien,350,200,The South,Rivendell,Rohan,Moria,Gondor
+Moria,320,300,The South,Lorien,Gondor,Mordor
+Gondor,400,250,The South,Rohan,Lorien,Moria,Mordor
+Mordor,420,320,The South,Moria,Gondor

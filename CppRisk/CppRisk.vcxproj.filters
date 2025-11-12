@@ -78,4 +78,7 @@
       <UniqueIdentifier>{619385d3-2fd4-4ec4-ba4c-fed8dd3b6ce4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\COMP345_A1\CppRisk\MAP.txt" />
+  </ItemGroup>
 </Project>

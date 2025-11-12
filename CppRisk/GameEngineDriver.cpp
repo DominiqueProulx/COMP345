@@ -1,5 +1,7 @@
 #include <iostream>
 #include "GameEngine.h"
+#include "CommandProcessing.h"
+#include <sstream>
 
 // for brevity
 using GameState = GameEngine::GameState;
@@ -19,9 +21,9 @@ void testGameStates()
 
 	// STARTUP
 	GameState start{ engine.createState("start", false) };
-	GameState mapLoaded{ engine.createState("map loaded", false) };
-	GameState mapValidated{ engine.createState("map validated", false) };
-	GameState playersAdded{ engine.createState("players added", false) };
+	GameState mapLoaded{ engine.createState("maploaded", false) };
+	GameState mapValidated{ engine.createState("mapvalidated", false) };
+	GameState playersAdded{ engine.createState("playersadded", false) };
 
 	engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
 	engine.addChildTransition(start, "loadmap", mapLoaded);
@@ -79,4 +81,42 @@ void testGameStates()
 			shouldContinue = false;
 		}
 	}
+}
+
+void testStartupPhase(GameEngine& engine) {
+
+	std::cout << "========================================" << std::endl;
+	std::cout << "      TESTING Startup Phase " << std::endl;
+	std::cout << "========================================" << std::endl;
+   
+    engine.startupPhase(std::cin, std::cout);
+}
+void testMainGameLoop(GameEngine& engine) {
+	std::cout << "========================================" << std::endl;
+	std::cout << "      TESTING Main Game Loop " << std::endl;
+	std::cout << "========================================" << std::endl;
+	
+
+	engine.mainGameLoop();
+	
+}
+
+void testGameEngine() {
+	GameEngine engine;
+	char buffer[256];
+
+	engine.initializeRiskFSM(engine);
+
+	testStartupPhase(engine);
+	std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+
+	testMainGameLoop(engine);
+	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
+	std::cin >> buffer;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
+	engine.gameOver(std::cin, std::cout);
+
 }

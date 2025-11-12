@@ -6,6 +6,12 @@
 #include <vector>
 #include <unordered_map>
 #include "LoggingObserver.h"
+#include "orders.h"  // contains player,cards and map includes
+class Player;
+class Deck;
+class Territory;
+class Map;
+class MapLoader;
 
 /* -- GAME ENGINE OBJECT DEFINITION -- */
 class GameEngine : public Subject, public ILoggable
@@ -55,6 +61,18 @@ private:
 	State* activeParentState;
 	State::StateList* parentStates;
 	State::StateList* states;
+	Map* map;
+	MapLoader* mapLoader;
+	std::vector<Player*>* players;
+	Deck* deck;
+	std::unordered_map<Player*, int>* reinforcementPool; //Jackson to test for now
+
+
+	//main game loop phases & helpers
+	bool validatePlayerStays(Player* player);
+	bool reinforcementPhase();
+	bool issueOrdersPhase();
+	bool executeOrdersPhase();
 
 public:
 	using GameState = State*; // exposed publically so states can be initialized but not used directly externally
@@ -81,6 +99,7 @@ public:
 	// accessors
 	State* getActiveStatePtr() const;
 	State* getActiveParentStatePtr() const;
+	Map* getMap() const { return map; }
 	void setActiveState(State* state);
 	void setActiveParentState(State* state);
 
@@ -93,6 +112,31 @@ public:
 	std::string getCurrentStateName() const;
 	std::string getParentStateName() const;
 
+    void startupPhase( std::istream& in=std::cin,std::ostream& out=std::cout);
+
+	void processStartupCommand(const std::string& full, std::ostream& out);
+	
+    const std::vector<Player*>* getPlayers() const { return players; }
+
+    friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
+	// main Game Loop
+	void mainGameLoop();
+	void gameOver(std::istream& in, std::ostream& out);
+
+
+private:
+        
+    bool cmdLoadMap(const std::string& filename, std::ostream& out);
+    bool cmdValidateMap(std::ostream& out);
+    bool cmdAddPlayer(const std::string& name, std::ostream& out);
+    bool cmdGameStart(std::ostream& out);
+
+    void fairDistributeTerritories(std::ostream& out);
+    void randomizePlayerOrder(std::ostream& out);
+    void grant50Reinforcements(std::ostream& out);
+    void initialCardDraws(std::ostream& out);
+
+	
 };
 
 #endif

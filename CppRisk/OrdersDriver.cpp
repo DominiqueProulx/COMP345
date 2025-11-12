@@ -12,95 +12,95 @@ using namespace std;
 
 // Assignment 1 test function - kept for backward compatibility
 void testOrdersLists() {
-	cout << "\n========================================" << endl;
-	cout << "    TESTING ORDERS AND ORDERS LIST" << endl;
-	cout << "========================================\n" << endl;
+    cout << "\n========================================" << endl;
+    cout << "    TESTING ORDERS AND ORDERS LIST" << endl;
+    cout << "========================================\n" << endl;
 
-	// Create dummy objects using default constructors
-	Player* player1 = new Player();
-	player1->setColor("Red");
-
-	Territory* terr1 = new Territory("Territory1", 0, 0);
-	Territory* terr2 = new Territory("Territory2", 1, 1);
-
-	terr1->setNumberOfArmies(10);
-	terr2->setNumberOfArmies(5);
-
-	player1->addTerritory(terr1);
-	player1->addTerritory(terr2);
-	player1->setReinforcementPool(20);
-
-	// Create orders
-	Order* deploy = new Deploy(player1, terr1, 5);
-	Order* advance = new Advance(player1, terr1, terr2, 3);
-	Order* bomb = new Bomb(player1, terr2);
-
-	OrdersList* ordersList = new OrdersList();
-	ordersList->add(deploy);
-	ordersList->add(advance);
-	ordersList->add(bomb);
-
-	cout << "Created OrdersList with 3 orders" << endl;
-	cout << *ordersList << endl;
-
-	// Test move
-	cout << "\nTesting move()..." << endl;
-	ordersList->move(0, 2);
-	cout << *ordersList << endl;
-
-	// Test remove
-	cout << "\nTesting remove()..." << endl;
-	ordersList->remove(1);
-	cout << *ordersList << endl;
-
-	// Test copy constructor
-	cout << "\nTesting copy constructor..." << endl;
-	OrdersList copyList(*ordersList);
-	cout << "Original list:" << endl;
-	cout << *ordersList << endl;
-	cout << "Copied list:" << endl;
-	cout << copyList << endl;
-
-	// Test assignment operator
-	cout << "\nTesting assignment operator..." << endl;
-	OrdersList assignedList;
-	assignedList = *ordersList;
-	cout << "Assigned list:" << endl;
-	cout << assignedList << endl;
-
-	// Test executing orders
-	cout << "\nExecuting all orders in list..." << endl;
-	for (int i = 0; i < ordersList->size(); i++) {
-		Order* order = ordersList->getOrder(i);
-		cout << "\nExecuting: " << *order << endl;
-		order->execute();
-		cout << "After execution: " << *order << endl;
-	}
-
-	// Cleanup
-	delete ordersList;
-	delete player1;
-	delete terr1;
-	delete terr2;
-
-	cout << "\nAssignment 1 tests completed!" << endl << endl;
+    // Create dummy objects using default constructors
+    Player* player1 = new Player();
+    player1->setColor("Red");
+    
+    Territory* terr1 = new Territory("Territory1", 0, 0);
+    Territory* terr2 = new Territory("Territory2", 1, 1);
+    
+    terr1->setNumberOfArmies(10);
+    terr2->setNumberOfArmies(5);
+    
+    player1->addTerritory(terr1);
+    player1->addTerritory(terr2);
+    player1->setReinforcementPool(20);
+    
+    // Create orders
+    Order* deploy = new Deploy(player1, terr1, 5);
+    Order* advance = new Advance(player1, terr1, terr2, 3);
+    Order* bomb = new Bomb(player1, terr2);
+    
+    OrdersList* ordersList = new OrdersList();
+    ordersList->add(deploy);
+    ordersList->add(advance);
+    ordersList->add(bomb);
+    
+    cout << "Created OrdersList with 3 orders" << endl;
+    cout << *ordersList << endl;
+    
+    // Test move
+    cout << "\nTesting move()..." << endl;
+    ordersList->move(0, 2);
+    cout << *ordersList << endl;
+    
+    // Test remove
+    cout << "\nTesting remove()..." << endl;
+    ordersList->remove(1);
+    cout << *ordersList << endl;
+    
+    // Test copy constructor
+    cout << "\nTesting copy constructor..." << endl;
+    OrdersList copyList(*ordersList);
+    cout << "Original list:" << endl;
+    cout << *ordersList << endl;
+    cout << "Copied list:" << endl;
+    cout << copyList << endl;
+    
+    // Test assignment operator
+    cout << "\nTesting assignment operator..." << endl;
+    OrdersList assignedList;
+    assignedList = *ordersList;
+    cout << "Assigned list:" << endl;
+    cout << assignedList << endl;
+    
+    // Test executing orders
+    cout << "\nExecuting all orders in list..." << endl;
+    for (int i = 0; i < ordersList->size(); i++) {
+        Order* order = ordersList->getOrder(i);
+        cout << "\nExecuting: " << *order << endl;
+        order->execute();
+        cout << "After execution: " << *order << endl;
+    }
+    
+    // Cleanup
+    delete ordersList;
+    delete player1;
+    delete terr1;
+    delete terr2;
+    
+    cout << "\nAssignment 1 tests completed!" << endl << endl;
 }
 
 // Assignment 2 test function - demonstrates order execution with game rules
 void testOrderExecution() {
-	cout << "\n========================================" << endl;
-	cout << "         TESTING ORDER EXECUTION" << endl;
-	cout << "========================================\n" << endl;
+    cout << "\n========================================" << endl;
+    cout << "  TESTING ORDER EXECUTION (Assignment 2)" << endl;
+    cout << "========================================\n" << endl;
 
-	// Create players
-	Player* player1 = new Player();
-	player1->setColor("Alice");
-
-	Player* player2 = new Player();
-	player2->setColor("Bob");
-
-	Player* neutralPlayer = new Player();
-	neutralPlayer->setColor("Neutral");
+    // Create players
+    Player* player1 = new Player();
+    player1->setColor("Alice");
+    
+    Player* player2 = new Player();
+    player2->setColor("Bob");
+    
+    Player* neutralPlayer = new Player();
+    neutralPlayer->setColor("Neutral");
 
 	// Create territories with coordinates
 	Territory* terrA = new Territory("Territory_A", 0, 0);
