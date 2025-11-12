@@ -23,9 +23,26 @@ Player::Player() {
     territoriesOwned = new std::vector<Territory*>();
     playerHand = new Hand();
     orderslist = new OrdersList();
-    deck = new Deck();
+    
     
     // Assignment 2 additions
+    reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
+    conqueredTerritoryThisTurn = new bool(false);
+    negotiatedPlayers = new std::set<Player*>();
+    territoriesToDefend = nullptr;
+    territoriesToAttack = nullptr;
+}
+Player::Player(Deck* &deck) {
+    Player::playerCount++;
+    playerID = new int(playerCount);
+    playerColor = new std::string("NoColor");
+    territoriesOwned = new std::vector<Territory*>();
+    playerHand = new Hand();
+    orderslist = new OrdersList();
+    this->deck = deck;
+
+       // Assignment 2 additions
     reinforcementPool = new int(0);
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
@@ -56,6 +73,8 @@ Player::Player(const std::string& color, const std::vector<Territory*>& initialT
     territoriesToDefend = nullptr;
     territoriesToAttack = nullptr;
 }
+
+
 
 // Copy constructor
 Player::Player(const Player& other) {

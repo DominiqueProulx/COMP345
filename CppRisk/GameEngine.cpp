@@ -627,7 +627,7 @@ bool GameEngine::cmdValidateMap(std::ostream& out)
 bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
 {
     if (players->size() >= 6) { out << "Max 6 players reached.\n"; return false; }
-    Player* p = new Player();
+    Player* p = new Player(deck);
     p->setColor(name); //There's no name in player
     players->push_back(p);
     out << "Player added: " << name << " (Total " << players->size() << ")\n";
@@ -982,9 +982,10 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
             changeGameState("replay");
 
             // Clean up for a fresh start
-            for (auto* player : *players) delete player;
+            for (auto* player : *players) 
+                if (player) { delete player; }
             players->clear();
-            delete map;
+            if (map) { delete map; }
             map = nullptr;
 
             startupPhase(std::cin, out);
@@ -1000,9 +1001,9 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
             // Clean up 
             for (auto* player : *players) delete player;
             players->clear();
-            delete map;
+            if (map) { delete map; }
             map = nullptr;
-            delete deck;
+            if (deck) { delete deck; }
             deck = nullptr;
             return;
         }
