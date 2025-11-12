@@ -19,9 +19,7 @@ int main(void)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); 
 	
-	//_CrtSetBreakAlloc(1235);  // Break at first leak
-
-    char directory[FILENAME_MAX];
+	 char directory[FILENAME_MAX];
     _getcwd(directory, FILENAME_MAX);
     std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
     std::cout << directory << std::endl;
@@ -32,21 +30,21 @@ int main(void)
 	GameEngine::initializeRiskFSM(engine);
 
     // run all driver test functions
- /*   testCommandProcessor();
+   testCommandProcessor();
     std::cout << "\n\nFinished testing COMMAND PROCESSOR. Enter any character to proceed to the next test. ";
     std::cin >> buffer;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
 	testStartupPhase(engine);
 	std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	/*testMainGameLoop(engine);
+	testMainGameLoop(engine);
 	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	*//*
+	
 	testOrderExecution();
 	std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
@@ -56,9 +54,8 @@ int main(void)
 	std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	*/
-	_CrtDumpMemoryLeaks();
-    return 0;
+
+	    return 0;
 
    
 }
