@@ -10,7 +10,6 @@
 #include <memory>
 #include <limits>
 
-
 /* -------------------------- */
 /* -- STATE IMPLEMENTATION -- */
 /* -------------------------- */
@@ -207,14 +206,13 @@ GameEngine::~GameEngine()
     parentStates = nullptr;
 
     // delete all State objects
-    for (const auto& s : *states){
+    for (const auto& s : *states) {
         delete s;
     }
     if (states) {
         delete states;
         states = nullptr;
     }
-    
 
     //A2_P2
     if (deck) delete deck;
@@ -223,7 +221,6 @@ GameEngine::~GameEngine()
     map = nullptr;
     if (mapLoader) delete mapLoader;
     mapLoader = nullptr;
-   
 
     if (players) {
         for (auto* p : *players) delete p;
@@ -240,10 +237,11 @@ GameEngine& GameEngine::operator=(const GameEngine& other)
     if (this == &other)
         return *this;
 
+    Subject::operator=(other);
+
     // deep copy other's fields and clear old memory
     activeParentState = other.activeParentState;
     activeState = other.activeState;
-
 
     if (deck) delete deck;
     deck = other.deck ? new Deck(*other.deck) : nullptr;
@@ -379,8 +377,8 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
 // Returns a log string describing the GameEngine's current state.
 std::string GameEngine::stringToLog() const
 {
-	return "[ENGINE] Transitioned to new state: { "
-		+ activeParentState->getName() + "/" + activeState->getName() + " }.";
+    return "[ENGINE] Transitioned to new state: { "
+        + activeParentState->getName() + "/" + activeState->getName() + " }.";
 }
 
 // Returns this GameEngine's active substate.
@@ -432,13 +430,13 @@ void GameEngine::changeGameState(const std::string& cmd)
         else
             activeState = newState;
 
-		std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
+        std::cout << "SUCCESS: transitioned to new state (" << activeState->getName() << ") via '" << cmd << "'.\n";
 
-		// log the state transition to gamelog.txt
-		notify(this);
-	}
-	else
-		std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";
+        // log the state transition to gamelog.txt
+        notify(this);
+    }
+    else
+        std::cerr << "ERR: command '" << cmd << "' does not exist for active state (" << activeState->getName() << ").\n";
 }
 
 // Returns true if the active state is considered a final state (defined by no outgoing transitions).
@@ -494,7 +492,7 @@ void GameEngine::startupPhase(std::istream& in, std::ostream& out) {
             if (!c) { out << "No more commands.\n"; break; }
             processStartupCommand(c->getCommandString(), out);
 
-			//Exit Setup Phase if we reach play state
+            //Exit Setup Phase if we reach play state
             if (getActiveParentStatePtr() && getActiveParentStatePtr()->getName() == "play") {
                 out << "Game setup complete. Starting main game loop...\n";
                 break;
@@ -592,14 +590,12 @@ void GameEngine::processStartupCommand(const std::string& full, std::ostream& ou
         if (cmdGameStart(out)) {
             changeGameState("gamestart");
 
-			
         }
         return;
     }
 
     out << "Invalid command.\n";
 }
-
 
 bool GameEngine::cmdLoadMap(const std::string& filename, std::ostream& out)
 {
@@ -731,7 +727,7 @@ bool GameEngine::validatePlayerStays(Player* player) {
         std::cout << "Player " << player->getName() << " has no territories left and is eliminated from the game." << std::endl;
         auto playerIndex = std::find(players->begin(), players->end(), player);
         if (playerIndex != players->end()) {
-            delete *playerIndex; //delete the player
+            delete* playerIndex; //delete the player
             players->erase(playerIndex); // remove the pointer from the vector
         }
         else {
@@ -759,21 +755,21 @@ bool GameEngine::reinforcementPhase() {
     for (Player* player : *players) {
 
         //Draw Cards back up
-		std::cout << "drawing cards back up " << std::endl;
+        std::cout << "drawing cards back up " << std::endl;
         player->drawBackUpCards();
 
-        //Clear Order effects from last turn 
+        //Clear Order effects from last turn
         player->clearNegotiations();
         player->setConqueredThisTurn(false);
         player->clearPendingDeployments();
 
         //Calculate reinforcements based on territories owned
         int numTerritories = player->getTerritories()->size();
-        int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn 
+        int reinforcements = std::max(3, numTerritories / 3); //minimum of 3 reinforcements per turn
         std::cout << "Player " << player->getName() << " receives " << reinforcements << " base reinforcements." << std::endl;
 
         //Calculate Continent bonuses
-    	for (Continent* c : getMap()->getContinents()) {
+        for (Continent* c : getMap()->getContinents()) {
             bool ownsAll = true;
             for (Territory* t : c->getTerritories()) {
                 if (t->getOwner() != player) {
@@ -783,19 +779,19 @@ bool GameEngine::reinforcementPhase() {
             }
             if (ownsAll) {
                 reinforcements += c->getBonus();
-				std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
+                std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
             }
         }
-		//Add reinforcements to player's pool
+        //Add reinforcements to player's pool
         player->addToReinforcementPool(reinforcements);
-       
+
     }
     return true;
 }
 
 /*Issue Order phase :
     - player has to build the toDefend and toAttack list first
-    - player has to deploy all reinforcement armies first   
+    - player has to deploy all reinforcement armies first
     - player can then issue advance or card orders.
  */
 bool GameEngine::issueOrdersPhase() {
@@ -813,7 +809,7 @@ bool GameEngine::issueOrdersPhase() {
     }
 
     bool allPlayersDone = false;
-    while (!allPlayersDone) {  
+    while (!allPlayersDone) {
         //Player issue orders in round robin fashion
         for (Player* player : *players) {
             if (!playersDoneIssuing[player]) {
@@ -821,7 +817,7 @@ bool GameEngine::issueOrdersPhase() {
                 std::cout << "---------- Player " << player->getName() << " turn ------" << std::endl;
                 std::cout << "---------------------------------------------------------" << std::endl;
                 std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
-               
+
                 player->issueOrder();
 
                 //verifies if player is done with his orders in this phase
@@ -832,7 +828,7 @@ bool GameEngine::issueOrdersPhase() {
                     playersDoneIssuing[player] = true;
                 }
                 else {
-					playersDoneIssuing[player] = false; //redundant but explicit, player is not done yet
+                    playersDoneIssuing[player] = false; //redundant but explicit, player is not done yet
                 }
             }
         }
@@ -848,7 +844,7 @@ bool GameEngine::issueOrdersPhase() {
         if (allPlayersDone) {
             std::cout << "All players have finished issuing orders." << std::endl; //the issue order phase will end for this turn.
             return true;
-          
+
         }
     }
     return false;
@@ -856,7 +852,7 @@ bool GameEngine::issueOrdersPhase() {
 
 /*Executes Orders
     - Executes orders in Orderlist.
-	- executes one order per player in round robin fashion until all orders are executed.
+    - executes one order per player in round robin fashion until all orders are executed.
 */
 bool GameEngine::executeOrdersPhase() {
     std::unordered_map<Player*, bool> playersDoneExecuting;
@@ -878,8 +874,8 @@ bool GameEngine::executeOrdersPhase() {
             if (nextOrder != nullptr) {
                 std::cout << "Player " << player->getName() << " is executing order" << std::endl;
                 nextOrder->execute();
-				player->removeExecutedOrder(); //Remove order from Orderlist after execution
-                
+                player->removeExecutedOrder(); //Remove order from Orderlist after execution
+
             }
             else {
                 playersDoneExecuting[player] = true;
@@ -890,13 +886,13 @@ bool GameEngine::executeOrdersPhase() {
         noMoreOrders = true;
         for (const auto& [player, done] : playersDoneExecuting) {
             if (!done) {
-				noMoreOrders = false; // found someone still has orders to execute, execute orders phase continues
+                noMoreOrders = false; // found someone still has orders to execute, execute orders phase continues
                 break;
             }
         }
 
         if (noMoreOrders) {
-			std::cout << "All players have finished executing orders." << std::endl; //ExecuteOrders phase ends for this turn
+            std::cout << "All players have finished executing orders." << std::endl; //ExecuteOrders phase ends for this turn
             return true;
         }
     }
@@ -908,14 +904,14 @@ Until game ends:
     -Reinforcement Phase
     -Issue Orders Phase
     -Execute Orders Phase
-	    checks if a player is eliminated
+        checks if a player is eliminated
         checks if a player has won , if so, moves to the win state
 */
 void GameEngine::mainGameLoop() {
     bool gameContinues = true;
     while (gameContinues) {
         if (reinforcementPhase()) {
-			changeGameState("issueorder");
+            changeGameState("issueorder");
         }
         if (issueOrdersPhase()) {
             changeGameState("issueordersend");
@@ -926,26 +922,24 @@ void GameEngine::mainGameLoop() {
             for (Player* player : *players) {
                 validatePlayerStays(player);
             }
-            //check if a player has won 
+            //check if a player has won
             if (players->size() == 1) {
-                std::cout << "*****---------------------------------------------------*****"<< std::endl;
+                std::cout << "*****---------------------------------------------------*****" << std::endl;
                 std::cout << "Player " << (*players)[0]->getName() << " has won the game!" << std::endl;
                 std::cout << "*****---------------------------------------------------*****" << std::endl;
                 gameContinues = false;
                 changeGameState("win");//Game state transition to win , the game has ended
-                
+
             }
             else { changeGameState("endexecorders"); } //Go back to reinformcement phase for another turn.
         }
         else {
-			changeGameState("execorder");
+            changeGameState("execorder");
         }
 
     }
     gameOver(std::cin, std::cout);
 }
-
-
 
 // Handles the end of a game once on "win" state., allowing the user to input command to replay or quit.
 void GameEngine::gameOver(std::istream& in, std::ostream& out) {
@@ -982,7 +976,7 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
             changeGameState("replay");
 
             // Clean up for a fresh start
-            for (auto* player : *players) 
+            for (auto* player : *players)
                 if (player) { delete player; }
             players->clear();
             if (map) { delete map; }
@@ -998,7 +992,7 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
             }
             out << "Exiting game. Goodbye!\n";
             changeGameState("end");
-            // Clean up 
+            // Clean up
             for (auto* player : *players) delete player;
             players->clear();
             if (map) { delete map; }
@@ -1012,5 +1006,4 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
         }
     }
 }
-
 
