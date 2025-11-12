@@ -39,7 +39,7 @@ ostream& operator<<(ostream& os, const Command& cmd) {
 }
 
 void Command::saveEffect(const string& newEffect) {
-	*this->effect = newEffect;
+	*effect = newEffect;
 
 	// log the effect change to gamelog.txt
 	notify(this);
