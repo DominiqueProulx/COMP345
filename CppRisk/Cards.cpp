@@ -139,7 +139,8 @@ void Deck::initializeDeck() {
     // Create 10 of each card type
     for (int i = 0; i < 10; ++i) {
         deck->push_back(new BombCard());
-        deck->push_back(new ReinforcementCard());
+        //useless card in current game configuration. breaks game
+        //deck->push_back(new ReinforcementCard());
         deck->push_back(new BlockadeCard());
         deck->push_back(new AirliftCard());
         deck->push_back(new DiplomacyCard());
