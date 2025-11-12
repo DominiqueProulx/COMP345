@@ -627,7 +627,7 @@ bool GameEngine::cmdValidateMap(std::ostream& out)
 bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
 {
     if (players->size() >= 6) { out << "Max 6 players reached.\n"; return false; }
-    Player* p = new Player();
+    Player* p = new Player(this->deck);
     p->setColor(name); //There's no name in player
     players->push_back(p);
     out << "Player added: " << name << " (Total " << players->size() << ")\n";
@@ -813,7 +813,7 @@ bool GameEngine::issueOrdersPhase() {
     }
 
     bool allPlayersDone = false;
-    while (!allPlayersDone) {  
+    while (!allPlayersDone) { 
         //Player issue orders in round robin fashion
         for (Player* player : *players) {
             if (!playersDoneIssuing[player]) {
@@ -821,7 +821,7 @@ bool GameEngine::issueOrdersPhase() {
                 std::cout << "---------- Player " << player->getName() << " turn ------" << std::endl;
                 std::cout << "---------------------------------------------------------" << std::endl;
                 std::cout << "Player " << player->getName() << "'s turn to issue an order." << std::endl;
-               
+        
                 player->issueOrder();
 
                 //verifies if player is done with his orders in this phase

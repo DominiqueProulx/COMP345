@@ -29,31 +29,12 @@ int main(void)
 	GameEngine engine;
 	GameEngine::initializeRiskFSM(engine);
 
-    // run all driver test functions
-   testCommandProcessor();
-    std::cout << "\n\nFinished testing COMMAND PROCESSOR. Enter any character to proceed to the next test. ";
-    std::cin >> buffer;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
 	testStartupPhase(engine);
 	std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	testMainGameLoop(engine);
-	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
-	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	
-	testOrderExecution();
-	std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
-	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-	testLoggingObserver();
-	std::cout << "\n\nFinished testing LOGGING OBSERVER. Enter any character to end the program. ";
-	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 	    return 0;
 

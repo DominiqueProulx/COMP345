@@ -38,6 +38,7 @@ public:
     // Constructor
     Player();
     Player(const std::string& color, const std::vector<Territory*>& initialTerritories, Deck* deck);
+    Player(Deck*deck);
     // Copy Constructor
     Player(const Player& other); 
 
