@@ -17,9 +17,9 @@ void testLoggingObserver();
 
 int main(void)
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); 
 	
-	_CrtSetBreakAlloc(1235);  // Break at first leak
+	//_CrtSetBreakAlloc(1235);  // Break at first leak
 
     char directory[FILENAME_MAX];
     _getcwd(directory, FILENAME_MAX);
@@ -42,11 +42,11 @@ int main(void)
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-	testMainGameLoop(engine);
+	/*testMainGameLoop(engine);
 	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	/*
+	*//*
 	testOrderExecution();
 	std::cout << "\n\nFinished testing ORDER EXECUTION. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;

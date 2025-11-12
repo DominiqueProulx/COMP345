@@ -933,6 +933,7 @@ void GameEngine::mainGameLoop() {
                 std::cout << "*****---------------------------------------------------*****" << std::endl;
                 gameContinues = false;
                 changeGameState("win");//Game state transition to win , the game has ended
+                
             }
             else { changeGameState("endexecorders"); } //Go back to reinformcement phase for another turn.
         }
@@ -996,6 +997,13 @@ void GameEngine::gameOver(std::istream& in, std::ostream& out) {
             }
             out << "Exiting game. Goodbye!\n";
             changeGameState("end");
+            // Clean up 
+            for (auto* player : *players) delete player;
+            players->clear();
+            delete map;
+            map = nullptr;
+            delete deck;
+            deck = nullptr;
             return;
         }
         else {

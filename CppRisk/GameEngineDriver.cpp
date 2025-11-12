@@ -98,7 +98,7 @@ void testMainGameLoop(GameEngine& engine) {
 	
 
 	engine.mainGameLoop();
-
+	
 }
 
 void testGameEngine() {
