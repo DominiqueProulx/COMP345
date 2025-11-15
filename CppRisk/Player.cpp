@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cstddef>
+#include "PlayerStrategies.h"
 
 // Initialize static member
 int Player::playerCount = 0; 
@@ -18,20 +19,21 @@ int Player::playerCount = 0;
 // Constructors 
 Player::Player() {
     Player::playerCount++;
+   
     playerID = new int(playerCount);
     playerColor = new std::string("NoColor");
     territoriesOwned = new std::vector<Territory*>();
     playerHand = new Hand();
     orderslist = new OrdersList();
     
-    
-    // Assignment 2 additions
     reinforcementPool = new int(0);
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
     territoriesToDefend = nullptr;
     territoriesToAttack = nullptr;
+
+	startegy = std::make_unique<HumanPlayerStrategy>(this); //default strategy
 }
 Player::Player(Deck* &deck) {
     Player::playerCount++;
@@ -49,6 +51,28 @@ Player::Player(Deck* &deck) {
     negotiatedPlayers = new std::set<Player*>();
     territoriesToDefend = nullptr;
     territoriesToAttack = nullptr;
+
+    startegy = std::make_unique<HumanPlayerStrategy>(this); //default strategy
+}
+
+Player::Player(Deck*& deck, PlayerStrategies* &initialStartegy) {
+    Player::playerCount++;
+    playerID = new int(playerCount);
+    playerColor = new std::string("NoColor");
+    territoriesOwned = new std::vector<Territory*>();
+    playerHand = new Hand();
+    orderslist = new OrdersList();
+    this->deck = deck;
+
+    // Assignment 2 additions
+    reinforcementPool = new int(0);
+    pendingDeployments = new int(0);
+    conqueredTerritoryThisTurn = new bool(false);
+    negotiatedPlayers = new std::set<Player*>();
+    territoriesToDefend = nullptr;
+    territoriesToAttack = nullptr;
+
+    startegy = initialStartegy; //default strategy
 }
 
 Player::Player(const std::string& color, const std::vector<Territory*>& initialTerritories, Deck* deck) {
@@ -134,7 +158,9 @@ const std::vector<Territory*>* Player::getTerritories() const {
 Hand* Player::getHand() const {
     return playerHand;
 }
-
+Deck* Player::getDeck() const {
+    return deck;
+}
 OrdersList* Player::getOrdersList() const {
     return orderslist;
 }
@@ -147,6 +173,16 @@ int Player::getReinforcementPool() const {
     return *reinforcementPool;
 }
 
+const std::vector<Territory*>* Player::getTerritoriesToDefend() const {
+	return territoriesToDefend;
+}
+const std::vector<Territory*>* Player::getTerritoriesToAttack() const {
+	return territoriesToAttack;
+}
+
+const PlayerStrategies* Player::getStrategy() const {
+    return startegy.get();
+}
 
 
 // Setters
@@ -177,9 +213,24 @@ void Player::setReinforcementPool(int armies) {
 void Player::setConqueredThisTurn(bool conquered) {
     *conqueredTerritoryThisTurn = conquered;
 }
+void Player::setTerritoriesToDefend(std::vector<Territory*>* territories) {
+    if (territoriesToDefend != nullptr) {
+        delete territoriesToDefend;  
+    }
+    territoriesToDefend = territories;
+}
+void Player::setTerritoriesToAttack(std::vector<Territory*>* territories) {
+    if (territoriesToAttack != nullptr) {
+        delete territoriesToAttack;  // free old memory
+    }
+    territoriesToAttack = territories;
+}
+void Player::setStrategy(PlayerStrategies* startegy) {
+	strategy = startegy;
+}
 
-// Assignment 2 methods
 
+//Methods
 void Player::addToReinforcementPool(int armies) {
     *reinforcementPool += armies;
 }
@@ -190,6 +241,9 @@ bool Player::ownsTerritory(Territory* territory) const {
         }
     }
     return false;
+}
+void Player::addOrderToOrderlist(Order* order) {
+    orderslist->add(order);
 }
 
 void Player::addTerritory(Territory* territory) {
@@ -215,9 +269,6 @@ void Player::removeExecutedOrder() {
     orderslist->remove(0);
 
 }
-
-
-
 void Player::addNegotiatedPlayer(Player* player) {
     if (player && player != this) {
         negotiatedPlayers->insert(player);
@@ -281,8 +332,6 @@ Player& Player::operator=(const Player& otherPlayer) {
     }
     
     this->deck = otherPlayer.deck;
-    
-    // Assignment 2 additions
     this->reinforcementPool = new int(*otherPlayer.reinforcementPool);
     this->pendingDeployments = new int(*otherPlayer.pendingDeployments);
     this->conqueredTerritoryThisTurn = new bool(*otherPlayer.conqueredTerritoryThisTurn);
@@ -983,22 +1032,16 @@ Order* Player::orderFactory(Player::OrderType type,
 void Player::issueOrder() {
     
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase turn
-    if (territoriesToDefend == nullptr || territoriesToAttack == nullptr) {
-        territoriesToDefend = new std::vector<Territory*>();
-        territoriesToAttack = new std::vector<Territory*>();
-
-        std::cout << "\nPlease specify which of your territories to defend : " << std::endl;
-        if (territoriesToDefend != nullptr) {
-            delete territoriesToDefend;
-        }
-        territoriesToDefend = toDefend();
-       
-        if (territoriesToAttack != nullptr) {
-            delete territoriesToAttack;
-        }
+      // Delete old vectors if they exist
+    if (territoriesToDefend != nullptr) {
+        delete territoriesToDefend;
+    }
+    if (territoriesToAttack != nullptr) {
+        delete territoriesToAttack;
+    }
         std::cout << "\nPlease specify which territories you want to attack : " << std::endl;
         territoriesToAttack = toAttack();
-    }
+    
 
     std::cout << "\nHere are the possible orders you can issue" << std::endl;
     // Only deploy order is available if the reinforcement pool is not empty
