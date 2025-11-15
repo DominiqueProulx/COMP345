@@ -39,7 +39,7 @@ public:
     // Constructor
     Player();
     Player(Deck* &deck);
-    Player(Deck*& deck, PlayerStrategies*& startegy);
+    Player(Deck*& deck, std::unique_ptr<PlayerStrategies>  strategy);
     Player(const std::string& color, const std::vector<Territory*>& initialTerritories, Deck* deck);
     // Copy Constructor
     Player(const Player& other); 
@@ -63,7 +63,7 @@ public:
     void setHand(Hand& hand);
 	void setTerritoriesToDefend(std::vector<Territory*>* territories);
 	void setTerritoriesToAttack(std::vector<Territory*>* territories);
-	void setStrategy(PlayerStrategies* startegy);
+	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
 
     bool ownsTerritory(Territory* territory) const;
     void addTerritory(Territory* territory);
@@ -122,7 +122,7 @@ public:
 	void addOrderToOrderlist(Order* order);
 
 private:
-    std::unique_ptr<PlayerStrategies> startegy;
+    std::unique_ptr<PlayerStrategies> strategy;
     const int* playerID;
     const std::string* playerColor;
     std::vector<Territory*>* territoriesOwned;

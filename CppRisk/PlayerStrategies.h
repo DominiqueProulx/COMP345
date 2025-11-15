@@ -33,6 +33,12 @@ class HumanPlayerStrategy : public PlayerStrategies {
 		HumanPlayerStrategy(const HumanPlayerStrategy& other);
 		HumanPlayerStrategy& operator=(const HumanPlayerStrategy& other);
 		friend std::ostream& operator<<(std::ostream& os, const HumanPlayerStrategy& strategy);
+        Order* issueDeployOrder();
+        Order* issueAdvanceOrder();
+        Order* issueBombOrder();
+        Order* issueBlockadeOrder();
+        Order* issueAirliftOrder();
+        Order* issueNegotiateOrder();
 
 };
 
