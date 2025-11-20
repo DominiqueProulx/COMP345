@@ -14,7 +14,7 @@ int testPlayerStrategy(void)
 
 	cout << "What kind of player do you want to create" << endl;
 	cout << "1. Human Player" << endl;
-	cout << "2. Aggressive Player" << endl;
+	cout << "2. Benevolent Player" << endl;
 	cout << "3. Cheater Player" << endl;
 
 	int choice;
@@ -28,6 +28,12 @@ int testPlayerStrategy(void)
 		cout << "Switching to Human Player Strategy" << endl;
 		player->setStrategy(std::make_unique<HumanPlayerStrategy>(player));
 		break;
+
+	case 2 : 
+		cout << "Switching to Benevolent Player Strategy" << endl;
+		player->setStrategy(std::make_unique<BenevolentPlayerStrategy>(player));
+		break;
+
 
 	default:
 		break;

@@ -10,7 +10,7 @@ void testStartupPhase(GameEngine& engine);
 void testMainGameLoop(GameEngine& engine);
 void testOrderExecution();
 void testLoggingObserver();
-void testPlayerStrategy();
+int testPlayerStrategy(void);
 
 int main(void)
 {
@@ -24,7 +24,7 @@ int main(void)
     GameEngine engine;
     GameEngine::initializeRiskFSM(engine);
 
-    testPlayerStrategy();
+   
 
     //// run all driver test functions
     //testCommandProcessor();
@@ -32,10 +32,12 @@ int main(void)
     //std::cin >> buffer;
     //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    //testStartupPhase(engine);
-    //std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
-    //std::cin >> buffer;
-    //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    testStartupPhase(engine);
+    std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
+    std::cin >> buffer;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    testPlayerStrategy();
 
     //testMainGameLoop(engine);
     //std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
