@@ -664,51 +664,59 @@ void BenevolentPlayerStrategy::issueOrder() {
     player->setTerritoriesToDefend(toDefend());
     player->setTerritoriesToAttack(toAttack());
 
-	//Computer player deploys all their armies to their  weakest territories
+    //Computer player deploys all their armies to their  weakest territories
     int reinforcementPool = player->getReinforcementPool();
     int pendingDeployments = player->getPendingDeployments();
-    if ((reinforcementPool - pendingDeployments) != 0) {
+
+    // Priority: deploy all reinforcements
+    if (reinforcementPool - pendingDeployments != 0) {
         // Deploy order to assign reinforcements to owned territories
         Order* deployOrder = issueDeployOrder();
         //Add to order list 
-        if (deployOrder != nullptr) { player->addOrderToOrderlist(deployOrder); }
-
-
+        if (deployOrder) player->addOrderToOrderlist(deployOrder);
+        return;
     }
-    else {
 
+    Hand* hand = player->getHand();
+    Deck* deck = player->getDeck();
+    bool orderIssued = false;
+
+    while (!orderIssued) {
         // Generate a random number between 0 and INT_MAX
-		int int_max = player->getHand()->getSize() + 1; 
-        std::srand(std::time(nullptr));
-        int randomNumber = std::rand() % (int_max + 1); // 0 to INT_MAX
+        int totalChoices = 2 + hand->getSize();
+        int randomNumber = std::rand() % totalChoices;
 
-          Hand* playerHand = player->getHand();
-               if (randomNumber == 0) {
+        // 0 cancel 
+        if (randomNumber == 0) return;
 
-            return;
-        }
-        else if (randomNumber == 1) {
-            // Advance order (to defend or attack)
+        // Advance order
+        if (randomNumber == 1) {
+            // Advance order (to defend only)
             Order* advanceOrder = issueAdvanceOrder();
-            if (advanceOrder != nullptr) { player->addOrderToOrderlist(advanceOrder); }
-            else { std::cout << "There was a problem with the advance order, it was not added to the orderList" << std::endl; };
+            if (advanceOrder) player->addOrderToOrderlist(advanceOrder);
+            else std::cout << "Advance order failed.\n";
+            orderIssued = true;
+            continue;
         }
-        else {
-            // Issue Order from hand
-            std::string cardName = playerHand->getCard(randomNumber - 2)->getName();
-           
-      
-            Deck* deck = (player->getDeck());
-            Order* cardOrder = playerHand->getCard(randomNumber - 2)->play(*playerHand, *deck, getPlayer());
-         
-            if (cardOrder != nullptr && cardName != "Bomb") { player->addOrderToOrderlist(cardOrder); }
-            else {
-                if (cardName == "Bomb") { std::cout << "Benevolent player won't player bomb cards, order not created" << std::endl; }
-                else  std::cout << "There was a problem with the card order, it was not added to the orderList" << std::endl; };
+
+        // Issue Order from hand
+        int cardIndex = randomNumber - 2;
+        Card* card = hand->getCard(cardIndex);
+
+        // Reject BombCards for Benevolent strategy
+        if (dynamic_cast<BombCard*>(card)) {
+            std::cout << "Benevolent player refuses BombCard. Choosing again.\n";
+            orderIssued = false; //redundant but explicit
+            continue;
         }
+
+        // Create the order
+        Order* cardOrder = card->play(*hand, *deck, getPlayer());
+        if (cardOrder) player->addOrderToOrderlist(cardOrder);
+        else std::cout << "Card order failed.\n";
+
+        orderIssued = true;
     }
-
-
 }
 Order* BenevolentPlayerStrategy::issueDeployOrder() {
 
