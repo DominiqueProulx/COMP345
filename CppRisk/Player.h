@@ -11,6 +11,7 @@
 #include <queue>
 #include <iostream>
 #include <set>
+#include <memory>
 #include "Map.h"
 #include "Cards.h"
 #include "PlayerStrategies.h"
@@ -66,7 +67,7 @@ public:
 	void setTerritoriesToDefend(std::vector<Territory*>* territories);
 	void setTerritoriesToAttack(std::vector<Territory*>* territories);
 	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
-    void Player::onTerritoryAttacked(Territory* territory, Player* attacker);
+    void onTerritoryAttacked(Territory* territory, Player* attacker);
 
     bool ownsTerritory(Territory* territory) const;
     void addTerritory(Territory* territory);

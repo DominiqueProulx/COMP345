@@ -919,32 +919,32 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
 // CheaterPlayerStrategy
 // ---------------------------------------------------------------------------
 // constructor
-cheaterPlayerStrategy::cheaterPlayerStrategy(Player *p)
-    : PlayerStrategies(p)
-{
-    delete strategyType;
-    strategyType = new std::string("Cheater");
-}
-// Destructor
-cheaterPlayerStrategy::~cheaterPlayerStrategy() = default;
-// Copy constrcutor
-cheaterPlayerStrategy::cheaterPlayerStrategy(const cheaterPlayerStrategy &other)
-    : PlayerStrategies(other.getPlayer())
-{
-    delete strategyType;
-    strategyType = new std::string(*other.strategyType);
-}
+// cheaterPlayerStrategy::cheaterPlayerStrategy(Player *p)
+//     : PlayerStrategies(p)
+// {
+//     delete strategyType;
+//     strategyType = new std::string("Cheater");
+// }
+// // Destructor
+// cheaterPlayerStrategy::~cheaterPlayerStrategy() = default;
+// // Copy constrcutor
+// cheaterPlayerStrategy::cheaterPlayerStrategy(const cheaterPlayerStrategy &other)
+//     : PlayerStrategies(other.getPlayer())
+// {
+//     delete strategyType;
+//     strategyType = new std::string(*other.strategyType);
+// }
 
-// instertion stream operator
-std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy)
-{
-    os << "CheaterPlayerStrategy for Player: ";
-    if (strategy.getPlayer())
-        os << strategy.getPlayer()->getName();
-    else
-        os << "(null)";
-    return os;
-}
+// // instertion stream operator
+// std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy)
+// {
+//     os << "CheaterPlayerStrategy for Player: ";
+//     if (strategy.getPlayer())
+//         os << strategy.getPlayer()->getName();
+//     else
+//         os << "(null)";
+//     return os;
+// }
 
 // ---------------------------------------------------------------------------
 // AggressivePlayerStrategy
@@ -983,29 +983,20 @@ std::ostream &operator<<(std::ostream &os, const AggressivePlayerStrategy &strat
 // ---------------------------------------------------------------------------
 // Helper: strongest territory (most armies)
 // ---------------------------------------------------------------------------
-Territory *AggressivePlayerStrategy::getStrongestTerritory()
-{
-    Territory *strongest = nullptr;
+Territory* AggressivePlayerStrategy::getStrongestTerritory() {
+    Territory* strongest = nullptr;
     int maxArmies = -1;
 
-    const std::vector<Territory *> *territoriesOwned = getPlayer()->getTerritories();
-    if (!territoriesOwned || territoriesOwned->empty())
-    {
-        return nullptr;
-    }
+    const std::vector<Territory*>* owned = getPlayer()->getTerritories();
+    if (!owned) return nullptr;
 
-    for (Territory *t : *territoriesOwned)
-    {
-        if (!t)
-            continue;
-        int armies = t->getNumberOfArmies();
-        if (armies > maxArmies)
-        {
-            maxArmies = armies;
+    for (Territory* t : *owned) {
+        if (t && t->getNumberOfArmies() > maxArmies) {
+            maxArmies = t->getNumberOfArmies();
             strongest = t;
         }
     }
-    return strongest;
+    return strongest; // returns Territory*
 }
 
 // ---------------------------------------------------------------------------
@@ -1040,7 +1031,7 @@ std::vector<Territory *> *AggressivePlayerStrategy::toDefend()
 std::vector<Territory *> *AggressivePlayerStrategy::toAttack()
 {
     auto *attackList = new std::vector<Territory *>();
-    Territory *strong = getStrongestTerritory();
+    Territory* strong = getStrongestTerritory();
     if (!strong)
         return attackList;
 

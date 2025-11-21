@@ -1,0 +1,17 @@
+[Map]
+author=Test
+image=none
+wrap=no
+scroll=none
+warn=yes
+
+[Continents]
+Ring=3
+
+[Territories]
+A,100,100,Ring,B,F
+B,200,100,Ring,A,C
+C,200,200,Ring,B,D
+D,100,200,Ring,C,E
+E, 50,150,Ring,D,F
+F, 50, 50,Ring,A,E

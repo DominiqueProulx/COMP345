@@ -9,6 +9,7 @@
 #include <vector>
 #include "Player.h"
 #include <iostream>
+#include <memory>
 #include <string>
 #include <memory>
 
@@ -78,21 +79,21 @@ public:
     Order *issueNegotiateOrder();
 };
 
-class cheaterPlayerStrategy : public PlayerStrategies
-{
+// class cheaterPlayerStrategy : public PlayerStrategies
+// {
 
-public:
-    cheaterPlayerStrategy(Player *p);
-    ~cheaterPlayerStrategy();
-    // copy constructor, assignment operator, and stream insertion operator.
-    cheaterPlayerStrategy(const cheaterPlayerStrategy &other);
-    cheaterPlayerStrategy &operator=(const cheaterPlayerStrategy &other);
-    friend std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy);
+// public:
+//     cheaterPlayerStrategy(Player *p);
+//     ~cheaterPlayerStrategy();
+//     // copy constructor, assignment operator, and stream insertion operator.
+//     cheaterPlayerStrategy(const cheaterPlayerStrategy &other);
+//     cheaterPlayerStrategy &operator=(const cheaterPlayerStrategy &other);
+//     friend std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy);
 
-    // void issueOrder() override;
-    // std::vector<Territory*>* toAttack() override;
-    // std::vector<Territory*>* toDefend() override;
-};
+//     // void issueOrder() override;
+//     // std::vector<Territory*>* toAttack() override;
+//     // std::vector<Territory*>* toDefend() override;
+// };
 
 class AggressivePlayerStrategy : public PlayerStrategies
 {
@@ -113,7 +114,7 @@ public:
     Order *issueAdvanceOrder();
     Order *issueBombOrder();
 
-    Territory *AggressivePlayerStrategy::getStrongestTerritory();
+    Territory* getStrongestTerritory();
 };
 
 
