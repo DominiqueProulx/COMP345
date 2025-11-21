@@ -57,7 +57,7 @@ public:
 	const std::vector<Territory*>* getTerritoriesToDefend() const;
     const std::vector<Territory*>* getTerritoriesToAttack() const;
     Deck* getDeck() const;
-    const PlayerStrategies* getStrategy() const;
+    PlayerStrategies* getStrategy() const;
 
     void setPendingDeployments(int armies);
     void setColor(const std::string& color);
@@ -86,12 +86,12 @@ public:
     Territory* choseFromToDefend();
     Territory* choseFromToAttack();
     Territory* choseFromAdjacent(Territory* ownTerritory , const std::string& option);
-    Order* issueAdvanceOrder();
+ /*Order* issueAdvanceOrder();
     Order* issueDeployOrder();
     Order* issueBombOrder();
     Order* issueBlockadeOrder();
     Order* issueAirliftOrder();
-    Order* issueNegotiateOrder();
+    Order* issueNegotiateOrder();*/
     Order* orderFactory(
         Player::OrderType type,
 		Territory* sourceTerritory = nullptr,
