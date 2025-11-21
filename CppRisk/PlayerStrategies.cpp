@@ -471,3 +471,111 @@ std::vector<Territory*>* HumanPlayerStrategy::toDefend() {
 
     return territoriesToDefendThisturn;
 }
+
+// ============================================================================
+// AGGRESSIVE PLAYER STRATEGY IMPLEMENTATION
+// ============================================================================
+
+// Constructor
+AggressivePlayerStrategy::AggressivePlayerStrategy(Player* p) : PlayerStrategies(p) {
+    std::cout << "Aggressive mode created for Player " << *(player->getID()) << std::endl;
+}
+
+// Destructor
+AggressivePlayerStrategy::~AggressivePlayerStrategy() {
+    std::cout << "Aggressive player destroyed" << std::endl;
+}
+
+// printi g operator
+std::ostream& operator<<(std::ostream& os, const AggressivePlayerStrategy& strategy) {
+    os << "Aggressive {Player " << *(strategy.player->getID())
+    << ", Focus: Attack with strongest territory]";
+    return os;
+}
+
+//Get strongest territory
+Territory* AggressivePlayerStrategy::getStrongestTerritory() {
+    Territory* strongest = nullptr;
+    int maxArmies = -1;
+    
+    for (Territory* t : *player->getTerritories()) {
+        if (t->getNumberOfArmies() > maxArmies) {
+            strongest = t;
+            maxArmies = t->getNumberOfArmies();
+        }
+    }
+    return strongest;
+}
+
+// toDefend: Return all owned territories
+std::vector<Territory*>* AggressivePlayerStrategy::toDefend() {
+    auto* list = new std::vector<Territory*>();
+    for (Territory* t : *player->getTerritories()) {
+        list->push_back(t);
+    }
+    return list;
+}
+
+// toAttack: Return all adjacent enemy territories from strongest territory
+std::vector<Territory*>* AggressivePlayerStrategy::toAttack() {
+    auto* attackList = new std::vector<Territory*>();
+    Territory* strong = getStrongestTerritory();
+    
+    if (!strong) return attackList;
+    
+    for (Territory* adj : strong->getAdjacentTerritories()) {
+        if (adj->getOwner() != player) {
+            attackList->push_back(adj);
+        }
+    }
+    
+    return attackList;
+}
+
+// issueOrder: Aggressive strategy implementation
+void AggressivePlayerStrategy::issueOrder() {
+    
+    
+    // Set defend and attack lists
+    player->setTerritoriesToDefend(toDefend());
+    player->setTerritoriesToAttack(toAttack());
+    
+    Territory* strongest = getStrongestTerritory();
+    if (!strongest) {
+        std::cout << "[Aggressive] No territories owned." << std::endl;
+        return;
+    }
+    
+    int reinforcement = player->getReinforcementPool();
+    int pending = player->getPendingDeployments();
+    
+    // Deploy all armies to strongest territory
+    if (reinforcement - pending > 0) {
+        int deployAmount = reinforcement - pending;
+        std::cout << "[Aggressive} Deploying " << deployAmount 
+                << " armies to strongest: " << strongest->getName() << std::endl;
+        
+        Order* deployOrder = player->orderFactory(
+            Player::OrderType::DEPLOY, nullptr, strongest, nullptr, deployAmount);
+        
+        player->setPendingDeployments(pending + deployAmount);
+        player->addOrderToOrderlist(deployOrder);
+        return;
+    }
+    
+    // Attack from strongest territory
+    const std::vector<Territory*>* targets = player->getTerritoriesToAttack();
+    if (!targets->empty() && strongest->getNumberOfArmies() > 1) {
+        Territory* target = (*targets)[0];
+        int armies = strongest->getNumberOfArmies() - 1; // Keep 1 army
+        
+        std::cout << "[Aggressive] Attacking " << target->getName()
+                << " from " << strongest->getName()
+                << " with " << armies << " armies" << std::endl;
+        
+        Order* advanceOrder = player->orderFactory(
+            Player::OrderType::ADVANCE, strongest, target, nullptr, armies);
+        
+        player->addOrderToOrderlist(advanceOrder);
+    }
+}

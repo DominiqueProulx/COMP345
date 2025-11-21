@@ -11,6 +11,7 @@
 #include <queue>
 #include <iostream>
 #include <set>
+#include <memory>
 #include "Map.h"
 #include "Cards.h"
 

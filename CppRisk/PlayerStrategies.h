@@ -6,19 +6,20 @@
 #ifndef PLAYERSTRATEGIES
 #define PLAYERSTRATEGIES   
 #include <vector>
+#include <memory>
 #include "Player.h"
 
 
 class PlayerStrategies {
 protected:
-    std::unique_ptr<Player> player;
+    Player* player;
 public:
     PlayerStrategies(Player* p);
     virtual ~PlayerStrategies() = default; // virtual destructor
     virtual void issueOrder() = 0;
     virtual std::vector<Territory*>* toAttack() = 0;
     virtual std::vector<Territory*>* toDefend() = 0;
-	Player* getPlayer() const { return player.get(); }
+	Player* getPlayer() const { return player; }
 };
 
 class HumanPlayerStrategy : public PlayerStrategies {
@@ -58,8 +59,6 @@ public:
 };
 
 class cheaterPlayerStrategy : public PlayerStrategies {
-private:
-    Player* player;
 public:
     cheaterPlayerStrategy(Player* p);
     ~cheaterPlayerStrategy();
@@ -71,6 +70,32 @@ public:
     cheaterPlayerStrategy& operator=(const cheaterPlayerStrategy& other);
     friend std::ostream& operator<<(std::ostream& os, const cheaterPlayerStrategy& strategy);
 
+};
+
+// ============================================================================
+// Aggressive Player Strategy
+// ============================================================================
+class AggressivePlayerStrategy : public PlayerStrategies {
+public:
+    // Constructor and destructor
+    AggressivePlayerStrategy(Player* p);
+    ~AggressivePlayerStrategy();
+
+    
+    void issueOrder() override;
+    std::vector<Territory*>* toAttack() override;
+    std::vector<Territory*>* toDefend() override;
+
+    // Copy constructor and assignment operator
+    AggressivePlayerStrategy(const AggressivePlayerStrategy& other);
+    AggressivePlayerStrategy& operator=(const AggressivePlayerStrategy& other);
+    
+    // Stream insertion operator
+    friend std::ostream& operator<<(std::ostream& os, const AggressivePlayerStrategy& strategy);
+
+private:
+    // method to fidn strongest territory
+    Territory* getStrongestTerritory();
 };
 
 #endif // !PLAYERSTRATEGIES
