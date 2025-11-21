@@ -326,6 +326,7 @@ void Advance::simulateBattle(int attackers, int defenders) {
         Player* previousOwner = targetTerritory->getOwner();
         if (previousOwner) {
             previousOwner->removeTerritory(targetTerritory);
+            previousOwner->onTerritoryLost(targetTerritory, player);
         }
         
         player->addTerritory(targetTerritory);

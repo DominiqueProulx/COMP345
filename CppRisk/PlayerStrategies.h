@@ -98,4 +98,17 @@ private:
     Territory* getStrongestTerritory();
 };
 
+class NeutralPlayerStrategy : public PlayerStrategies {
+public:
+    NeutralPlayerStrategy(Player* p);
+    ~NeutralPlayerStrategy();
+    void issueOrder() override;
+    std::vector<Territory*>* toAttack() override;
+    std::vector<Territory*>* toDefend() override;
+
+    // assignment, copy..
+    NeutralPlayerStrategy(const NeutralPlayerStrategy& other);
+    NeutralPlayerStrategy& operator=(const NeutralPlayerStrategy& other);
+    friend std::ostream& operator<<(std::ostream& os, const NeutralPlayerStrategy& strategy);
+};
 #endif // !PLAYERSTRATEGIES

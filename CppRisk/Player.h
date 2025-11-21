@@ -121,6 +121,7 @@ public:
 
   //add Order To Orderlist
 	void addOrderToOrderlist(Order* order);
+    void Player::onTerritoryLost(Territory* territory, Player* attacker);
 
 private:
     std::unique_ptr<PlayerStrategies> strategy;

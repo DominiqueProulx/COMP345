@@ -579,3 +579,42 @@ void AggressivePlayerStrategy::issueOrder() {
         player->addOrderToOrderlist(advanceOrder);
     }
 }
+
+// Constructor
+NeutralPlayerStrategy::NeutralPlayerStrategy(Player* p) : PlayerStrategies(p) {
+    std::cout << "Neutral mode created for Player " << *(player->getID()) << std::endl;
+}
+
+// Destructor
+NeutralPlayerStrategy::~NeutralPlayerStrategy() {
+    std::cout << "Neutral Player destroyed" << std::endl;
+}
+
+// Do nothing
+void NeutralPlayerStrategy::issueOrder() {
+    std::cout << "[Neutral] Player " << *(player->getID()) << " takes no action." << std::endl;
+}
+
+// Return empty lists
+std::vector<Territory*>* NeutralPlayerStrategy::toAttack() {
+    return new std::vector<Territory*>();
+}
+
+std::vector<Territory*>* NeutralPlayerStrategy::toDefend() {
+    return new std::vector<Territory*>();
+}
+
+// Copy and assignment
+NeutralPlayerStrategy::NeutralPlayerStrategy(const NeutralPlayerStrategy& other) : PlayerStrategies(other.player) {}
+NeutralPlayerStrategy& NeutralPlayerStrategy::operator=(const NeutralPlayerStrategy& other) {
+    if (this != &other) {
+        this->player = other.player;
+    }
+    return *this;
+}
+
+// print method
+std::ostream& operator<<(std::ostream& os, const NeutralPlayerStrategy& strategy) {
+    os << "NeutralPlayerStrategy[Player " << *(strategy.player->getID()) << ", Behavior: Passive]";
+    return os;
+}

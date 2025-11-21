@@ -687,6 +687,15 @@ void Player::resetDefendAndAttack() {
         territoriesToAttack = nullptr;
     }
 }
+void Player::onTerritoryLost(Territory* territory, Player* attacker) {
+    std::cout << "[Player " << *playerID << "] Lost territory: " << territory->getName()
+              << " to Player " << *(attacker->getID()) << std::endl;
+
+    if (dynamic_cast<NeutralPlayerStrategy*>(strategy.get())) {
+        std::cout << "[Neutral] Player " << *playerID << " becomes Aggressive!" << std::endl;
+        setStrategy(std::make_unique<AggressivePlayerStrategy>(this));
+    }
+}
 
 //// issueAdvanceOrder()
 //// Handles the issuance of an Advance order by the player.
