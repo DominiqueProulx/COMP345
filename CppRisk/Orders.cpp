@@ -423,8 +423,8 @@ void Advance::execute()
 
             delete effect;
             effect = new std::string("Moved " + std::to_string(*armiesToMove) +
-                                     " armies from " + sourceTerritory->getName() +
-                                     " to " + targetTerritory->getName());
+                                    " armies from " + sourceTerritory->getName() +
+                                    " to " + targetTerritory->getName());
             *executed = true;
 
             std::cout << "Advance EXECUTED: " << *effect << std::endl;
@@ -434,7 +434,7 @@ void Advance::execute()
             // Attack enemy territory
             Player *previousOwner = targetTerritory->getOwner();
             if (previousOwner)
-                previousOwner->onTerritoryLost(targetTerritory, player);
+                previousOwner->onTerritoryAttacked(targetTerritory, player);
             simulateBattle(*armiesToMove, targetTerritory->getNumberOfArmies());
             *executed = true;
             std::cout << "Advance EXECUTED: " << *effect << std::endl;
