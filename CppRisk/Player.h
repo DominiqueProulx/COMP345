@@ -13,6 +13,7 @@
 #include <set>
 #include "Map.h"
 #include "Cards.h"
+#include "PlayerStrategies.h"
 
 // Forward declarations to break circular dependency
 class OrdersList;
@@ -57,6 +58,7 @@ public:
     const std::vector<Territory*>* getTerritoriesToAttack() const;
     Deck* getDeck() const;
     PlayerStrategies* getStrategy() const;
+    
 
     void setPendingDeployments(int armies);
     void setColor(const std::string& color);
@@ -64,6 +66,7 @@ public:
 	void setTerritoriesToDefend(std::vector<Territory*>* territories);
 	void setTerritoriesToAttack(std::vector<Territory*>* territories);
 	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
+    void Player::onTerritoryAttacked(Territory* territory, Player* attacker);
 
     bool ownsTerritory(Territory* territory) const;
     void addTerritory(Territory* territory);
