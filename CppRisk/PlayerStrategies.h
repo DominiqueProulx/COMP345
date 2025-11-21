@@ -119,19 +119,18 @@ public:
 
 class NeutralPlayerStrategy : public PlayerStrategies
 {
+
 public:
     NeutralPlayerStrategy(Player p);
+    NeutralPlayerStrategy(Player *p);
     ~NeutralPlayerStrategy() override;
-    
-    
-    void issueOrder() override;
-    std::vector<Territory *> *toAttack() override;
-    std::vector<Territory *> *toDefend() override;
 
-    
-    NeutralPlayerStrategy(const NeutralPlayerStrategy &other);
-    NeutralPlayerStrategy &operator=(const NeutralPlayerStrategy &other);
-    friend std::ostream &operator<<(std::ostream &os, const NeutralPlayerStrategy &strategy);
+    void issueOrder() override;
+    std::vector<Territory*>* toAttack() override;
+    std::vector<Territory*>* toDefend() override;
+
+    NeutralPlayerStrategy(const NeutralPlayerStrategy& other);
+    friend std::ostream& operator<<(std::ostream& os, const NeutralPlayerStrategy& strategy);
 };
 
 #endif // !PLAYERSTRATEGIES

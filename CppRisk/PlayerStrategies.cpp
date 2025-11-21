@@ -1276,3 +1276,47 @@ Order *AggressivePlayerStrategy::issueBombOrder()
         nullptr,
         0);
 }
+
+// ----------------------------------------------------------
+//  NeutralPlayerStrategy  --  full implementation
+// ----------------------------------------------------------
+
+
+NeutralPlayerStrategy::NeutralPlayerStrategy(Player* p)
+    : PlayerStrategies(p) {
+    delete strategyType;                       // inherit-safe: base inits to nullptr
+    strategyType = new std::string("Neutral");
+}
+
+NeutralPlayerStrategy::~NeutralPlayerStrategy() = default;
+
+
+void NeutralPlayerStrategy::issueOrder() {
+    std::cout << "[Neutral] Player " << (getPlayer() ? getPlayer()->getName() : "(null)")
+            << " takes no action.\n";
+}
+
+std::vector<Territory*>* NeutralPlayerStrategy::toAttack() {
+    return new std::vector<Territory*>();
+}
+
+std::vector<Territory*>* NeutralPlayerStrategy::toDefend() {
+    return new std::vector<Territory*>();
+}
+
+
+NeutralPlayerStrategy::NeutralPlayerStrategy(const NeutralPlayerStrategy& other)
+    : PlayerStrategies(other.getPlayer()) {
+    delete strategyType;
+    strategyType = new std::string(*other.strategyType);
+}
+
+
+std::ostream& operator<<(std::ostream& os, const NeutralPlayerStrategy& strategy) {
+    os << "NeutralPlayerStrategy for Player: ";
+    if (strategy.getPlayer())
+        os << strategy.getPlayer()->getName();
+    else
+        os << "(null)";
+    return os;
+}
