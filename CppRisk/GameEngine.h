@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <memory>
 #include "LoggingObserver.h"
 #include "orders.h"  // contains player,cards and map includes
 class Player;

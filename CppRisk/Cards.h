@@ -4,7 +4,6 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-#include <memory>
 
 class Order; //forward declaration for DummyOrder class
 class Deck; //forward declaration for Deck class

@@ -5,7 +5,6 @@
 #include <vector>
 #include <iostream>
 #include <set>
-#include <memory>
 #include "LoggingObserver.h"
 
 // Include actual implementations from teammates

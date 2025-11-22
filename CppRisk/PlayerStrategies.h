@@ -7,7 +7,6 @@
 #define PLAYERSTRATEGIES   
 
 #include <vector>
-#include <memory>
 #include "Player.h"
 #include <iostream>
 #include <string>
@@ -91,45 +90,12 @@ public:
     cheaterPlayerStrategy& operator=(const cheaterPlayerStrategy& other);
     friend std::ostream& operator<<(std::ostream& os, const cheaterPlayerStrategy& strategy);
 
+
+    //void issueOrder() override;
+    //std::vector<Territory*>* toAttack() override;
+    //std::vector<Territory*>* toDefend() override;
+  
+
 };
 
-// ============================================================================
-// Aggressive Player Strategy
-// ============================================================================
-class AggressivePlayerStrategy : public PlayerStrategies {
-public:
-    // Constructor and destructor
-    AggressivePlayerStrategy(Player* p);
-    ~AggressivePlayerStrategy();
-
-    
-    void issueOrder() override;
-    std::vector<Territory*>* toAttack() override;
-    std::vector<Territory*>* toDefend() override;
-
-    // Copy constructor and assignment operator
-    AggressivePlayerStrategy(const AggressivePlayerStrategy& other);
-    AggressivePlayerStrategy& operator=(const AggressivePlayerStrategy& other);
-    
-    // Stream insertion operator
-    friend std::ostream& operator<<(std::ostream& os, const AggressivePlayerStrategy& strategy);
-
-private:
-    // method to fidn strongest territory
-    Territory* getStrongestTerritory();
-};
-
-class NeutralPlayerStrategy : public PlayerStrategies {
-public:
-    NeutralPlayerStrategy(Player* p);
-    ~NeutralPlayerStrategy();
-    void issueOrder() override;
-    std::vector<Territory*>* toAttack() override;
-    std::vector<Territory*>* toDefend() override;
-
-    // assignment, copy..
-    NeutralPlayerStrategy(const NeutralPlayerStrategy& other);
-    NeutralPlayerStrategy& operator=(const NeutralPlayerStrategy& other);
-    friend std::ostream& operator<<(std::ostream& os, const NeutralPlayerStrategy& strategy);
-};
 #endif // !PLAYERSTRATEGIES
