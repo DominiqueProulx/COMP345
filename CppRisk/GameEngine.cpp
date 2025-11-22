@@ -660,7 +660,6 @@ bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
             break;
         case 3:
             p->setStrategy(std::make_unique<BenevolentPlayerStrategy>(p));
-            cout<<"Here"<<endl;
             break;
         case 4:
             p->setStrategy(std::make_unique<NeutralPlayerStrategy>(p));
@@ -869,6 +868,7 @@ bool GameEngine::issueOrdersPhase() {
         playersDoneIssuing[player] = false; //initialize all players as not done issuing orders
         player->resetDefendAndAttack();   // reset the toDefend and toAttack lists for the new turn
         player->setPendingDeployments(0); //reset the pending deployment for the phase
+        cout <<*player<<endl;
     }
 
     bool allPlayersDone = false;
