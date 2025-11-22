@@ -227,8 +227,8 @@ void Player::setTerritoriesToAttack(std::vector<Territory*>* territories) {
     }
     territoriesToAttack = territories;
 }
-void Player::setStrategy(std::unique_ptr<PlayerStrategies> startegy) {
-	strategy = std::move(startegy);
+void Player::setStrategy(std::unique_ptr<PlayerStrategies> newStrategy) {
+    strategy = std::move(newStrategy);
 }
 
 

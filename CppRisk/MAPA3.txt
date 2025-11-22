@@ -1,17 +1,25 @@
 [Map]
-author=Test
+author=Test Strategy Map
 image=none
 wrap=no
 scroll=none
 warn=yes
 
 [Continents]
-Ring=3
+North=5
+South=3
+East=4
 
 [Territories]
-A,100,100,Ring,B,F
-B,200,100,Ring,A,C
-C,200,200,Ring,B,D
-D,100,200,Ring,C,E
-E, 50,150,Ring,D,F
-F, 50, 50,Ring,A,E
+Territory1,100,100,North,Territory2,Territory4,Territory7
+Territory2,200,100,North,Territory1,Territory3,Territory5
+Territory3,300,100,North,Territory2,Territory6,Territory8
+Territory4,100,200,North,Territory1,Territory5,Territory7,Territory9
+Territory5,200,200,North,Territory2,Territory4,Territory6,Territory10
+Territory6,300,200,North,Territory3,Territory5,Territory8,Territory11
+Territory7,100,300,South,Territory1,Territory4,Territory8,Territory9
+Territory8,200,300,South,Territory3,Territory6,Territory7,Territory10
+Territory9,100,400,South,Territory4,Territory7,Territory10,Territory12
+Territory10,200,400,South,Territory5,Territory8,Territory9,Territory11
+Territory11,300,400,East,Territory6,Territory10,Territory12
+Territory12,200,500,East,Territory9,Territory11

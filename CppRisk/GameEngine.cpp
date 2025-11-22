@@ -620,13 +620,58 @@ bool GameEngine::cmdValidateMap(std::ostream& out)
     return ok;
 }
 
+
 bool GameEngine::cmdAddPlayer(const std::string& name, std::ostream& out)
 {
-    if (players->size() >= 6) { out << "Max 6 players reached.\n"; return false; }
+    if (players->size() >= 6) { 
+        out << "Max 6 players reached.\n"; 
+        return false; 
+    }
+
     Player* p = new Player(deck);
-    p->setColor(name); //There's no name in player
+    p->setColor(name); // still works as "name"
+
+    // Ask user for strategy
+    std::cout << "Choose strategy for player '" << name << "':\n";
+    std::cout << "1 - Human\n";
+    std::cout << "2 - Aggressive\n";
+    std::cout << "3 - Benevolent\n";
+    std::cout << "4 - Neutral\n";
+    std::cout << "5 - Cheater\n";
+    std::cout << "Enter choice: ";
+
+    int choice;
+    std::cin >> choice;
+
+    while (std::cin.fail() || choice < 1 || choice > 5) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid choice. Enter 1–5: ";
+        std::cin >> choice;
+    }
+
+    // Attach strategy based on input
+    switch (choice) {
+        case 1:
+            p->setStrategy(std::make_unique<HumanPlayerStrategy>(p));
+            break;
+        case 2:
+            p->setStrategy(std::make_unique<AggressivePlayerStrategy>(p));
+            break;
+        case 3:
+            p->setStrategy(std::make_unique<BenevolentPlayerStrategy>(p));
+            cout<<"Here"<<endl;
+            break;
+        case 4:
+            p->setStrategy(std::make_unique<NeutralPlayerStrategy>(p));
+            break;
+    }
+
     players->push_back(p);
-    out << "Player added: " << name << " (Total " << players->size() << ")\n";
+    out << "Player added: " << name 
+        << " [Strategy chosen: " << choice << "] "
+        << "(Total " << players->size() << ")\n";
+
     return true;
 }
 
@@ -680,8 +725,23 @@ void GameEngine::fairDistributeTerritories(std::ostream& out)
     out << "Distributed " << ts.size() << " territories among " << players->size() << " players.\n";
 
     for (auto* p : *players) {
-        cout << *p;
+        //cout << *p;
     }
+
+    // ========= RANDOMLY SET ARMIES PER TERRITORY =========
+    std::srand(static_cast<unsigned>(time(nullptr)));
+
+    for (auto* t : ts) {
+        int randomArmies = 1 + (std::rand() % 5); // random 1–5 armies
+        t->setNumberOfArmies(randomArmies);
+    }
+
+    out << "Distributed " << ts.size() << " territories among "
+        << players->size() << " players.\n";
+
+    // for (auto* p : *players) {
+    //     std::cout << *p;
+    // }
 }
 
 void GameEngine::randomizePlayerOrder(std::ostream& out)
@@ -705,6 +765,9 @@ void GameEngine::grant50Reinforcements(std::ostream& out)
         p->setReinforcementPool(50);
     }
     out << "Granted each player 50 reinforcement armies.\n";
+     for (auto* p : *players) {
+        //std::cout << *p;
+    }
 }
 
 void GameEngine::initialCardDraws(std::ostream& out)

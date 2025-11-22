@@ -724,7 +724,13 @@ std::vector<Territory *> *BenevolentPlayerStrategy::toDefend()
     const std::vector<Territory *> *territoriesOwned = player->getTerritories();
     if (territoriesOwned->empty())
     {
-        std::cout << "Player has no territories to defend." << std::endl;
+        std::cout << "Player has no territories to defend.";
+        if (player) {
+            std::cout << " Color: " <<  *(player->getColor()) << " ID: " <<  *(player->getID());
+            const auto* terrs = player->getTerritories();
+            std::cout << " Territories: " << (terrs ? terrs->size() : 0);
+        }
+        std::cout << std::endl;
         return nullptr;
     }
 
@@ -1008,6 +1014,7 @@ std::vector<Territory *> *AggressivePlayerStrategy::toDefend()
     if (!territoriesOwned || territoriesOwned->empty())
     {
         std::cout << "Aggressive player has no territories to defend.\n";
+        std::cout <<"Player territories size: " << (territoriesOwned ? territoriesOwned->size() : 0) << std::endl;
         return new std::vector<Territory *>();
     }
 

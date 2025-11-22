@@ -6,7 +6,7 @@
 #include <algorithm>  
 #include "PlayerStrategies.h"
 
-static const int handSizeValue = 5;
+static const int handSizeValue = 60;
 const int* Hand::MAX_HAND_SIZE = &handSizeValue;
 
 
