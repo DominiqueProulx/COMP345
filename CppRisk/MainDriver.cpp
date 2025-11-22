@@ -12,7 +12,7 @@ void testOrderExecution();
 void testLoggingObserver();
 int testPlayerStrategy(void);
 
-int main(void)
+int main2(void)
 {
     // char directory[FILENAME_MAX];
     // _getcwd(directory, FILENAME_MAX);
