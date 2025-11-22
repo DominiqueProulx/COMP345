@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 /* -- LOGGABLE INTERFACE DEFINITION -- */
 class ILoggable
