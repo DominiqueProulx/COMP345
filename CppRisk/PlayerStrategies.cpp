@@ -6,7 +6,7 @@
 // ============================================================================
 PlayerStrategies::PlayerStrategies(Player *p)
     : player(std::make_unique<Player>(*p)),
-      strategyType(new std::string("Default"))
+    strategyType(new std::string("Default"))
 {
 }
 
@@ -722,6 +722,7 @@ std::vector<Territory *> *BenevolentPlayerStrategy::toDefend()
 {
     // Get territories owned by the player
     const std::vector<Territory *> *territoriesOwned = player->getTerritories();
+    std::cout<<player<<std::endl;
     if (territoriesOwned->empty())
     {
         std::cout << "Player has no territories to defend.";
@@ -740,9 +741,9 @@ std::vector<Territory *> *BenevolentPlayerStrategy::toDefend()
     // Sort the territories in ascending order by number of armies
     std::sort(territoriesToDefendThisturn->begin(), territoriesToDefendThisturn->end(),
               [](Territory *t1, Territory *t2)
-              {
-                  return t1->getNumberOfArmies() < t2->getNumberOfArmies();
-              });
+            {
+            return t1->getNumberOfArmies() < t2->getNumberOfArmies();
+            });
 
     std::cout << "Territories to defend (weakest first):" << std::endl;
     for (Territory *t : *territoriesToDefendThisturn)
