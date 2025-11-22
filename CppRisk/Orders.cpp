@@ -520,11 +520,14 @@ bool Bomb::validate()
     if (!isAdjacent)
     {
         std::cout << "Bomb INVALID: " << targetTerritory->getName()
-                  << " is not adjacent to any owned territory" << std::endl;
+                << " is not adjacent to any owned territory" << std::endl;
         return false;
     }
 
     std::cout << "Bomb VALID: Bombing " << targetTerritory->getName() << std::endl;
+    Player *previousOwner = targetTerritory->getOwner();
+            if (previousOwner)
+                previousOwner->onTerritoryAttacked(targetTerritory, player);
     return true;
 }
 

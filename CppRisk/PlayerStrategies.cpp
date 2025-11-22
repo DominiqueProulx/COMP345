@@ -1082,66 +1082,61 @@ void AggressivePlayerStrategy::issueOrder()
     p->setTerritoriesToDefend(toDefend());
     p->setTerritoriesToAttack(toAttack());
 
-    const int reinforcemtn   = p->getReinforcementPool();
+    const int reinforcement = p->getReinforcementPool();
     const int pending= p->getPendingDeployments();
 
-    /* 2  –  deploy everything to the strongest country  -------------------- */
-    if (reinforcemtn - pending != 0)
+/* 1  –  deploy everything to the strongest country  -------------------- */
+    if (reinforcement - pending != 0)
     {
         Order* dep = issueDeployOrder();
         if (dep) p->addOrderToOrderlist(dep);
-        return;                       // nothing else this turn
+        // do NOT return – we still want one aggressive action this turn
     }
 
-    /* 3  –  aggressive card phase :  Bomb only  ---------------------------- */
-    Hand* hand = p->getHand();
-    Deck* deck = p->getDeck();
-
-    if (hand && deck && hand->getSize() > 0)
+    /* 2  –  one aggressive action per turn  ------------------------------ */
+    const std::vector<Territory*>* targets = p->getTerritoriesToAttack();
+    if (targets && !targets->empty())
     {
-        for (std::size_t i = 0; i < hand->getSize(); ++i)
+        /* 2a  –  try Bomb card first  ---------------------------------- */
+        Hand* hand = p->getHand();
+        Deck* deck = p->getDeck();
+        if (hand && deck)
         {
-            Card* c = hand->getCard(i);
-
-            if (dynamic_cast<BombCard*>(c))          // aggressive card
+            for (std::size_t i = 0; i < hand->getSize(); ++i)
             {
-                std::cout << "[Aggressive] playing BombCard.\n";
-                Order* bomb = c->play(*hand, *deck, p);
-                if (bomb)
+                Card* c = hand->getCard(i);
+                if (dynamic_cast<BombCard*>(c))
                 {
-                    p->addOrderToOrderlist(bomb);
-                    return;                          // done for this turn
+                    std::cout << "[Aggressive] playing BombCard.\n";
+                    Order* bomb = c->play(*hand, *deck, p);
+                    if (bomb)
+                    {
+                        p->addOrderToOrderlist(bomb);
+                        return;                     // done for this call
+                    }
+                    break;                          // only one Bomb attempt
                 }
-                std::cout << "Bomb play failed – continuing.\n";
-                break;                               // don’t try another Bomb
-            }
-
-            /*  explicitly skip  Blockade, Negotiate, Airlift  */
-            if (dynamic_cast<BlockadeCard*>(c))
-            {
-                std::cout << "[Aggressive] skips BlockadeCard (defensive).\n";
-                continue;
-            }
-            if (dynamic_cast<DiplomacyCard*>(c))
-            {
-                std::cout << "[Aggressive] skips NegotiateCard (prevents attacks).\n";
-                continue;
-            }
-            if (dynamic_cast<AirliftCard*>(c))
-            {
-                std::cout << "[Aggressive] skips AirliftCard (not purely aggressive).\n";
-                continue;
+                // explicitly skip non-aggressive cards
+                if (dynamic_cast<BlockadeCard*>(c) ||
+                    dynamic_cast<DiplomacyCard*>(c) ||
+                    dynamic_cast<AirliftCard*>(c))
+                {
+                    continue;
+                }
             }
         }
-        // if we reach here : no suitable card was found
-    }
 
-    /* 4  –  fallback : always advance from strongest to enemy  ------------- */
-    Order* adv = issueAdvanceOrder();
-    if (adv)
-        p->addOrderToOrderlist(adv);
+        /* 2b  –  fall back to Advance from strongest  ------------------ */
+        Order* adv = issueAdvanceOrder();
+        if (adv)
+            p->addOrderToOrderlist(adv);
+        else
+            std::cout << "[Aggressive] no valid advance possible this turn.\n";
+    }
     else
-        std::cout << "[Aggressive] no valid advance possible this turn.\n";
+    {
+        std::cout << "[Aggressive] no enemy territories adjacent – nothing to attack.\n";
+    }
 }
 // ---------------------------------------------------------------------------
 // issueDeployOrder: deploy ALL available armies to the strongest territory
