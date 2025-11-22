@@ -16,16 +16,16 @@
 class PlayerStrategies
 {
 protected:
-    std::unique_ptr<Player> player;
-    std::string *strategyType;
+    Player*  player;
+    std::string* strategyType;
 
 public:
     PlayerStrategies(Player *p);
     virtual ~PlayerStrategies();
     virtual void issueOrder() = 0;
-    virtual std::vector<Territory *> *toAttack() = 0;
-    virtual std::vector<Territory *> *toDefend() = 0;
-    Player *getPlayer() const { return player.get(); }
+    virtual std::vector<Territory*>* toAttack() = 0;
+    virtual std::vector<Territory*>* toDefend() = 0;
+	Player* getPlayer() const { return player; }
     // Stream insertion operator
     friend std::ostream &operator<<(std::ostream &os, const PlayerStrategies &strategey);
 
