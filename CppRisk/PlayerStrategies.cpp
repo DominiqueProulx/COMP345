@@ -5,12 +5,13 @@
 // PLAYER STRATEGY CLASS IMPLEMENTATION
 // ============================================================================
 PlayerStrategies::PlayerStrategies(Player* p)
-    : player(std::make_unique<Player>(*p)),
+    : player(p),
     strategyType(new std::string("Default"))
 {
 }
 
 PlayerStrategies::~PlayerStrategies() {
+	//don't delete player as strategy is not the owner of player
     delete strategyType;
 }
 
