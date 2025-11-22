@@ -439,7 +439,7 @@ void HumanPlayerStrategy::issueOrder()
         std::cout << "0. End turn" << std::endl;
         std::cout << "1. Advance" << std::endl;
         std::cout << "From the cards available in your hand : \n"
-                  << std::endl;
+                << std::endl;
         Hand *playerHand = player->getHand();
         for (int i = 0; i < (*playerHand).getSize(); i++)
         {
@@ -1105,6 +1105,7 @@ void AggressivePlayerStrategy::issueOrder()
             for (std::size_t i = 0; i < hand->getSize(); ++i)
             {
                 Card* c = hand->getCard(i);
+                std::cout << "[Aggressive] considering card: " << c->getName() << "\n";
                 if (dynamic_cast<BombCard*>(c))
                 {
                     std::cout << "[Aggressive] playing BombCard.\n";
@@ -1112,7 +1113,7 @@ void AggressivePlayerStrategy::issueOrder()
                     if (bomb)
                     {
                         p->addOrderToOrderlist(bomb);
-                        return;                     // done for this call
+                        break;;                     // or return;
                     }
                     break;                          // only one Bomb attempt
                 }
@@ -1179,44 +1180,85 @@ Order *AggressivePlayerStrategy::issueDeployOrder()
 // Game engine will keep calling issueOrder(), so it keeps attacking until it
 // cannot (no enemies adjacent / not enough armies).
 // ---------------------------------------------------------------------------
-Order *AggressivePlayerStrategy::issueAdvanceOrder()
+Order* AggressivePlayerStrategy::issueAdvanceOrder()
 {
-    Territory *fromTerritory = getStrongestTerritory();
-    if (!fromTerritory)
-    {
+    Territory* fromTerritory = getStrongestTerritory();
+    if (!fromTerritory) {
         std::cout << "Aggressive advance: no strongest territory.\n";
         return nullptr;
     }
 
-    if (fromTerritory->getNumberOfArmies() <= 1)
-    {
+    int sourceArmies = fromTerritory->getNumberOfArmies();
+    if (sourceArmies <= 1) {
         std::cout << "Aggressive advance: strongest territory has no spare armies.\n";
         return nullptr;
     }
 
-    const std::vector<Territory *> *targets = getPlayer()->getTerritoriesToAttack();
-    if (!targets || targets->empty())
-    {
+    
+    const std::vector<Territory*>* targets = getPlayer()->getTerritoriesToAttack();
+    if (!targets || targets->empty()) {
         std::cout << "Aggressive advance: no enemy territories adjacent to strongest.\n";
         return nullptr;
     }
 
-    // Easiest enemy first (already sorted in toAttack)
-    Territory *targetTerritory = (*targets)[0];
+    
+    int armiesAvailable = sourceArmies - 1;
+    if (armiesAvailable <= 0) return nullptr;
 
-    int armiesToMove = fromTerritory->getNumberOfArmies() - 1; // keep 1 behind
+    Order* firstOrder = nullptr;
 
-    std::cout << "Aggressive player advancing " << armiesToMove
-            << " armies from " << fromTerritory->getName()
-            << " to enemy territory " << targetTerritory->getName() << ".\n";
+    for (size_t idx = 0; idx < targets->size(); ++idx) {
+        Territory* target = (*targets)[idx];
+        if (!target) continue;
 
-    return getPlayer()->orderFactory(
-        Player::OrderType::ADVANCE,
-        fromTerritory,
-        targetTerritory,
-        nullptr,
-        armiesToMove);
+        int targetArmies = target->getNumberOfArmies();
+        int batch = (targetArmies == 0 ? 1 : targetArmies);
+
+        
+        if (batch > armiesAvailable) {
+            std::cout << "Aggressive advance: stopping before target '"
+                    << target->getName() << "' (need " << batch
+                    << ", have " << armiesAvailable << ").\n";
+            break;
+        }
+
+        std::cout << "Aggressive ADVANCE " << batch
+                << " from " << fromTerritory->getName()
+                << " to " << target->getName() << ".\n";
+
+        Order* adv = getPlayer()->orderFactory(
+            Player::OrderType::ADVANCE,
+            fromTerritory,
+            target,
+            nullptr,
+            batch
+        );
+
+        if (!adv) {
+            std::cout << "Aggressive advance: failed to create order; stopping.\n";
+            break;
+        }
+
+        if (!firstOrder) {
+            // return the first to the caller as per your flow
+            firstOrder = adv;
+        } else {
+            // enqueue subsequent ones now
+            getPlayer()->addOrderToOrderlist(adv);
+        }
+
+        armiesAvailable -= batch;
+
+        // If only 1 remains, we must stop
+        if (armiesAvailable <= 0) break;
+    }
+
+    if (!firstOrder) {
+        std::cout << "Aggressive advance: no eligible full-batch attacks this turn.\n";
+    }
+    return firstOrder;
 }
+
 
 // ---------------------------------------------------------------------------
 // issueBombOrder (if your header declares it; otherwise you can omit this)
