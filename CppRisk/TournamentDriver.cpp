@@ -56,15 +56,19 @@ void testTournament() {
                 const TournamentData& data = cmd.getTournamentData();
 
                 cout << "--- Parsed & Stored Tournament Data ---\n";
-                cout << "  Maps: " << data.mapList.size() << " [";
+                cout << "  Maps: " << data.mapList.size() << " [ ";
                 for (const auto& m : data.mapList) cout << m << " ";
                 cout << "]\n";
-                cout << "  Strategies: " << data.playerList.size() << " [";
+                cout << "  Strategies: " << data.playerList.size() << " [ ";
                 for (const auto& p : data.playerList) cout << p << " ";
                 cout << "]\n";
                 cout << "  Games: " << data.numGames << "\n";
                 cout << "  Max Turns: " << data.maxTurns << "\n";
                 cout << "---------------------------------------\n";
+
+                cout << "\n\n--- STARTING TOURNAMENT ---" << endl;
+
+                engine.tournamentGameLoop(data);
             }
         }
         else {

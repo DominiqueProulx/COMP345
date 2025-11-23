@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "Cards.h"
 #include <sstream>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <algorithm>
 #include <random>
@@ -348,16 +350,13 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
 
     //added for Tournament mode
     engine.addChildTransition(start, "tournament", play);
-    //
-
+    
     engine.addChildTransition(start, "loadmap", mapLoaded);
     engine.addChildTransition(mapLoaded, "loadmap", mapLoaded);
     engine.addChildTransition(mapLoaded, "validatemap", mapValidated);
     engine.addChildTransition(mapValidated, "addplayer", playersAdded);
     engine.addChildTransition(playersAdded, "addplayer", playersAdded);
     engine.addChildTransition(playersAdded, "gamestart", play);
-
-	
 
     engine.setActiveState(startup->getInitialSubstatePtr());
 
@@ -369,13 +368,14 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
 
     engine.addChildStates(play, { assignReinforcements, issueOrders, executeOrders, win });
     engine.addChildTransition(assignReinforcements, "issueorder", issueOrders);
+    engine.addChildTransition(assignReinforcements, "draw", win); // special transition for tournament mode
     engine.addChildTransition(issueOrders, "issueorder", issueOrders);
     engine.addChildTransition(issueOrders, "issueordersend", executeOrders);
     engine.addChildTransition(executeOrders, "execorder", executeOrders);
     engine.addChildTransition(executeOrders, "endexecorders", assignReinforcements);
     engine.addChildTransition(executeOrders, "win", win);
     engine.addChildTransition(win, "replay", startup);
-    engine.addChildTransition(win, "end", end);
+    engine.addChildTransition(win, "quit", end);
 
     // END
     GameState final{ engine.createState("quit", false) };
@@ -456,7 +456,7 @@ bool GameEngine::isActiveStateFinal() const
 //helper commands for validate function in command processor
 //If the command is allowed in the current state, it returns the State of the next state
 bool GameEngine::isCommandValid(const std::string& cmd) const {
-    if (!activeState) return false;
+    if (!activeState || cmd == "draw") return false;
     return (activeState->resolveTransition(cmd) != nullptr);
 }
 
@@ -947,6 +947,128 @@ void GameEngine::mainGameLoop() {
 
     }
     gameOver(std::cin, std::cout);
+}
+
+// executes the tournament games automatically and reports their execution in the log file
+void GameEngine::tournamentGameLoop(const TournamentData& td)
+{
+    std::unordered_map<int, std::vector<std::string>> gameResults{};
+    int nbMaps{ static_cast<int>(td.mapList.size()) };
+
+    // run a tourney loop for each map
+    for (int i{}; i < nbMaps; i++)
+    {
+        // run a game loop on each game per map
+        for (int j{}; j < td.numGames; j++)
+        {
+            std::cout << "\nStarting new tourney round..." << std::endl;
+            std::cout << "\n===== GAME " << (j + 1) << " ON " << td.mapList[i] << " =====";
+            std::cout << "\n[INFO]: Initiating startup phase...\n" << std::endl;
+
+            /* HANDLE THE STARTUP PHASE AUTONOMOUSLY */
+            processStartupCommand("loadmap " + td.mapList[i], std::cout);
+            processStartupCommand("validatemap", std::cout);
+            
+            // TODO: double check that this adds a player with the correct strategy.. for now this is passing the strategy as the player's name. check with jack's branch for this
+            for (const std::string& plr : td.playerList)
+                processStartupCommand("addplayer " + plr, std::cout);
+
+            processStartupCommand("gamestart", std::cout);
+            std::cout << "\n[INFO]: Completed startup, progressing to play phase...\n" << std::endl;
+
+            /* AUTOMATED PLAYER STRATEGY GAME LOOP */
+            int currentTurn{ 1 };
+            while (currentTurn <= td.maxTurns && players->size() != 1)
+            {
+                std::cout << "== TURN " << currentTurn << " ==" << std::endl;
+
+                // TODO - implement the play phase for the strategies, should play autonomously 
+                // IN THE CASE OF A DRAW - im assuming the loop will end on 'assignreinforcements', so I added a special state that allows us to break
+                // from the play loop into the ending state. if this is not the case, be sure to update it!!
+
+                currentTurn++;
+            }
+   
+            /* HANDLE GAME RESULT, UPDATE RESULTS MAP AND RESTART */
+            if (players->size() == 1) {}
+                // TODO: uncomment when the PlayerStrategies have been integrated, getStrategyType needs to be added but its a simple getter!
+                // gameResults[i].push_back((*players)[0]->getStrategy()->getStrategyType());
+            else
+            {
+                gameResults[i].push_back(to_string(players->size()) + "-plr Draw");
+                changeGameState("draw"); // force-break from the play phase to the win state
+            }
+
+            // replay if there are more games to play, otherwise set the game engine to the final state
+            if (i == nbMaps - 1 && j == td.numGames - 1)
+                changeGameState("quit");
+            else
+                changeGameState("replay");
+
+            /* TOURNEY ROUND RESOURCE CLEANUP */
+            std::cout << "\n[INFO]: Completed tourney round, cleaning up resources...\n" << std::endl;
+            for (auto* player : *players) delete player;
+            players->clear();
+            if (map) { delete map; }
+            map = nullptr;
+        }
+    }
+    
+    /* FULL TOURNEY RESOURCE CLEANUP */
+    if (deck) { delete deck; }
+    deck = nullptr;
+
+    // log the result of each match to the log file
+    std::cout << "\n[INFO]: The tournament has completed! See the results in tourney-results.txt.\n" << std::endl;
+    logTournamentResults(td, gameResults);
+}
+
+// logs the results of the tournement
+void GameEngine::logTournamentResults(const TournamentData& data, const std::unordered_map<int, std::vector<std::string>>& results)
+{
+    std::ofstream logFile{ "tourney-results.txt", std::ios::trunc };
+    if (logFile.is_open())
+    {
+        logFile << "Tournament Mode:\nM: ";
+
+        // map names
+        for (int i{}; i < data.mapList.size() - 1; i++)
+            logFile << data.mapList[i] << ", ";
+        logFile << data.mapList[data.mapList.size() - 1];
+
+        // strategy names
+        logFile << "\nP: ";
+        for (int i{}; i < data.playerList.size() - 1; i++)
+            logFile << data.playerList[i] << ", ";
+        logFile << data.playerList[data.playerList.size() - 1];
+
+        // nb games and max turns
+        logFile << "\nG: " << data.numGames;
+        logFile << "\nD: " << data.maxTurns;
+
+        // results table
+        logFile << "\n\nResults:\n";
+        logFile << std::left << std::setw(13) << "";
+        for (int i{ 1 }; i <= data.numGames; i++)
+            logFile << std::setw(14) << "Game " + to_string(i);
+
+        for (int i{}; i < data.mapList.size(); i++)
+        {
+            logFile << std::setw(14) << "\nMap " + to_string(i + 1);
+
+            for (int j{}; j < data.numGames; j++)
+                logFile << std::setw(14) << results.at(i)[j];
+        }
+        
+        logFile << std::endl;
+        logFile.close();
+    }
+    else
+    {
+        std::cerr << "Failed to open tourney-results.txt. Terminating the application..." << std::endl;
+        exit(-1);
+    }
+
 }
 
 // Handles the end of a game once on "win" state., allowing the user to input command to replay or quit.

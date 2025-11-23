@@ -3,10 +3,11 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include "GameEngine.h"
 #include "LoggingObserver.h"
 
 using namespace std;
+
+class GameEngine;
 
 //new Tournament struct to hold/pass info
 struct TournamentData {
