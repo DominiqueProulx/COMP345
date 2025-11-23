@@ -227,8 +227,8 @@ void Player::setTerritoriesToAttack(std::vector<Territory*>* territories) {
     }
     territoriesToAttack = territories;
 }
-void Player::setStrategy(std::unique_ptr<PlayerStrategies> startegy) {
-	strategy = std::move(startegy);
+void Player::setStrategy(std::unique_ptr<PlayerStrategies> newStrategy) {
+    strategy = std::move(newStrategy);
 }
 
 
@@ -342,6 +342,17 @@ Player& Player::operator=(const Player& otherPlayer) {
     return *this;
 }
 
+void Player::onTerritoryAttacked(Territory* territory, Player* attacker)
+{
+    
+    /*  Neutral becomes Aggressive when attacked  */
+    if (dynamic_cast<NeutralPlayerStrategy*>(strategy.get()))
+    {
+        std::cout << "[Neutral] Player " << getName()
+                << " was attacked – becoming Aggressive!\n";
+        setStrategy(std::make_unique<AggressivePlayerStrategy>(this));
+    }
+}
 
 //// toDefend()
 //// Player selects the territories they wish to defend this turn, in priority order.

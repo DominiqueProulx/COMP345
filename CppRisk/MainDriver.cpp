@@ -12,19 +12,18 @@ void testOrderExecution();
 void testLoggingObserver();
 int testPlayerStrategy(void);
 
-int main(void)
+int main2(void)
 {
-    char directory[FILENAME_MAX];
-    _getcwd(directory, FILENAME_MAX);
-    std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
-    std::cout << directory << std::endl;
-    std::cout << "--- Place MAP.txt in the folder above ---\n" << std::endl;
+    // char directory[FILENAME_MAX];
+    // _getcwd(directory, FILENAME_MAX);
+    // std::cout << "--- CURRENT WORKING DIRECTORY ---" << std::endl;
+    // std::cout << directory << std::endl;
+    // std::cout << "--- Place MAP.txt in the folder above ---\n" << std::endl;
 
     char buffer[256];
     GameEngine engine;
     GameEngine::initializeRiskFSM(engine);
 
-   
 
     //// run all driver test functions
     //testCommandProcessor();
@@ -33,13 +32,13 @@ int main(void)
     //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     testStartupPhase(engine);
-    std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
-    std::cin >> buffer;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    // std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
+    // std::cin >> buffer;
+    // std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    testPlayerStrategy();
+    //testPlayerStrategy();
 
-    //testMainGameLoop(engine);
+    testMainGameLoop(engine);
     //std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
     //std::cin >> buffer;
     //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');

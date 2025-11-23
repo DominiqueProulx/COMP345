@@ -80,6 +80,7 @@ public:
 	GameEngine();
 	GameEngine(const GameEngine& other);
 	~GameEngine();
+	int attachStrategyFromMenu(Player* p);
 
 	// operators
 	GameEngine& operator=(const GameEngine& other);
@@ -122,6 +123,7 @@ public:
 	// main Game Loop
 	void mainGameLoop();
 	void gameOver(std::istream& in, std::ostream& out);
+	
 
 
 private:
