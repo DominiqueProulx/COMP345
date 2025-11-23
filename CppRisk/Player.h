@@ -64,8 +64,8 @@ public:
     void setPendingDeployments(int armies);
     void setColor(const std::string& color);
     void setHand(Hand& hand);
-	void setTerritoriesToDefend(std::vector<Territory*>& territories);
-	void setTerritoriesToAttack(std::vector<Territory*>& territories);
+	void setTerritoriesToDefend(const std::vector<Territory*>& territories);
+	void setTerritoriesToAttack(const std::vector<Territory*>& territories);
 	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
     void onTerritoryAttacked(Territory* territory, Player* attacker);
 
@@ -89,12 +89,7 @@ public:
     Territory* choseFromToDefend();
     Territory* choseFromToAttack();
     Territory* choseFromAdjacent(Territory* ownTerritory , const std::string& option);
- /*Order* issueAdvanceOrder();
-    Order* issueDeployOrder();
-    Order* issueBombOrder();
-    Order* issueBlockadeOrder();
-    Order* issueAirliftOrder();
-    Order* issueNegotiateOrder();*/
+
     Order* orderFactory(
         Player::OrderType type,
 		Territory* sourceTerritory = nullptr,
@@ -118,8 +113,8 @@ public:
     Player& operator= (const Player& otherplayer);
 
     // Methods
-    std::vector<Territory*>* toDefend();
-    std::vector<Territory*>* toAttack();
+    std::vector<Territory*> toDefend();
+    std::vector<Territory*> toAttack();
     void issueOrder();
 
   //add Order To Orderlist

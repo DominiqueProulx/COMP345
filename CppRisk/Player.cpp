@@ -30,8 +30,8 @@ Player::Player() {
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
-    territoriesToDefend = nullptr;
-    territoriesToAttack = nullptr;
+    territoriesToDefend = new std::vector<Territory*>();
+    territoriesToAttack = new std::vector<Territory*>();
 
 	strategy = std::make_unique<HumanPlayerStrategy>(this); //default strategy
 }
@@ -49,8 +49,8 @@ Player::Player(Deck* &deck) {
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
-    territoriesToDefend = nullptr;
-    territoriesToAttack = nullptr;
+	territoriesToDefend = new std::vector<Territory*>();
+    territoriesToAttack = new std::vector<Territory*>();
 
     strategy = std::make_unique<HumanPlayerStrategy>(this); //default strategy
 }
@@ -69,8 +69,8 @@ Player::Player(Deck*& deck, std::unique_ptr<PlayerStrategies> initialStartegy) {
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
-    territoriesToDefend = nullptr;
-    territoriesToAttack = nullptr;
+    territoriesToDefend = new std::vector<Territory*>();
+    territoriesToAttack = new std::vector<Territory*>();
 
     strategy = std::move(initialStartegy); 
 }
@@ -94,8 +94,8 @@ Player::Player(const std::string& color, const std::vector<Territory*>& initialT
     pendingDeployments = new int(0);
     conqueredTerritoryThisTurn = new bool(false);
     negotiatedPlayers = new std::set<Player*>();
-    territoriesToDefend = nullptr;
-    territoriesToAttack = nullptr;
+    territoriesToDefend = new std::vector<Territory*>();
+    territoriesToAttack = new std::vector<Territory*>();
 }
 
 
@@ -113,7 +113,7 @@ Player::Player(const Player& other) {
         territoriesOwned->push_back(t);
     }
     
-    // Assignment 2 additions
+    
     this->reinforcementPool = new int(*other.reinforcementPool);
     this->pendingDeployments = new int(*other.pendingDeployments); 
     this->conqueredTerritoryThisTurn = new bool(*other.conqueredTerritoryThisTurn);
@@ -133,8 +133,7 @@ Player::~Player() {
     delete territoriesOwned;
     territoriesOwned = nullptr;
    
-    
-    // Assignment 2 additions
+   
     delete reinforcementPool;
     delete pendingDeployments;
     delete conqueredTerritoryThisTurn;
@@ -215,20 +214,18 @@ void Player::setReinforcementPool(int armies) {
 void Player::setConqueredThisTurn(bool conquered) {
     *conqueredTerritoryThisTurn = conquered;
 }
-void Player::setTerritoriesToDefend(std::vector<Territory*>& territories) {
-    //if (territoriesToDefend != nullptr) {   //problem player is not the owner of the territories pointers
-    //    delete territoriesToDefend;  
-    //}
-    //territoriesToDefend = territories;
+void Player::setTerritoriesToDefend(const std::vector<Territory*>& territories) {
+    if (!territoriesToDefend) {  // allocate if nullptr
+        territoriesToDefend = new std::vector<Territory*>();
+    }
     territoriesToDefend->clear();
     territoriesToDefend->insert(territoriesToDefend->end(), territories.begin(), territories.end());
 
 }
-void Player::setTerritoriesToAttack(std::vector<Territory*>& territories) {
-    //if (territoriesToAttack != nullptr) {   //problem player is not the owner of territories pointers
-    //  delete territoriesToAttack;  // free old memory
-    //}
-    //territoriesToAttack = territories;
+void Player::setTerritoriesToAttack(const std::vector<Territory*>& territories) {
+    if (!territoriesToAttack) {  // allocate if nullptr
+        territoriesToAttack = new std::vector<Territory*>();
+    }
     territoriesToAttack->clear();
     territoriesToAttack->insert(territoriesToAttack->end(), territories.begin(), territories.end());
 }
@@ -362,9 +359,8 @@ void Player::onTerritoryAttacked(Territory* territory, Player* attacker)
 //// toDefend()
 //// Player selects the territories they wish to defend this turn, in priority order.
 //// Returns a vector of Territory pointers representing the defend list.
-std::vector<Territory*>* Player::toDefend() {
-std::vector<Territory*>* territoriesToDefendThisturn = strategy->toDefend();
-    return territoriesToDefendThisturn;
+std::vector<Territory*> Player::toDefend() {
+    return strategy->toDefend();
 }
 
 //choose from territories to defend
@@ -544,10 +540,8 @@ Territory* Player::choseFromAdjacent(Territory* ownTerritory, const std::string&
 // toAttack()
 // Player selects the territories they wish to attack this turn, in priority order.
 // Returns a vector of Territory pointers representing the attack list.
-std::vector<Territory*>* Player::toAttack() {
-    
-    std::vector<Territory*>* territoriesToAttackThisturn = strategy->toAttack();
-	return territoriesToAttackThisturn;// Return the attack list
+std::vector<Territory*> Player::toAttack() {
+	return strategy->toAttack();// Copy / Return the attack list
 }
 
 // Draw backup cards to ensure the player has at least 2 cards in hand at the beginning of the turn
@@ -570,12 +564,15 @@ void Player::drawBackUpCards() {
 // Reset defend and attack lists at the beginnign of the turn 
 void Player::resetDefendAndAttack() {
     if (territoriesToDefend) {
-        delete territoriesToDefend;
-        territoriesToDefend = nullptr;
+       // delete territoriesToDefend;
+      //  territoriesToDefend = nullptr;
+        territoriesToDefend->clear();
+
     }
     if (territoriesToAttack) {
-        delete territoriesToAttack;
-        territoriesToAttack = nullptr;
+       /* delete territoriesToAttack;
+        territoriesToAttack = nullptr;*/
+		territoriesToAttack->clear();
     }
 }
 
@@ -627,10 +624,10 @@ void Player::issueOrder() {
     // ToDefend and ToAttack list are chosen only once per issueOrderPhase and are cleared at the beginning of a new issueOrderPhase turn
       // Delete old vectors if they exist
     if (territoriesToDefend != nullptr) {
-        delete territoriesToDefend;
+        territoriesToDefend->clear();
     }
     if (territoriesToAttack != nullptr) {
-        delete territoriesToAttack;
+        territoriesToAttack->clear();
     }
 	
 	strategy->issueOrder();

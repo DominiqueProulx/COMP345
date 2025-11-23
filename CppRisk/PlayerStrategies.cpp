@@ -409,9 +409,11 @@ void HumanPlayerStrategy::issueOrder()
 {
     // First set both toDefend and toAttack list for the player
     std::cout << "\nPlease specify which of your territories to defend : " << std::endl;
-    player->setTerritoriesToDefend(toDefend());
+	auto todefend = this->toDefend();
+    player->setTerritoriesToDefend(todefend);
     std::cout << "\nPlease specify which territories you want to attack : " << std::endl;
-    player->setTerritoriesToAttack(toAttack());
+	auto toattack = this->toAttack();
+    player->setTerritoriesToAttack(toattack);
 
     std::cout << "\nHere are the possible orders you can issue" << std::endl;
     // Only deploy order is available if the reinforcement pool is not empty
@@ -709,11 +711,11 @@ std::ostream &operator<<(std::ostream &os, const BenevolentPlayerStrategy &strat
         os << "(null)";
     return os;
 }
-std::vector<Territory *> *BenevolentPlayerStrategy::toAttack()
+std::vector<Territory *> BenevolentPlayerStrategy::toAttack()
 {
     // Benevolent player does not attack
     std::cout << "Benevolent player does not attack. No territories to attack." << std::endl;
-    std::vector<Territory *> *territoriesToAttackThisturn = new std::vector<Territory *>();
+    std::vector<Territory*> territoriesToAttackThisturn;
     return territoriesToAttackThisturn; // Return an empty list
 }
 
@@ -973,7 +975,7 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
  }
  void cheaterPlayerStrategy::cheat() {
      
-	 for (Territory* targetTerritory : *toAttack()) {
+	 for (Territory* targetTerritory : toAttack()) {
          std::cout << *(player->getColor()) << " is cheating and conquering " << targetTerritory->getName() << " and it's armies!" << std::endl;
          Player* previousOwner = targetTerritory->getOwner();
          if (previousOwner)
@@ -991,7 +993,7 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
 
  std::vector<Territory*> cheaterPlayerStrategy::toAttack() {
  // Cheater attacks all adjacent enemy territories
-    auto *attackList = new std::vector<Territory *>();
+     std::vector<Territory*> attackList;
     const std::vector<Territory *> *owned = getPlayer()->getTerritories();
     if (!owned) return attackList;
     for (Territory* t : *owned) {
@@ -999,8 +1001,8 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
         for (Territory *adjTerritory : adj) {
             if (adjTerritory && adjTerritory->getOwner() != getPlayer()) {
                 // Avoid duplicates
-                if (std::find(attackList->begin(), attackList->end(), adjTerritory) == attackList->end()) {
-                    attackList->push_back(adjTerritory);
+                if (std::find(attackList.begin(), attackList.end(), adjTerritory) == attackList.end()) {
+                    attackList.push_back(adjTerritory);
                 }
             }
         }
@@ -1010,8 +1012,15 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
  }
  std::vector<Territory*> cheaterPlayerStrategy::toDefend() {
      // Generate a random number between 0 and max choice number
-     const int totalChoices = player->getTerritories()->size();
+     int totalChoices;
+     if (!player->getTerritories()->empty()) {
+          totalChoices = player->getTerritories()->size();
+         int randomNumber = std::rand() % totalChoices;
+     }
      int randomNumber = std::rand() % totalChoices;
+     if (totalChoices == 0) {
+         return {};  // return empty vector
+     }
 
      //defend a random number of territories
      std::vector<Territory*> territoriesToDefendThisturn;
@@ -1058,9 +1067,14 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
  
  }
  Order* cheaterPlayerStrategy::issueAdvanceOrder() {
-     // Generate a random number between 0 and max choice number
-	 int totalChoices = player->getTerritoriesToAttack()->size();
-     int randomNumber = std::rand() % totalChoices;
+     const auto* attackList = player->getTerritoriesToAttack();
+     const auto* defendList = player->getTerritoriesToDefend();
+
+     // Check if either lists are empty
+     if (!attackList || attackList->empty() || !defendList || defendList->empty()) {
+         std::cout << "No territories available in attack or defend list for advance order.\n";
+         return nullptr;
+     }
 
 	 // Choose the firstterritory to move armies from
 	 Territory* fromTerritory = player->getTerritoriesToDefend()->at(0);
@@ -1070,8 +1084,13 @@ Order *BenevolentPlayerStrategy::issueNegotiateOrder()
 
 	 int numberOfArmies = fromTerritory->getNumberOfArmies();
      double fractionToMove = 8.0 / 10.0;  // 8 out of 10
+
      // Compute number of armies to move (round down)
      int armiesToMove = static_cast<int>(numberOfArmies * fractionToMove);
+     if (armiesToMove <= 0) {
+         armiesToMove = 1;  // always move at least 1 army
+     }
+
 	 return player->orderFactory(Player::OrderType::ADVANCE, fromTerritory, toTerritory, nullptr, armiesToMove);
  }
 
@@ -1211,7 +1230,7 @@ std::vector<Territory *> AggressivePlayerStrategy::toAttack()
         // Compare owner against getPlayer() (Player*) – NOT the unique_ptr
         if (t && t->getOwner() != getPlayer())
         {
-            attackList->push_back(t);
+            attackList.push_back(t);
         }
     }
 
@@ -1494,12 +1513,12 @@ void NeutralPlayerStrategy::issueOrder() {
             << " takes no action.\n";
 }
 
-std::vector<Territory*>* NeutralPlayerStrategy::toAttack() {
-    return new std::vector<Territory*>();
+std::vector<Territory*> NeutralPlayerStrategy::toAttack() {
+    return  std::vector<Territory*>();
 }
 
-std::vector<Territory*>* NeutralPlayerStrategy::toDefend() {
-    return new std::vector<Territory*>();
+std::vector<Territory*> NeutralPlayerStrategy::toDefend() {
+    return  std::vector<Territory*>();
 }
 
 
