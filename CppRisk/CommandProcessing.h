@@ -8,11 +8,22 @@
 
 using namespace std;
 
+//new Tournament struct to hold/pass info
+struct TournamentData {
+	vector<string> mapList;
+	vector<string> playerList;
+	int numGames;
+	int maxTurns;
+};
+
 class Command : public Subject, public ILoggable {
 protected:
 	unique_ptr<string> command;
 	unique_ptr<string> effect;
 	unique_ptr<bool> valid;
+
+	//added for tournament mode
+	unique_ptr<TournamentData> tournamentData;
 
 public:
 	Command(const string& command);
@@ -32,6 +43,11 @@ public:
 	bool isValid() const;
 	void setValid(bool v);
 
+	// Tournament Data Accessors/Setters
+	void setTournamentData(const TournamentData& data) { tournamentData = make_unique<TournamentData>(data); }
+	const TournamentData& getTournamentData() const { return *tournamentData; }
+	bool hasTournamentData() const { return tournamentData != nullptr; }
+
 };
 
 class CommandProcessor : public Subject, public ILoggable {
@@ -45,6 +61,10 @@ public:
 	Command* getCommand(GameEngine& engine);
 	bool validate(Command& command, GameEngine& engine);
 
+	//added for tournament mode
+	bool validateTournament(Command& command, const string& fullCommand, GameEngine& engine);
+
+	//file parsing adapter function
 	void runFromFile(const string& filename, GameEngine& engine);
 
 	// logging function

@@ -345,12 +345,20 @@ void GameEngine::initializeRiskFSM(GameEngine& engine)
     GameState playersAdded{ engine.createState("players added", false) };
 
     engine.addChildStates(startup, { start, mapLoaded, mapValidated, playersAdded });
+
+    //added for Tournament mode
+    engine.addChildTransition(start, "tournament", play);
+    //
+
     engine.addChildTransition(start, "loadmap", mapLoaded);
     engine.addChildTransition(mapLoaded, "loadmap", mapLoaded);
     engine.addChildTransition(mapLoaded, "validatemap", mapValidated);
     engine.addChildTransition(mapValidated, "addplayer", playersAdded);
     engine.addChildTransition(playersAdded, "addplayer", playersAdded);
     engine.addChildTransition(playersAdded, "gamestart", play);
+
+	
+
     engine.setActiveState(startup->getInitialSubstatePtr());
 
     // PLAY
