@@ -23,8 +23,8 @@ public:
     PlayerStrategies(Player *p);
     virtual ~PlayerStrategies();
     virtual void issueOrder() = 0;
-    virtual std::vector<Territory*>* toAttack() = 0;
-    virtual std::vector<Territory*>* toDefend() = 0;
+    virtual std::vector<Territory*> toAttack() = 0;
+    virtual std::vector<Territory*> toDefend() = 0;
 	Player* getPlayer() const { return player; }
     // Stream insertion operator
     friend std::ostream &operator<<(std::ostream &os, const PlayerStrategies &strategey);
@@ -44,8 +44,8 @@ public:
     HumanPlayerStrategy(Player *p);
     ~HumanPlayerStrategy();
     void issueOrder() override;
-    std::vector<Territory *> *toAttack() override;
-    std::vector<Territory *> *toDefend() override;
+    std::vector<Territory *> toAttack() override;
+    std::vector<Territory *> toDefend() override;
     // correct copy constructor, assignment operator, and stream insertion operator.
     HumanPlayerStrategy(const HumanPlayerStrategy &other);
     friend std::ostream &operator<<(std::ostream &os, const HumanPlayerStrategy &strategy);
@@ -69,8 +69,8 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const BenevolentPlayerStrategy &strategy);
 
     void issueOrder() override;
-    std::vector<Territory *> *toAttack() override;
-    std::vector<Territory *> *toDefend() override;
+    std::vector<Territory *> toAttack() override;
+    std::vector<Territory *> toDefend() override;
 
     Order *issueDeployOrder();
     Order *issueAdvanceOrder();
@@ -79,21 +79,23 @@ public:
     Order *issueNegotiateOrder();
 };
 
-// class cheaterPlayerStrategy : public PlayerStrategies
-// {
+ class cheaterPlayerStrategy : public PlayerStrategies
+{
 
-// public:
-//     cheaterPlayerStrategy(Player *p);
-//     ~cheaterPlayerStrategy();
-//     // copy constructor, assignment operator, and stream insertion operator.
-//     cheaterPlayerStrategy(const cheaterPlayerStrategy &other);
-//     cheaterPlayerStrategy &operator=(const cheaterPlayerStrategy &other);
-//     friend std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy);
+public:
+    cheaterPlayerStrategy(Player *p);
+    ~cheaterPlayerStrategy();
+    // copy constructor, assignment operator, and stream insertion operator.
+    cheaterPlayerStrategy(const cheaterPlayerStrategy &other);
+     friend std::ostream &operator<<(std::ostream &os, const cheaterPlayerStrategy &strategy);
 
-//     // void issueOrder() override;
-//     // std::vector<Territory*>* toAttack() override;
-//     // std::vector<Territory*>* toDefend() override;
-// };
+     void issueOrder() override;
+     std::vector<Territory*> toAttack() override;
+     std::vector<Territory*> toDefend() override;
+     Order* issueDeployOrder();
+     Order* issueAdvanceOrder();
+     void cheat();
+ };
 
 class AggressivePlayerStrategy : public PlayerStrategies
 {
@@ -107,8 +109,8 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const AggressivePlayerStrategy &strategy);
 
     void issueOrder() override;
-    std::vector<Territory *> *toAttack() override;
-    std::vector<Territory *> *toDefend() override;
+    std::vector<Territory *> toAttack() override;
+    std::vector<Territory *> toDefend() override;
 
     Order *issueDeployOrder();
     Order *issueAdvanceOrder();

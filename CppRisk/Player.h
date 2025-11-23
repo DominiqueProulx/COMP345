@@ -64,8 +64,8 @@ public:
     void setPendingDeployments(int armies);
     void setColor(const std::string& color);
     void setHand(Hand& hand);
-	void setTerritoriesToDefend(std::vector<Territory*>* territories);
-	void setTerritoriesToAttack(std::vector<Territory*>* territories);
+	void setTerritoriesToDefend(std::vector<Territory*>& territories);
+	void setTerritoriesToAttack(std::vector<Territory*>& territories);
 	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
     void onTerritoryAttacked(Territory* territory, Player* attacker);
 

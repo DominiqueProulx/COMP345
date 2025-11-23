@@ -215,17 +215,22 @@ void Player::setReinforcementPool(int armies) {
 void Player::setConqueredThisTurn(bool conquered) {
     *conqueredTerritoryThisTurn = conquered;
 }
-void Player::setTerritoriesToDefend(std::vector<Territory*>* territories) {
-    if (territoriesToDefend != nullptr) {
-        delete territoriesToDefend;  
-    }
-    territoriesToDefend = territories;
+void Player::setTerritoriesToDefend(std::vector<Territory*>& territories) {
+    //if (territoriesToDefend != nullptr) {   //problem player is not the owner of the territories pointers
+    //    delete territoriesToDefend;  
+    //}
+    //territoriesToDefend = territories;
+    territoriesToDefend->clear();
+    territoriesToDefend->insert(territoriesToDefend->end(), territories.begin(), territories.end());
+
 }
-void Player::setTerritoriesToAttack(std::vector<Territory*>* territories) {
-    if (territoriesToAttack != nullptr) {
-        delete territoriesToAttack;  // free old memory
-    }
-    territoriesToAttack = territories;
+void Player::setTerritoriesToAttack(std::vector<Territory*>& territories) {
+    //if (territoriesToAttack != nullptr) {   //problem player is not the owner of territories pointers
+    //  delete territoriesToAttack;  // free old memory
+    //}
+    //territoriesToAttack = territories;
+    territoriesToAttack->clear();
+    territoriesToAttack->insert(territoriesToAttack->end(), territories.begin(), territories.end());
 }
 void Player::setStrategy(std::unique_ptr<PlayerStrategies> newStrategy) {
     strategy = std::move(newStrategy);

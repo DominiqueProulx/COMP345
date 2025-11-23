@@ -456,7 +456,8 @@ int GameEngine::attachStrategyFromMenu(Player *p)
     case 4:
         p->setStrategy(std::make_unique<NeutralPlayerStrategy>(p));
         break;
-        // case 5: p->setStrategy(std::make_unique<cheaterPlayerStrategy>(p)); break;
+      case 5: p->setStrategy(std::make_unique<cheaterPlayerStrategy>(p)); 
+        break;
     }
     return choice;
 }
