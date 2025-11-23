@@ -53,7 +53,6 @@ void testTournament() {
 
             // Show that the data was successfully stored in the Command object
             if (cmd.hasTournamentData()) {
-                // IMPORTANT: This access uses the TournamentData struct accessors
                 const TournamentData& data = cmd.getTournamentData();
 
                 cout << "--- Parsed & Stored Tournament Data ---\n";
