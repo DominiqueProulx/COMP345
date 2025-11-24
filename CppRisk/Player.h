@@ -11,12 +11,15 @@
 #include <queue>
 #include <iostream>
 #include <set>
+#include <memory>
 #include "Map.h"
 #include "Cards.h"
+#include "PlayerStrategies.h"
 
 // Forward declarations to break circular dependency
 class OrdersList;
 class Order;
+class PlayerStrategies;
 
 
 // ------------------ CLASS PLAYER ------------------
@@ -38,6 +41,7 @@ public:
     // Constructor
     Player();
     Player(Deck* &deck);
+    Player(Deck*& deck, std::unique_ptr<PlayerStrategies>  strategy);
     Player(const std::string& color, const std::vector<Territory*>& initialTerritories, Deck* deck);
     // Copy Constructor
     Player(const Player& other); 
@@ -51,12 +55,20 @@ public:
     const std::vector<Territory*>* getTerritories() const;
     Hand* getHand() const;
     OrdersList* getOrdersList() const;
-    void setPendingDeployments(int armies);
+	const std::vector<Territory*>* getTerritoriesToDefend() const;
+    const std::vector<Territory*>* getTerritoriesToAttack() const;
+    Deck* getDeck() const;
+    PlayerStrategies* getStrategy() const;
+    
 
+    void setPendingDeployments(int armies);
     void setColor(const std::string& color);
     void setHand(Hand& hand);
+	void setTerritoriesToDefend(const std::vector<Territory*>& territories);
+	void setTerritoriesToAttack(const std::vector<Territory*>& territories);
+	void setStrategy(std::unique_ptr<PlayerStrategies> startegy);
+    void onTerritoryAttacked(Territory* territory, Player* attacker);
 
-    // Assignment 2 additions for order execution
     bool ownsTerritory(Territory* territory) const;
     void addTerritory(Territory* territory);
     void removeTerritory(Territory* territory);
@@ -77,12 +89,7 @@ public:
     Territory* choseFromToDefend();
     Territory* choseFromToAttack();
     Territory* choseFromAdjacent(Territory* ownTerritory , const std::string& option);
-    Order* issueAdvanceOrder();
-    Order* issueDeployOrder();
-    Order* issueBombOrder();
-    Order* issueBlockadeOrder();
-    Order* issueAirliftOrder();
-    Order* issueNegotiateOrder();
+
     Order* orderFactory(
         Player::OrderType type,
 		Territory* sourceTerritory = nullptr,
@@ -106,13 +113,15 @@ public:
     Player& operator= (const Player& otherplayer);
 
     // Methods
-    std::vector<Territory*>* toDefend();
-    std::vector<Territory*>* toAttack();
+    std::vector<Territory*> toDefend();
+    std::vector<Territory*> toAttack();
     void issueOrder();
 
-  
+  //add Order To Orderlist
+	void addOrderToOrderlist(Order* order);
 
 private:
+    std::unique_ptr<PlayerStrategies> strategy;
     const int* playerID;
     const std::string* playerColor;
     std::vector<Territory*>* territoriesOwned;

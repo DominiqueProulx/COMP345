@@ -95,6 +95,10 @@ void testMainGameLoop(GameEngine& engine) {
 	std::cout << "========================================" << std::endl;
 	std::cout << "      TESTING Main Game Loop " << std::endl;
 	std::cout << "========================================" << std::endl;
+
+	 for (auto* p : *engine.getPlayers()) {
+		 std::cout << *p;
+	 }
 	
 
 	engine.mainGameLoop();

@@ -3,7 +3,7 @@
 #include <direct.h>
 
 // Declare test functions
-//void testPlayerStrategies();
+void testPlayerStrategies();
 void testTournament();
 
 int main(void)
@@ -17,13 +17,12 @@ int main(void)
     char buffer[256];
 
     // run all driver test functions
-    /*
+    
     testPlayerStrategies();
     std::cout << "\n\nFinished testing PLAYER STRATEGIES. Enter any character to proceed to the next test. ";
     std::cin >> buffer;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    */
-
+    
     testTournament();
     std::cout << "\n\nFinished testing TOURNAMENT. Enter any character to end the program. ";
     std::cin >> buffer;

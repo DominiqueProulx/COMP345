@@ -107,6 +107,7 @@ public:
     std::string readCommand() const;
     void changeGameState(const std::string& cmd);
     bool isActiveStateFinal() const;
+    int attachStrategyFromMenu(Player* p);
 
     //bea added helper functions for command processing
     bool isCommandValid(const std::string& cmd) const;
@@ -118,8 +119,6 @@ public:
     void processStartupCommand(const std::string& full, std::ostream& out);
 
     const std::vector<Player*>* getPlayers() const { return players; }
-
-    friend std::ostream& operator<<(std::ostream& os, const GameEngine& engine);
 
     // main Game Loop
     void mainGameLoop();

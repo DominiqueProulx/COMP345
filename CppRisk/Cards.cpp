@@ -4,8 +4,9 @@
 #include <iostream>
 #include <random>
 #include <algorithm>  
+#include "PlayerStrategies.h"
 
-static const int handSizeValue = 5;
+static const int handSizeValue = 60;
 const int* Hand::MAX_HAND_SIZE = &handSizeValue;
 
 
@@ -42,7 +43,7 @@ Order* BombCard::play(Hand& hand, Deck& deck, Player* player) {
     //removes from hand
 	hand.removeCard(this);
     //returns order for order list  
-    Order* bombOrder = player->issueBombOrder();
+    Order* bombOrder = player->getStrategy()->issueBombOrder();
     return bombOrder;
 }
 
@@ -60,7 +61,7 @@ Order* ReinforcementCard::play(Hand& hand, Deck& deck, Player* player) {
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    Order* deployOrder = player->issueDeployOrder();
+    Order* deployOrder = player->getStrategy()->issueDeployOrder();
     return deployOrder;
 }
 
@@ -78,7 +79,7 @@ Order* BlockadeCard::play(Hand& hand, Deck& deck, Player* player) {
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    Order* blockadeOrder = player->issueBlockadeOrder();
+    Order* blockadeOrder = player->getStrategy()->issueBlockadeOrder();
     return blockadeOrder;
 }
 
@@ -96,7 +97,7 @@ Order* AirliftCard::play(Hand& hand, Deck& deck, Player* player) {
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    Order* airliftOrder = player->issueAirliftOrder();
+    Order* airliftOrder = player->getStrategy()->issueAirliftOrder();
     return airliftOrder;
 }
 
@@ -114,7 +115,7 @@ Order* DiplomacyCard::play(Hand& hand, Deck& deck, Player* player) {
     //removes from hand
     hand.removeCard(this);
     //returns order for order list
-    Order* negociatetOrder = player->issueNegotiateOrder();
+    Order* negociatetOrder = player->getStrategy()->issueNegotiateOrder();
 	return negociatetOrder;
 }
 
