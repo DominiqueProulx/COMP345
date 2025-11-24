@@ -1,6 +1,8 @@
 #include "CommandProcessing.h"
+#include "GameEngine.h"
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 using namespace std;
 
 //Command Class
@@ -143,6 +145,12 @@ bool CommandProcessor::validate(Command& command, GameEngine& engine) {
 		return true;
 	}
 
+	// Tournament validation
+	if (commandBase == "tournament") {
+		return validateTournament(command, fullCommand, engine);
+	}
+	// 
+
 	// Since State is private, use helper functions to determine validity
 	//"isCommandValid()" checks if the command is valid in the current state from the engine. Couldn't read state from here directly
 	// due to encapsulation
@@ -157,6 +165,172 @@ bool CommandProcessor::validate(Command& command, GameEngine& engine) {
 		return false;
 	}
 }
+
+// Helper function to check if a strategy is valid 
+bool isValidStrategy(const string& strategy) {
+	// List of allowed strategies
+	const static vector<string> validStrategies = {
+		"benevolent", "neutral", "cheater", "aggressive"
+	};
+
+	// Convert input strategy to lowercase for case-insensitive comparison
+	string lowercaseStrategy = strategy;
+	transform(lowercaseStrategy.begin(), lowercaseStrategy.end(), lowercaseStrategy.begin(), ::tolower);
+
+	return find(validStrategies.begin(), validStrategies.end(), lowercaseStrategy) != validStrategies.end();
+}
+
+bool CommandProcessor::validateTournament(Command& command, const string& fullCommand, GameEngine& engine) {
+
+	//if command entered in wrong state (ie, anything but start state)
+	if (!engine.isCommandValid("tournament")) {
+		command.setValid(false);
+		command.saveEffect("Invalid command: 'tournament' is not recognized in state '" + engine.getCurrentStateName() + "'.");
+		return false;
+	}
+
+	//extract argument string
+	string args;
+	size_t space_pos = fullCommand.find(' '); //size t holds any size, finds first space after 'tournament'
+	if (space_pos != string::npos) {
+		//extracts argument after first space and stores as string for later
+		args = fullCommand.substr(space_pos + 1);
+	}
+	else {
+		// Only "tournament" was entered, invalid
+		command.setValid(false);
+		command.saveEffect("Error: Tournament command requires four arguments (maps, players, games, turns).");
+		return false;
+	}
+
+	//string stream, variables and vectors to hold parsed arguments
+	TournamentData tournData;
+	stringstream ss(args);
+	string token;
+	string currentFlag;
+
+	//track flags for found arguments
+	bool flagM = false;
+	bool flagP = false;
+	bool flagG = false;
+	bool flagD = false;
+
+	while (ss >> token) {
+		if (token == "-M" || token == "-P" || token == "-G" || token == "-D") {
+			currentFlag = token;
+			if (token == "-M") flagM = true;
+			if (token == "-P") flagP = true;
+			if (token == "-G") flagG = true;
+			if (token == "-D") flagD = true;
+			continue;
+		}
+
+		//parse on comma or " " separation
+		if (currentFlag == "-M") {
+			stringstream ms(token);
+			string mapName;
+			while (getline(ms, mapName, ',')) {
+				if (!mapName.empty()) {
+					tournData.mapList.push_back(mapName);
+				}
+			}
+		}
+
+		else if (currentFlag == "-P") {
+			stringstream ps(token);
+			string playerType;
+			while (getline(ps, playerType, ',')) {
+				if (!playerType.empty()) {
+					if (!isValidStrategy(playerType)) {
+						command.setValid(false);
+						command.saveEffect("Error: Invalid player strategy '" + playerType + "'. Must be benevolent, neutral, cheater, or aggressive.");
+						return false;
+					}
+					tournData.playerList.push_back(playerType);
+				}
+			}
+		}
+
+		else if (currentFlag == "-G") {
+			// Validate number of games
+			try {
+				//converts string to int
+				tournData.numGames = stoi(token);
+				if (tournData.numGames < 1 || tournData.numGames > 5) {
+					command.setValid(false);
+					command.saveEffect("Error: Number of games must be between 1 and 5.");
+					return false;
+				}
+			}
+			catch (invalid_argument&) {
+				command.setValid(false);
+				command.saveEffect("Error: Must specify an integer for number of games.");
+				return false;
+			}
+			currentFlag = ""; //reset so next token is not misinterpreted
+		}
+		else if (currentFlag == "-D") {
+			// Validate max turns
+			try {
+				//converts string to int
+				tournData.maxTurns = stoi(token);
+				if (tournData.maxTurns < 10 || tournData.maxTurns > 50) {
+					command.setValid(false);
+					command.saveEffect("Error: Max turns must be between 10 and 50.");
+					return false;
+				}
+			}
+			catch (invalid_argument&) {
+				command.setValid(false);
+				command.saveEffect("Error: Must specify an integer for turns.");
+				return false;
+			}
+
+			currentFlag = ""; //reset so next token is not misinterpreted
+
+		}
+
+		else {
+			// Invalid token found
+			command.setValid(false);
+			command.saveEffect("Error: Unexepcted argument '" + token + "' in tournament command.");
+			return false;
+		}
+
+	}
+
+	//check for missing flags 
+	if (!flagM || !flagP || !flagG|| !flagD) {
+		command.setValid(false);
+		command.saveEffect("Error: Missing one or more required arguments (-M, -P, -G, -D).");
+		return false;
+	}
+
+	//validate number of maps and players now that loop is complete
+	if (tournData.mapList.size() < 1 || tournData.mapList.size() > 5) {
+		command.setValid(false);
+		command.saveEffect("Error: Number of maps must be between 1 and 5.");
+		return false;
+	}
+
+	if (tournData.playerList.size() < 2 || tournData.playerList.size() > 4) {
+		command.setValid(false);
+		command.saveEffect("Error: Number of players must be between 2 and 4.");
+		return false;
+	}
+
+	command.setTournamentData(tournData);
+
+	command.setValid(true);
+	command.saveEffect("Tournament command is valid with " +
+		to_string(tournData.mapList.size()) + " maps, " +
+		to_string(tournData.playerList.size()) + " players, " +
+		to_string(tournData.numGames) + " games, and " +
+		to_string(tournData.maxTurns) + " max turns.");
+
+	return true; //valid input wow
+}
+
 
 Command* CommandProcessor::getCommand(GameEngine& engine) {
 	Command newCommand = readCommand(engine);

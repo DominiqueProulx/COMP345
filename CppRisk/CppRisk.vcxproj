@@ -164,6 +164,7 @@
     <ClCompile Include="PlayerDriver.cpp" />
     <ClCompile Include="PlayerStrategies.cpp" />
     <ClCompile Include="PlayerStrategiesDriver.cpp" />
+    <ClCompile Include="TournamentDriver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandProcessing.h" />
