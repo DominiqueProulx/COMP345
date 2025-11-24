@@ -1,0 +1,10 @@
+Tournament Mode:
+M: Smallmap.txt, SmallSmallMap.txt
+P: aggressive, benevolent, cheater
+G: 3
+D: 10
+
+Results:
+             Game 1        Game 2        Game 3        
+Map 1        3-plr Draw    3-plr Draw    3-plr Draw    
+Map 2        3-plr Draw    3-plr Draw    3-plr Draw    

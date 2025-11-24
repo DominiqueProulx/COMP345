@@ -162,6 +162,7 @@
     <ClCompile Include="OrdersDriver.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerDriver.cpp" />
+    <ClCompile Include="TournamentDriver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandProcessing.h" />
