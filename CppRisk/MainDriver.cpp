@@ -21,31 +21,15 @@ int main(void)
 
     // run all driver test functions
     
-    //testPlayerStrategies();
+    testPlayerStrategies();
     std::cout << "\n\nFinished testing PLAYER STRATEGIES. Enter any character to proceed to the next test. ";
     std::cin >> buffer;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
     testTournament();
-    std::cout << "\n\nFinished testing TOURNAMENT. Enter any character to start the game. ";
+    std::cout << "\n\nFinished testing TOURNAMENT. Enter any character to finish the test. ";
     std::cin >> buffer;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    //// NOW START THE ACTUAL GAME ENGINE
-    //std::cout << "\n========================================" << std::endl;
-    //std::cout << "Starting Game Engine..." << std::endl;
-    //std::cout << "========================================\n" << std::endl;
-    //
-    //GameEngine engine;
-    //GameEngine::initializeRiskFSM(engine);
-    //
-    //// Start the game
-    //engine.startupPhase();
-    //
-    //// After startup completes, check if we should run main game loop
-    //if (engine.getParentStateName() == "play") {
-    //    engine.mainGameLoop();
-    //}
 
     return 0;
 }
