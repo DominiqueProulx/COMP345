@@ -1,4 +1,3 @@
-
 #include "PlayerStrategies.h"
 
 // ============================================================================
@@ -738,7 +737,7 @@ std::vector<Territory *> BenevolentPlayerStrategy::toDefend()
     }
 
     // Copy territories to a new vector
-    std::vector<Territory*> territoriesToDefendThisturn;
+    std::vector<Territory*> territoriesToDefendThisturn(*territoriesOwned);
 
     // Sort the territories in ascending order by number of armies
     std::sort(territoriesToDefendThisturn.begin(), territoriesToDefendThisturn.end(),
@@ -1198,7 +1197,7 @@ std::vector<Territory *> AggressivePlayerStrategy::toDefend()
         return std::vector<Territory *>();
     }
 
-    std::vector<Territory*> territoriesToDefendThisturn;
+    std::vector<Territory*> territoriesToDefendThisturn(*territoriesOwned);
 
     // Sort strongest first
     std::sort(

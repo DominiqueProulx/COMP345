@@ -74,6 +74,10 @@ private:
     bool reinforcementPhase();
     bool issueOrdersPhase();
     bool executeOrdersPhase();
+    
+    // ADDED FOR TOURNAMENT MODE
+    bool tournamentIssueOrdersPhase();
+    Player* createTournamentPlayer(const std::string& strategyName);
 
 public:
     using GameState = State*; // exposed publically so states can be initialized but not used directly externally
