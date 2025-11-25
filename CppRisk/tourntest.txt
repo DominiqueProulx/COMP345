@@ -1,0 +1,1 @@
+tournament -M Smallmap.txt,SmallSmallMap.txt -P aggressive,benevolent,cheater -G 3 -D 10
