@@ -731,13 +731,7 @@ void GameEngine::processStartupCommand(const std::string &full, std::ostream &ou
     // TOURNAMENT COMMAND HANDLER - ADDED FOR ASSIGNMENT 3 PART 2
     if (verb == "tournament")
     {
-        if (!isCommandValid("tournament"))
-        {
-            out << "State invalid for tournament command.\n";
-            return;
-        }
-        
-        // Parse the tournament command
+        // Parse the tournament command (no state transition here - let tournamentGameLoop handle it)
         TournamentData td;
         std::istringstream argStream(arg);
         std::string token;
@@ -796,7 +790,10 @@ void GameEngine::processStartupCommand(const std::string &full, std::ostream &ou
         out << "\n  Games per map: " << td.numGames;
         out << "\n  Max turns: " << td.maxTurns << "\n\n";
         
-        changeGameState("tournament");
+        // FIX: DON'T transition to tournament state here!
+        // The state transitions will happen naturally inside tournamentGameLoop
+        // changeGameState("tournament");  // REMOVED - this was causing loadmap/validatemap to fail!
+        
         tournamentGameLoop(td);
         return;
     }
@@ -1010,6 +1007,14 @@ bool GameEngine::reinforcementPhase()
     std::cout << "---------------------------" << std::endl;
     std::cout << "Reinforcement Phase" << std::endl;
     std::cout << "---------------------------" << std::endl;
+    
+    // FIX: Add null check for map to prevent crash
+    if (!map)
+    {
+        std::cerr << "ERROR: No map loaded! Cannot run reinforcement phase." << std::endl;
+        return false;
+    }
+    
     for (Player *player : *players)
     {
 
@@ -1027,22 +1032,25 @@ bool GameEngine::reinforcementPhase()
         int reinforcements = std::max(3, numTerritories / 3); // minimum of 3 reinforcements per turn
         std::cout << "Player " << player->getName() << " receives " << reinforcements << " base reinforcements." << std::endl;
 
-        // Calculate Continent bonuses
-        for (Continent *c : getMap()->getContinents())
+        // Calculate Continent bonuses (with null check)
+        if (getMap() != nullptr)
         {
-            bool ownsAll = true;
-            for (Territory *t : c->getTerritories())
+            for (Continent *c : getMap()->getContinents())
             {
-                if (t->getOwner() != player)
+                bool ownsAll = true;
+                for (Territory *t : c->getTerritories())
                 {
-                    ownsAll = false;
-                    break;
+                    if (t->getOwner() != player)
+                    {
+                        ownsAll = false;
+                        break;
+                    }
                 }
-            }
-            if (ownsAll)
-            {
-                reinforcements += c->getBonus();
-                std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
+                if (ownsAll)
+                {
+                    reinforcements += c->getBonus();
+                    std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
+                }
             }
         }
         // Add reinforcements to player's pool
@@ -1332,7 +1340,8 @@ void GameEngine::tournamentGameLoop(const TournamentData& td)
             std::cout << "[INFO]: Initiating startup phase...\n" << std::endl;
 
             /* HANDLE THE STARTUP PHASE AUTONOMOUSLY */
-            // Load and validate map using existing commands
+            // We're in "start" state here (either initially, or after "replay")
+            // Load and validate map using existing commands - these will transition state properly
             processStartupCommand("loadmap " + td.mapList[i], std::cout);
             processStartupCommand("validatemap", std::cout);
             
@@ -1354,6 +1363,7 @@ void GameEngine::tournamentGameLoop(const TournamentData& td)
             }
 
             // Now run gamestart (this handles territory distribution, etc.)
+            // This will transition us to "play" phase ("assign reinforcements" state)
             processStartupCommand("gamestart", std::cout);
             std::cout << "\n[INFO]: Completed startup, progressing to play phase...\n" << std::endl;
 
@@ -1366,7 +1376,11 @@ void GameEngine::tournamentGameLoop(const TournamentData& td)
                 std::cout << "\n======== TURN " << currentTurn << " ========" << std::endl;
 
                 // 1. Reinforcement Phase
-                reinforcementPhase();
+                if (!reinforcementPhase())
+                {
+                    std::cerr << "ERROR: Reinforcement phase failed! Aborting game.\n";
+                    break;
+                }
                 changeGameState("issueorder");
 
                 // 2. Issue Orders Phase (autonomous - no user input)
@@ -1417,8 +1431,9 @@ void GameEngine::tournamentGameLoop(const TournamentData& td)
             /* HANDLE GAME RESULT, UPDATE RESULTS MAP AND RESTART */
             if (players->size() == 1)
             {
-                // We have a winner
+                // We have a winner - need to transition to "win" state first!
                 gameResults[i].push_back(winner);
+                changeGameState("win");  // FIX: Must transition to win state before replay/quit
             }
             else
             {
@@ -1428,11 +1443,11 @@ void GameEngine::tournamentGameLoop(const TournamentData& td)
                 changeGameState("draw"); // force-break from the play phase to the win state
             }
 
-            // Replay if there are more games to play, otherwise set the game engine to the final state
+            // Now we're in "win" state - replay or quit
             if (i == nbMaps - 1 && j == td.numGames - 1)
                 changeGameState("quit");
             else
-                changeGameState("replay");
+                changeGameState("replay");  // This takes us back to "start" state for next game
 
             /* TOURNEY ROUND RESOURCE CLEANUP */
             std::cout << "\n[INFO]: Completed tourney round, cleaning up resources...\n" << std::endl;
