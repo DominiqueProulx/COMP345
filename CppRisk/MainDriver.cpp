@@ -1,6 +1,9 @@
 #include <iostream>
+#include <limits>
 #include <string>
 #include <direct.h>
+#include "GameEngine.h"
+#include "CommandProcessing.h"
 
 // Declare test functions
 void testPlayerStrategies();
@@ -24,7 +27,7 @@ int main(void)
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
     testTournament();
-    std::cout << "\n\nFinished testing TOURNAMENT. Enter any character to end the program. ";
+    std::cout << "\n\nFinished testing TOURNAMENT. Enter any character to finish the test. ";
     std::cin >> buffer;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 

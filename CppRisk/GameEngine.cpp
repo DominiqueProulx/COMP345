@@ -2,6 +2,7 @@
 #include "map.h"
 #include "Player.h"
 #include "Cards.h"
+#include "PlayerStrategies.h"
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -446,7 +447,7 @@ int GameEngine::attachStrategyFromMenu(Player *p)
     {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid choice. Enter 1–5: ";
+        std::cout << "Invalid choice. Enter 1-5: ";
     }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // flush line
 
@@ -549,7 +550,8 @@ void GameEngine::startupPhase(std::istream &in, std::ostream &out)
             << "  loadmap <filename>\n"
             << "  validatemap\n"
             << "  addplayer <playername>\n"
-            << "  gamestart\n";
+            << "  gamestart\n"
+            << "  tournament -M <maps> -P <strategies> -G <games> -D <maxturns>\n";
 
         CommandProcessor cp;
         for (;;)
@@ -716,13 +718,83 @@ void GameEngine::processStartupCommand(const std::string &full, std::ostream &ou
         }
         if (!players || players->size() < 2 || players->size() > 6)
         {
-            out << "Need 2�6 players before 'gamestart'.\n";
+            out << "Need 2-6 players before 'gamestart'.\n";
             return;
         }
         if (cmdGameStart(out))
         {
             changeGameState("gamestart");
         }
+        return;
+    }
+
+    // TOURNAMENT COMMAND HANDLER - ADDED FOR ASSIGNMENT 3 PART 2
+    if (verb == "tournament")
+    {
+        // Parse the tournament command (no state transition here - let tournamentGameLoop handle it)
+        TournamentData td;
+        std::istringstream argStream(arg);
+        std::string token;
+        
+        while (argStream >> token)
+        {
+            if (token == "-M")
+            {
+                std::string mapStr;
+                argStream >> mapStr;
+                std::istringstream mapStream(mapStr);
+                std::string map;
+                while (std::getline(mapStream, map, ','))
+                    td.mapList.push_back(map);
+            }
+            else if (token == "-P")
+            {
+                std::string playerStr;
+                argStream >> playerStr;
+                std::istringstream playerStream(playerStr);
+                std::string player;
+                while (std::getline(playerStream, player, ','))
+                    td.playerList.push_back(player);
+            }
+            else if (token == "-G")
+            {
+                argStream >> td.numGames;
+            }
+            else if (token == "-D")
+            {
+                argStream >> td.maxTurns;
+            }
+        }
+        
+        // Validate tournament parameters
+        if (td.mapList.empty() || td.playerList.empty() || td.numGames < 1 || td.maxTurns < 1)
+        {
+            out << "Invalid tournament parameters.\n";
+            out << "Usage: tournament -M <map1,map2,...> -P <strategy1,strategy2,...> -G <numGames> -D <maxTurns>\n";
+            return;
+        }
+        
+        out << "Starting tournament mode with:\n";
+        out << "  Maps: ";
+        for (size_t i = 0; i < td.mapList.size(); ++i)
+        {
+            out << td.mapList[i];
+            if (i < td.mapList.size() - 1) out << ", ";
+        }
+        out << "\n  Players: ";
+        for (size_t i = 0; i < td.playerList.size(); ++i)
+        {
+            out << td.playerList[i];
+            if (i < td.playerList.size() - 1) out << ", ";
+        }
+        out << "\n  Games per map: " << td.numGames;
+        out << "\n  Max turns: " << td.maxTurns << "\n\n";
+        
+        // FIX: DON'T transition to tournament state here!
+        // The state transitions will happen naturally inside tournamentGameLoop
+        // changeGameState("tournament");  // REMOVED - this was causing loadmap/validatemap to fail!
+        
+        tournamentGameLoop(td);
         return;
     }
 
@@ -833,28 +905,17 @@ void GameEngine::fairDistributeTerritories(std::ostream &out)
         ++i;
     }
 
-    out << "Distributed " << ts.size() << " territories among " << players->size() << " players.\n";
-
-    for (auto *p : *players)
-    {
-        // cout << *p;
-    }
+    out << "Distributed " << ts.size() << " territories among "
+        << players->size() << " players.\n";
 
     // ========= RANDOMLY SET ARMIES PER TERRITORY =========
     std::srand(static_cast<unsigned>(time(nullptr)));
 
     for (auto *t : ts)
     {
-        int randomArmies = 1 + (std::rand() % 5); // random 1–5 armies
+        int randomArmies = 1 + (std::rand() % 5); // random 1-5 armies
         t->setNumberOfArmies(randomArmies);
     }
-
-    out << "Distributed " << ts.size() << " territories among "
-        << players->size() << " players.\n";
-
-    // for (auto* p : *players) {
-    //     std::cout << *p;
-    // }
 }
 
 void GameEngine::randomizePlayerOrder(std::ostream &out)
@@ -888,10 +949,6 @@ void GameEngine::grant50Reinforcements(std::ostream &out)
         p->setReinforcementPool(50);
     }
     out << "Granted each player 50 reinforcement armies.\n";
-    for (auto *p : *players)
-    {
-        // std::cout << *p;
-    }
 }
 
 void GameEngine::initialCardDraws(std::ostream &out)
@@ -950,6 +1007,14 @@ bool GameEngine::reinforcementPhase()
     std::cout << "---------------------------" << std::endl;
     std::cout << "Reinforcement Phase" << std::endl;
     std::cout << "---------------------------" << std::endl;
+    
+    // FIX: Add null check for map to prevent crash
+    if (!map)
+    {
+        std::cerr << "ERROR: No map loaded! Cannot run reinforcement phase." << std::endl;
+        return false;
+    }
+    
     for (Player *player : *players)
     {
 
@@ -967,22 +1032,25 @@ bool GameEngine::reinforcementPhase()
         int reinforcements = std::max(3, numTerritories / 3); // minimum of 3 reinforcements per turn
         std::cout << "Player " << player->getName() << " receives " << reinforcements << " base reinforcements." << std::endl;
 
-        // Calculate Continent bonuses
-        for (Continent *c : getMap()->getContinents())
+        // Calculate Continent bonuses (with null check)
+        if (getMap() != nullptr)
         {
-            bool ownsAll = true;
-            for (Territory *t : c->getTerritories())
+            for (Continent *c : getMap()->getContinents())
             {
-                if (t->getOwner() != player)
+                bool ownsAll = true;
+                for (Territory *t : c->getTerritories())
                 {
-                    ownsAll = false;
-                    break;
+                    if (t->getOwner() != player)
+                    {
+                        ownsAll = false;
+                        break;
+                    }
                 }
-            }
-            if (ownsAll)
-            {
-                reinforcements += c->getBonus();
-                std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
+                if (ownsAll)
+                {
+                    reinforcements += c->getBonus();
+                    std::cout << "Player " << player->getName() << " receives " << c->getBonus() << " bonus reinforcements for owning continent " << c->getName() << "." << std::endl;
+                }
             }
         }
         // Add reinforcements to player's pool
@@ -1187,76 +1255,223 @@ void GameEngine::mainGameLoop()
     gameOver(std::cin, std::cout);
 }
 
-// executes the tournament games automatically and reports their execution in the log file
+
+// ============================================================================
+// TOURNAMENT MODE - NEW FUNCTIONS ADDED BY HAKIM
+// ============================================================================
+
+// Creates a player with a specific strategy for tournament mode (no user input required)
+Player* GameEngine::createTournamentPlayer(const std::string& strategyName)
+{
+    Player* p = new Player(deck);
+    p->setColor(strategyName);  // Use strategy name as player identifier
+    
+    // Attach the appropriate strategy based on the name
+    if (strategyName == "aggressive") {
+        p->setStrategy(std::make_unique<AggressivePlayerStrategy>(p));
+    }
+    else if (strategyName == "benevolent") {
+        p->setStrategy(std::make_unique<BenevolentPlayerStrategy>(p));
+    }
+    else if (strategyName == "neutral") {
+        p->setStrategy(std::make_unique<NeutralPlayerStrategy>(p));
+    }
+    else if (strategyName == "cheater") {
+        p->setStrategy(std::make_unique<cheaterPlayerStrategy>(p));
+    }
+    else {
+        // Default to aggressive if unknown
+        std::cerr << "Warning: Unknown strategy '" << strategyName << "', defaulting to Aggressive.\n";
+        p->setStrategy(std::make_unique<AggressivePlayerStrategy>(p));
+    }
+    
+    return p;
+}
+
+// Tournament issue orders phase - autonomous, no user input
+bool GameEngine::tournamentIssueOrdersPhase()
+{
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Issue Orders Phase (Tournament)" << std::endl;
+    std::cout << "---------------------------" << std::endl;
+
+    // For tournament mode, each computer player issues all their orders
+    // in a single call to issueOrder() - no user prompts needed
+    for (Player* player : *players)
+    {
+        if (!player || !player->getStrategy()) {
+            std::cerr << "Warning: Player has no strategy assigned!\n";
+            continue;
+        }
+        
+        std::cout << "---------------------------------------------------------" << std::endl;
+        std::cout << "---------- Player " << player->getName() << " (" 
+                  << player->getStrategy()->getStrategyType() << ") turn ------" << std::endl;
+        std::cout << "---------------------------------------------------------" << std::endl;
+
+        // Reset for new turn
+        player->resetDefendAndAttack();
+        player->setPendingDeployments(0);
+
+        // Computer strategies handle everything internally in issueOrder()
+        // They set up toDefend/toAttack, deploy reinforcements, and issue orders
+        player->issueOrder();
+    }
+
+    std::cout << "All players have finished issuing orders." << std::endl;
+    return true;
+}
+
+// Executes the tournament games automatically and reports their execution in the log file
 void GameEngine::tournamentGameLoop(const TournamentData& td)
 {
     std::unordered_map<int, std::vector<std::string>> gameResults{};
     int nbMaps{ static_cast<int>(td.mapList.size()) };
 
-    // run a tourney loop for each map
-    for (int i{}; i < nbMaps; i++)
+    // Run a tourney loop for each map
+    for (int i = 0; i < nbMaps; i++)
     {
-        // run a game loop on each game per map
-        for (int j{}; j < td.numGames; j++)
+        // Run a game loop on each game per map
+        for (int j = 0; j < td.numGames; j++)
         {
-            std::cout << "\nStarting new tourney round..." << std::endl;
-            std::cout << "\n===== GAME " << (j + 1) << " ON " << td.mapList[i] << " =====";
-            std::cout << "\n[INFO]: Initiating startup phase...\n" << std::endl;
+            std::cout << "\n========================================" << std::endl;
+            std::cout << "Starting new tourney round..." << std::endl;
+            std::cout << "===== GAME " << (j + 1) << " ON " << td.mapList[i] << " =====" << std::endl;
+            std::cout << "[INFO]: Initiating startup phase...\n" << std::endl;
 
             /* HANDLE THE STARTUP PHASE AUTONOMOUSLY */
+            // We're in "start" state here (either initially, or after "replay")
+            // Load and validate map using existing commands - these will transition state properly
             processStartupCommand("loadmap " + td.mapList[i], std::cout);
             processStartupCommand("validatemap", std::cout);
             
-            // TODO: double check that this adds a player with the correct strategy.. for now this is passing the strategy as the player's name. check with jack's branch for this
-            for (const std::string& plr : td.playerList)
-                processStartupCommand("addplayer " + plr, std::cout);
+            // Create players with their strategies attached
+            // NOTE: We DON'T use processStartupCommand("addplayer ...") here because
+            // cmdAddPlayer() calls attachStrategyFromMenu() which requires user input!
+            // Instead, we create players directly with strategies attached.
+            for (const std::string& strategyName : td.playerList)
+            {
+                Player* p = createTournamentPlayer(strategyName);
+                players->push_back(p);
+                std::cout << "Player added: " << strategyName << " with " 
+                          << p->getStrategy()->getStrategyType() << " strategy (Total " 
+                          << players->size() << ")\n";
+                
+                // Manually transition state (since we're not using processStartupCommand)
+                if (isCommandValid("addplayer"))
+                    changeGameState("addplayer");
+            }
 
+            // Now run gamestart (this handles territory distribution, etc.)
+            // This will transition us to "play" phase ("assign reinforcements" state)
             processStartupCommand("gamestart", std::cout);
             std::cout << "\n[INFO]: Completed startup, progressing to play phase...\n" << std::endl;
 
             /* AUTOMATED PLAYER STRATEGY GAME LOOP */
-            int currentTurn{ 1 };
-            while (currentTurn <= td.maxTurns && players->size() != 1)
+            int currentTurn = 1;
+            std::string winner = "";
+            
+            while (currentTurn <= td.maxTurns && players->size() > 1)
             {
-                std::cout << "== TURN " << currentTurn << " ==" << std::endl;
+                std::cout << "\n======== TURN " << currentTurn << " ========" << std::endl;
 
-                // TODO - implement the play phase for the strategies, should play autonomously 
-                // IN THE CASE OF A DRAW - im assuming the loop will end on 'assignreinforcements', so I added a special state that allows us to break
-                // from the play loop into the ending state. if this is not the case, be sure to update it!!
+                // 1. Reinforcement Phase
+                if (!reinforcementPhase())
+                {
+                    std::cerr << "ERROR: Reinforcement phase failed! Aborting game.\n";
+                    break;
+                }
+                changeGameState("issueorder");
 
+                // 2. Issue Orders Phase (autonomous - no user input)
+                tournamentIssueOrdersPhase();
+                changeGameState("issueordersend");
+
+                // 3. Execute Orders Phase
+                executeOrdersPhase();
+
+                // 4. Check for eliminated players
+                // Use a separate vector to avoid modifying while iterating
+                std::vector<Player*> playersToRemove;
+                for (Player* player : *players)
+                {
+                    if (player->getTerritories()->empty())
+                    {
+                        std::cout << "Player " << player->getName() << " has been eliminated!" << std::endl;
+                        playersToRemove.push_back(player);
+                    }
+                }
+                
+                // Remove eliminated players
+                for (Player* eliminated : playersToRemove)
+                {
+                    auto it = std::find(players->begin(), players->end(), eliminated);
+                    if (it != players->end())
+                    {
+                        delete *it;
+                        players->erase(it);
+                    }
+                }
+
+                // 5. Check for winner
+                if (players->size() == 1)
+                {
+                    winner = (*players)[0]->getStrategy()->getStrategyType();
+                    std::cout << "\n*****---------------------------------------------------*****" << std::endl;
+                    std::cout << "Player " << (*players)[0]->getName() << " (" << winner << ") has won the game!" << std::endl;
+                    std::cout << "*****---------------------------------------------------*****" << std::endl;
+                    break;
+                }
+
+                // Transition back to reinforcement phase for next turn
+                changeGameState("endexecorders");
                 currentTurn++;
             }
    
             /* HANDLE GAME RESULT, UPDATE RESULTS MAP AND RESTART */
-            if (players->size() == 1) {}
-                // TODO: uncomment when the PlayerStrategies have been integrated, getStrategyType needs to be added but its a simple getter!
-                // gameResults[i].push_back((*players)[0]->getStrategy()->getStrategyType());
+            if (players->size() == 1)
+            {
+                // We have a winner - need to transition to "win" state first!
+                gameResults[i].push_back(winner);
+                changeGameState("win");  // FIX: Must transition to win state before replay/quit
+            }
             else
             {
-                gameResults[i].push_back(to_string(players->size()) + "-plr Draw");
+                // Draw - game ended due to max turns reached
+                gameResults[i].push_back("Draw");
+                std::cout << "\n[INFO]: Game ended in a draw after " << td.maxTurns << " turns." << std::endl;
                 changeGameState("draw"); // force-break from the play phase to the win state
             }
 
-            // replay if there are more games to play, otherwise set the game engine to the final state
+            // Now we're in "win" state - replay or quit
             if (i == nbMaps - 1 && j == td.numGames - 1)
                 changeGameState("quit");
             else
-                changeGameState("replay");
+                changeGameState("replay");  // This takes us back to "start" state for next game
 
             /* TOURNEY ROUND RESOURCE CLEANUP */
             std::cout << "\n[INFO]: Completed tourney round, cleaning up resources...\n" << std::endl;
-            for (auto* player : *players) delete player;
+            for (auto* player : *players) 
+                delete player;
             players->clear();
-            if (map) { delete map; }
-            map = nullptr;
+            Player::playerCount = 0;  // Reset player count for next game
+            
+            if (map) 
+            { 
+                delete map; 
+                map = nullptr;
+            }
         }
     }
     
     /* FULL TOURNEY RESOURCE CLEANUP */
-    if (deck) { delete deck; }
-    deck = nullptr;
+    if (deck) 
+    { 
+        delete deck; 
+        deck = nullptr;
+    }
 
-    // log the result of each match to the log file
+    // Log the result of each match to the log file
     std::cout << "\n[INFO]: The tournament has completed! See the results in tourney-results.txt.\n" << std::endl;
     logTournamentResults(td, gameResults);
 }

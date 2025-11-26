@@ -26,6 +26,10 @@ public:
     virtual std::vector<Territory*> toAttack() = 0;
     virtual std::vector<Territory*> toDefend() = 0;
 	Player* getPlayer() const { return player; }
+    
+    // ADDED FOR TOURNAMENT MODE - Returns the strategy type string
+    std::string getStrategyType() const { return *strategyType; }
+    
     // Stream insertion operator
     friend std::ostream &operator<<(std::ostream &os, const PlayerStrategies &strategey);
 

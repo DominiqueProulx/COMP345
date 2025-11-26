@@ -19,9 +19,3 @@ void testPlayerStrategies()
     testMainGameLoop(engine);
 
 }
-
-int main()
-{
-    testPlayerStrategies();
-    return 0;
-}
