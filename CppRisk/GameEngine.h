@@ -127,7 +127,7 @@ public:
     // main Game Loop
     void mainGameLoop();
     void tournamentGameLoop(const TournamentData& td);
-    void gameOver(std::istream& in, std::ostream& out);
+    bool gameOver(std::istream& in, std::ostream& out);
 
 private:
 

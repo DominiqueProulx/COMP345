@@ -15,7 +15,18 @@ void testPlayerStrategies()
     char buffer[256];
     GameEngine engine;
     GameEngine::initializeRiskFSM(engine);
-    testStartupPhase(engine);
-    testMainGameLoop(engine);
+    
+
+	bool gameDone = false;
+	while (!gameDone) {
+
+		testStartupPhase(engine);
+		testMainGameLoop(engine);
+		
+
+		gameDone = engine.gameOver(std::cin, std::cout);
+
+	}
+
 
 }
