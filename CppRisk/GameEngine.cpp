@@ -1252,7 +1252,7 @@ void GameEngine::mainGameLoop()
             changeGameState("execorder");
         }
     }
-    gameOver(std::cin, std::cout);
+    
 }
 
 
@@ -1525,7 +1525,7 @@ void GameEngine::logTournamentResults(const TournamentData& data, const std::uno
 }
 
 // Handles the end of a game once on "win" state., allowing the user to input command to replay or quit.
-void GameEngine::gameOver(std::istream &in, std::ostream &out)
+bool GameEngine::gameOver(std::istream &in, std::ostream &out)
 {
     out << "\n=== GAME OVER ===\n";
     out << "Commands:\n"
@@ -1576,8 +1576,7 @@ void GameEngine::gameOver(std::istream &in, std::ostream &out)
             }
             map = nullptr;
 
-            startupPhase(std::cin, out);
-            return;
+            return false;
         }
         else if (command == "quit")
         {
@@ -1602,7 +1601,7 @@ void GameEngine::gameOver(std::istream &in, std::ostream &out)
                 delete deck;
             }
             deck = nullptr;
-            return;
+            return true;
         }
         else
         {

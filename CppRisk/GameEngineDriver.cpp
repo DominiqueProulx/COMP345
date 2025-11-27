@@ -110,17 +110,22 @@ void testGameEngine() {
 	char buffer[256];
 
 	engine.initializeRiskFSM(engine);
+	bool gameDone = false;
+
+	while (!gameDone) {
 
 	testStartupPhase(engine);
 	std::cout << "\n\nFinished testing Startup Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 	testMainGameLoop(engine);
 	std::cout << "\n\nFinished testing Main Game Phase. Enter any character to proceed to the next test. ";
 	std::cin >> buffer;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	
-	engine.gameOver(std::cin, std::cout);
+
+	gameDone = engine.gameOver(std::cin, std::cout);
+
+}
 
 }
