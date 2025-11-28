@@ -1316,7 +1316,7 @@ void AggressivePlayerStrategy::issueOrder()
     }
     else
     {
-        std::cout << "[Aggressive] no enemy territories adjacent – nothing to attack.\n";
+        std::cout << "[Aggressive] no enemy territories adjacent  nothing to attack.\n";
     }
 }
 // ---------------------------------------------------------------------------
