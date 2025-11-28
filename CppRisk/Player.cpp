@@ -351,7 +351,7 @@ void Player::onTerritoryAttacked(Territory* territory, Player* attacker)
     if (dynamic_cast<NeutralPlayerStrategy*>(strategy.get()))
     {
         std::cout << "[Neutral] Player " << getName()
-                << " was attacked – becoming Aggressive!\n";
+                << " was attacked becoming Aggressive!\n";
         setStrategy(std::make_unique<AggressivePlayerStrategy>(this));
     }
 }
